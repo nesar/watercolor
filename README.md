@@ -185,7 +185,7 @@ radius, azimut = cart2pol(x_centered_scaled, y_centered_scaled)
 azimut += np.pi
 
 # define binning
-rbins = np.linspace(0,radius.max(), 20)
+rbins = np.linspace(0,radius.max(), 10)
 abins = np.linspace(0,2*np.pi, 2)
 
 
@@ -242,9 +242,9 @@ ax3.set_xlabel('Normalized radius')
 ax3.set_ylabel('Luminosity')
 ```
 
-    /tmp/ipykernel_3700107/801960792.py:47: MatplotlibDeprecationWarning: Auto-removal of grids by pcolor() and pcolormesh() is deprecated since 3.5 and will be removed two minor releases later; please call grid(False) first.
+    /tmp/ipykernel_3731884/3773410264.py:45: MatplotlibDeprecationWarning: Auto-removal of grids by pcolor() and pcolormesh() is deprecated since 3.5 and will be removed two minor releases later; please call grid(False) first.
       pc2 = ax0.pcolormesh(A2, R2, np.repeat(hist.T, subdivs, axis=1), cmap='gist_heat_r')
-    /tmp/ipykernel_3700107/801960792.py:60: MatplotlibDeprecationWarning: Auto-removal of grids by pcolor() and pcolormesh() is deprecated since 3.5 and will be removed two minor releases later; please call grid(False) first.
+    /tmp/ipykernel_3731884/3773410264.py:58: MatplotlibDeprecationWarning: Auto-removal of grids by pcolor() and pcolormesh() is deprecated since 3.5 and will be removed two minor releases later; please call grid(False) first.
       pc3 = ax2.pcolormesh(A2, R2, np.repeat(grid_flux_polar.T, subdivs, axis=1), cmap='gist_heat_r')
 
     Text(0, 0.5, 'Luminosity')

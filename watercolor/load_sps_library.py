@@ -10,6 +10,9 @@ import matplotlib.pylab as plt
 from .load_sim_stellar_catalog import Z_SOLAR_PADOVA, H0
 
 # %% ../nbs/00_load_sps_library.ipynb 4
+# _THIS_DRNAME = os.path.dirname(os.path.abspath(__file__))
+# os.path.join(_THIS_DRNAME, "models", GPmodelname)
+
 STELLAR_LIBRARY_DIR = '../watercolor/data/sps_library_data/'
 
 # %% ../nbs/00_load_sps_library.ipynb 5
