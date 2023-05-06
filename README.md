@@ -5,7 +5,8 @@
 ## Installation
 
 ``` sh
-pip install watercolor
+current: pip install git+https://github.com/nesar/watercolor.git
+future:  pip install watercolor
 ```
 
 ## Simple implementation to HACC hydro data

@@ -11,7 +11,7 @@ from .load_sps_library import load_fsps_spectral_library, load_fsps_age_metallic
 from .load_sps_library import STELLAR_LIBRARY_DIR
 
 from .load_sim_stellar_catalog import load_hacc_galaxy_data
-from .load_sim_stellar_catalog import GALS_DIR, GALS_FILE
+from .load_sim_stellar_catalog import GALS_FILE
 from .load_sim_stellar_catalog import Z_SOLAR_PADOVA, H0
 
 # %% ../nbs/03_calculate_csp.ipynb 4
@@ -35,7 +35,7 @@ def ssp_to_csp(spec_flux_ssp:np.ndarray # SSP SEDs
     return spec_csp
 
 # %% ../nbs/03_calculate_csp.ipynb 5
-def calc_fluxes_for_galaxy(gal_file_in:str=GALS_DIR+GALS_FILE, # HACC stellar catalog
+def calc_fluxes_for_galaxy(gal_file_in:str=GALS_FILE, # HACC stellar catalog
                            unique_gal_tag:np.float32=None, # Selected galaxy tag
                            spectral_library_path:str=STELLAR_LIBRARY_DIR, # Spectral library path
                           )->tuple: # SED wavelength, individual SSP SEDs, CSP SED, Luminosity, Galaxy stellar mass  

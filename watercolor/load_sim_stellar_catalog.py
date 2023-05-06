@@ -7,10 +7,11 @@ __all__ = ['GALS_DIR', 'GALS_FILE', 'Z_SOLAR_HACC', 'Z_SOLAR_PADOVA', 'H0', 'loa
 import numpy as np
 import os
 import matplotlib.pylab as plt
+import pkg_resources
 
 # %% ../nbs/01_load_sim_stellar_catalog.ipynb 5
-GALS_DIR = '../watercolor/data/test_hacc_stellar_catalog/'
-GALS_FILE = 'Gals_Z0.txt'
+GALS_DIR = "data/test_hacc_stellar_catalog/"
+GALS_FILE = pkg_resources.resource_stream("watercolor", GALS_DIR + "Gals_Z0.txt").name
 
 # %% ../nbs/01_load_sim_stellar_catalog.ipynb 6
 Z_SOLAR_HACC = 0.012899 # Solar metallicity value in HACC Hydro
@@ -39,7 +40,7 @@ def _convert_age(hacc_age:np.array=None, #Age in 1/H0 units
     return age_hydro_gyr
 
 # %% ../nbs/01_load_sim_stellar_catalog.ipynb 8
-def load_hacc_galaxy_data(fileIn:str=GALS_DIR+GALS_FILE, # Input galaxy catalog file from HACC hydro sim
+def load_hacc_galaxy_data(fileIn:str=GALS_FILE, # Input galaxy catalog file from HACC hydro sim
                               Z_solar:np.float32=Z_SOLAR_PADOVA, #Solar metallicity
                               H0:np.float32=H0, # Hubble constant
                               ) -> tuple: # galaxy_tag, stellar_indices, metallicity, mass, age, x, y, z

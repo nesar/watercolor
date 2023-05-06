@@ -11,7 +11,7 @@ from .load_sps_library import load_fsps_spectral_library, load_fsps_age_metallic
 from .load_sps_library import STELLAR_LIBRARY_DIR
 
 from .load_sim_stellar_catalog import load_hacc_galaxy_data
-from .load_sim_stellar_catalog import GALS_DIR, GALS_FILE
+from .load_sim_stellar_catalog import GALS_FILE
 from .load_sim_stellar_catalog import Z_SOLAR_PADOVA, H0
 
 from .calculate_csp import calc_fluxes_for_galaxy

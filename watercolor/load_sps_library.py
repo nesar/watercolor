@@ -8,39 +8,42 @@ import numpy as np
 import os
 import matplotlib.pylab as plt
 from .load_sim_stellar_catalog import Z_SOLAR_PADOVA, H0
+import pkg_resources
 
-# %% ../nbs/00_load_sps_library.ipynb 4
+# %% ../nbs/00_load_sps_library.ipynb 5
 # _THIS_DRNAME = os.path.dirname(os.path.abspath(__file__))
 # os.path.join(_THIS_DRNAME, "models", GPmodelname)
 
-STELLAR_LIBRARY_DIR = '../watercolor/data/sps_library_data/'
+STELLAR_LIBRARY_DIR = "data/sps_library_data/"
 
-# %% ../nbs/00_load_sps_library.ipynb 5
+# %% ../nbs/00_load_sps_library.ipynb 6
 def load_fsps_spectral_library(dirIn:str=STELLAR_LIBRARY_DIR # Input directory of the stellar spectra library 
                               ) -> tuple: #Fluxes, wavelengths 
-    spec_flux = np.load(os.path.join(dirIn, "ssp_spec_flux_lines.npy"))
-    spec_wave = np.load(os.path.join(dirIn, "ssp_spec_wave.npy"))
+    spec_flux = np.load(pkg_resources.resource_stream("watercolor", STELLAR_LIBRARY_DIR + "ssp_spec_flux_lines.npy"))
+    spec_wave = np.load(pkg_resources.resource_stream("watercolor", STELLAR_LIBRARY_DIR + "ssp_spec_wave.npy"))
     print('Library shape: ', spec_flux.shape) 
     print('Wavelength shape: ', spec_wave.shape)
     return spec_flux, spec_wave
 
-# %% ../nbs/00_load_sps_library.ipynb 6
+# %% ../nbs/00_load_sps_library.ipynb 7
 def _load_fsps_age(dirIn:str=STELLAR_LIBRARY_DIR # Input directory of the stellar spectra library 
                   )-> np.array: # Age in Gyr
-    log_age_gyr = np.load(os.path.join(dirIn, "log_age.npy")) - 9
+    
+    # log_age_gyr = np.load(os.path.join(dirIn, "log_age.npy")) - 9
+    log_age_gyr = np.load( pkg_resources.resource_stream("watercolor", STELLAR_LIBRARY_DIR + "log_age.npy") ) - 9
     age_fsps_gyr = 10**log_age_gyr
     ## (age is in 1/H0 units)
     return age_fsps_gyr
 
-# %% ../nbs/00_load_sps_library.ipynb 7
+# %% ../nbs/00_load_sps_library.ipynb 8
 def _load_fsps_metallicity(dirIn:str=STELLAR_LIBRARY_DIR, # Input directory of the stellar spectra library
                            Z_solar:np.float32=Z_SOLAR_PADOVA # Solar metallicity in Padova
                           ) -> np.array: #Metallicity values in Z/Z_solar units
-    Z_legend = np.load(os.path.join(dirIn, "zlegend.npy"))
+    Z_legend = np.load( pkg_resources.resource_stream("watercolor", STELLAR_LIBRARY_DIR + "zlegend.npy"))
     Z_padova_fsps = Z_legend/Z_solar
     return Z_padova_fsps
 
-# %% ../nbs/00_load_sps_library.ipynb 8
+# %% ../nbs/00_load_sps_library.ipynb 9
 def load_fsps_age_metallicity(dirIn:str=STELLAR_LIBRARY_DIR,
                               Z_solar:np.float32=Z_SOLAR_PADOVA # Solar metallicity in Padova
                              )-> tuple: # Age in Gyr, Metallicity in Z/Z_sun
