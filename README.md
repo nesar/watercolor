@@ -4,11 +4,17 @@
 
 ## Installation
 
+Temporary installation:
+
 ``` sh
-Temporary installation: pip install git+https://github.com/nesar/watercolor.git
+pip install git+https://github.com/nesar/watercolor.git
 ```
 
-~~future: pip install watercolor~~
+Future:
+
+``` sh
+pip install watercolor
+```
 
 ## Simple implementation to HACC hydro data
 
