@@ -3,5 +3,6 @@ include LICENSE
 include CONTRIBUTING.md
 include README.md
 include watercolor/data/sps_library_data/*.npy
+include watercolor/data/sps_library_data/*.dat
 include watercolor/data/test_hacc_stellar_catalog/*.txt
 recursive-exclude * __pycache__

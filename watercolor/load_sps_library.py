@@ -19,8 +19,8 @@ STELLAR_LIBRARY_DIR = "data/sps_library_data/"
 # %% ../nbs/00_load_sps_library.ipynb 6
 def load_fsps_spectral_library(dirIn:str=STELLAR_LIBRARY_DIR # Input directory of the stellar spectra library 
                               ) -> tuple: #Fluxes, wavelengths 
-    spec_flux = np.load(pkg_resources.resource_stream("watercolor", STELLAR_LIBRARY_DIR + "ssp_spec_flux_lines.npy"))
-    spec_wave = np.load(pkg_resources.resource_stream("watercolor", STELLAR_LIBRARY_DIR + "ssp_spec_wave.npy"))
+    spec_flux = np.load(pkg_resources.resource_stream("watercolor", dirIn + "ssp_spec_flux_lines.npy"))
+    spec_wave = np.load(pkg_resources.resource_stream("watercolor", dirIn + "ssp_spec_wave.npy"))
     print('Library shape: ', spec_flux.shape) 
     print('Wavelength shape: ', spec_wave.shape)
     return spec_flux, spec_wave
@@ -30,7 +30,7 @@ def _load_fsps_age(dirIn:str=STELLAR_LIBRARY_DIR # Input directory of the stella
                   )-> np.array: # Age in Gyr
     
     # log_age_gyr = np.load(os.path.join(dirIn, "log_age.npy")) - 9
-    log_age_gyr = np.load( pkg_resources.resource_stream("watercolor", STELLAR_LIBRARY_DIR + "log_age.npy") ) - 9
+    log_age_gyr = np.load( pkg_resources.resource_stream("watercolor", dirIn + "log_age.npy") ) - 9
     age_fsps_gyr = 10**log_age_gyr
     ## (age is in 1/H0 units)
     return age_fsps_gyr
@@ -39,7 +39,7 @@ def _load_fsps_age(dirIn:str=STELLAR_LIBRARY_DIR # Input directory of the stella
 def _load_fsps_metallicity(dirIn:str=STELLAR_LIBRARY_DIR, # Input directory of the stellar spectra library
                            Z_solar:np.float32=Z_SOLAR_PADOVA # Solar metallicity in Padova
                           ) -> np.array: #Metallicity values in Z/Z_solar units
-    Z_legend = np.load( pkg_resources.resource_stream("watercolor", STELLAR_LIBRARY_DIR + "zlegend.npy"))
+    Z_legend = np.load( pkg_resources.resource_stream("watercolor", dirIn + "zlegend.npy"))
     Z_padova_fsps = Z_legend/Z_solar
     return Z_padova_fsps
 
