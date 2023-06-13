@@ -18,8 +18,10 @@ from .load_sim_stellar_catalog import Z_SOLAR_PADOVA, H0
 
 from .calculate_csp import calc_fluxes_for_galaxy
 
-# %% ../nbs/06_filter_convolve.ipynb 10
-def load_indiv_filter_all(filtfile, norm=True):
+# %% ../nbs/06_filter_convolve.ipynb 9
+def load_indiv_filter_all(filtfile:str=ALL_FILTER_DIR+'LSST', # Individual filter files 
+                          norm:bool=True #Bandpass normalization condition
+                         )->tuple: #Wavelengths, bandpass values, central wavelengths, filter name
     
     if ('SPHEREx' in filtfile):
         bandpass_name = filtfile.split('.dat')[0].split('/')[-1]
@@ -40,8 +42,10 @@ def load_indiv_filter_all(filtfile, norm=True):
 
     return bandpass_wav, bandpass_val, cenwav, bandpass_name
 
-# %% ../nbs/06_filter_convolve.ipynb 11
-def clip_bandpass_vals(bandpass_wavs, bandpass_vals):
+# %% ../nbs/06_filter_convolve.ipynb 10
+def clip_bandpass_vals(bandpass_wavs:np.float32=None, 
+                       bandpass_vals:np.float32=None
+                      )->tuple: #Clipped bandpass wavelengths, clipped bandpass values
     all_clip_bandpass_wav, all_clip_bandpass_vals = [], []
 
     for b in range(len(bandpass_wavs)):
@@ -53,13 +57,11 @@ def clip_bandpass_vals(bandpass_wavs, bandpass_vals):
 
     return all_clip_bandpass_wav, all_clip_bandpass_vals
 
-# %% ../nbs/06_filter_convolve.ipynb 12
-def load_survey_filters(filtdir='data/spherex_filts/', to_um=True):
+# %% ../nbs/06_filter_convolve.ipynb 11
+def load_survey_filters(filtdir:str='data/spherex_filts/', #Input directory with all filter definitions
+                        to_um:bool=True, #True/False to convert wavelengths to microns
+                       )->tuple: #Central wavelengths, Bandpass wavelengths, Bandpass values, filter names 
 
-    ''' 
-    Loads files, returns list of central wavelengths and list of wavelengths/filter responses. 
-    Converts wavelengths to microns unless otherwise specified.
-    '''
     if ('SPHEREx' in filtdir):
         
         bandpass_wavs, bandpass_vals, central_wavelengths, bandpass_names = [], [], [], []
@@ -121,9 +123,16 @@ def load_survey_filters(filtdir='data/spherex_filts/', to_um=True):
     return central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names
     # return np.array(central_wavelengths, dtype=np.float64), np.array(bandpass_wavs, dtype=np.float64), np.array(bandpass_vals, dtype=np.float64), np.array(bandpass_names, dtype=object)
 
-# %% ../nbs/06_filter_convolve.ipynb 13
-def sed_to_mock_phot(central_wavelengths, sed_um_wave, sed_mJy_flux, 
-                     bandpass_wavs, bandpass_vals, interp_kind='linear', plot=True, clip_bandpass=True):
+# %% ../nbs/06_filter_convolve.ipynb 12
+def sed_to_mock_phot(central_wavelengths:np.array=None, # Central wavelengths
+                     sed_um_wave:np.array=None, # SED wavelengths (in microns)
+                     sed_mJy_flux:np.array=None, # SED fluxes (in mJy)
+                     bandpass_wavs:np.array=None, # Bandpass wavelenths
+                     bandpass_vals:np.array=None, # Bandspass values
+                     interp_kind:str='linear', # Interpolation type
+                     plot:bool=True, # Plotting SEDs with filter convolution
+                     clip_bandpass:bool=True #Clip bandpass condition
+                    )->tuple: # Fluxes, Apparent magnitudes, Band fluxes
     # central wavelengths in micron
     if clip_bandpass:
         all_clip_bandpass_wav, all_clip_bandpass_vals = clip_bandpass_vals(bandpass_wavs, bandpass_vals)
