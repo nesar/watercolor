@@ -58,7 +58,7 @@ def clip_bandpass_vals(bandpass_wavs:np.float32=None,
     return all_clip_bandpass_wav, all_clip_bandpass_vals
 
 # %% ../nbs/06_filter_convolve.ipynb 11
-def load_survey_filters(filtdir:str='data/spherex_filts/', #Input directory with all filter definitions
+def load_survey_filters(filtdir:str=ALL_FILTER_DIR+'LSST', #Input directory with all filter definitions
                         to_um:bool=True, #True/False to convert wavelengths to microns
                        )->tuple: #Central wavelengths, Bandpass wavelengths, Bandpass values, filter names 
 
