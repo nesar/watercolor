@@ -84,15 +84,15 @@ def load_survey_filters(filtdir:str=ALL_FILTER_DIR+'LSST', #Input directory with
 
                 bandpass_wav, bandpass_val, cenwav, bandpass_name = load_indiv_filter_all(filtfile)
                 
-#                 bandpass_names.append(bandpass_name)
-#                 bandpass_wavs.append(bandpass_wav)
-#                 bandpass_vals.append(bandpass_val)
-#                 central_wavelengths.append(cenwav)
+                bandpass_names.append(bandpass_name)
+                bandpass_wavs.append(bandpass_wav)
+                bandpass_vals.append(bandpass_val)
+                central_wavelengths.append(cenwav)
                 
-                np.append(bandpass_names, bandpass_name)
-                np.append(bandpass_wavs, bandpass_wav)
-                np.append(bandpass_vals, bandpass_val)
-                np.append(central_wavelengths, cenwav)
+                # np.append(bandpass_names, bandpass_name)
+                # np.append(bandpass_wavs, bandpass_wav)
+                # np.append(bandpass_vals, bandpass_val)
+                # np.append(central_wavelengths, cenwav)
     
     else:
         bandpass_wavs, bandpass_vals, central_wavelengths, bandpass_names = [], [], [], []
