@@ -11,7 +11,7 @@ from .load_sim_stellar_catalog import load_hacc_galaxy_data
 from .calculate_csp import calc_fluxes_for_galaxy
 from .load_sps_library import STELLAR_LIBRARY_DIR
 
-# %% ../nbs/04_dust_attenuation.ipynb 9
+# %% ../nbs/04_dust_attenuation.ipynb 8
 import sys
 import os
 from duste.DustAttnCalc import DustAttnCalc # https://github.com/Astropianist/DustE
