@@ -22,7 +22,7 @@ from .calculate_csp import calc_fluxes_for_galaxy
 ALL_FILTER_DIR = '../watercolor/data/filter_specifics/'
 
 # %% ../nbs/06_filter_convolve.ipynb 10
-def load_filter_single(filtfile:str=ALL_FILTER_DIR+'LSST', # Individual filter files 
+def load_filter_single(filtfile:str=None, # Individual filter files 
                           norm:bool=True #Bandpass normalization condition
                          )->tuple: #Wavelengths, bandpass values, central wavelengths, filter name
     
