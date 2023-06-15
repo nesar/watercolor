@@ -5,6 +5,7 @@ __all__ = []
 
 # %% ../nbs/05_cosmic_dimming.ipynb 3
 import numpy as np
+from astropy.cosmology import *
 from .ssp_interpolation import spec_ssp_lookup
 
 from .load_sps_library import load_fsps_spectral_library, load_fsps_age_metallicity
