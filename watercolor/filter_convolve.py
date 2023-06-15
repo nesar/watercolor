@@ -132,6 +132,7 @@ def sed_to_mock_phot(central_wavelengths:np.array=None, # Central wavelengths
                      sed_mJy_flux:np.array=None, # SED fluxes (in mJy)
                      bandpass_wavs:np.array=None, # Bandpass wavelenths
                      bandpass_vals:np.array=None, # Bandspass values
+                     bandpass_names:np.array=None, #Names of the bandpasses
                      interp_kind:str='linear', # Interpolation type
                      plot:bool=True, # Plotting SEDs with filter convolution
                      clip_bandpass:bool=True #Clip bandpass condition
@@ -162,16 +163,23 @@ def sed_to_mock_phot(central_wavelengths:np.array=None, # Central wavelengths
 
         wav_um = np.array(central_wavelengths)
 
-        plt.figure(figsize=(12, 4))
-        plt.title('sed uJy flux')
-        plt.plot(sed_um_wave, 1e3*sed_mJy_flux, color='k', zorder=5, alpha=0.5)
-        plt.scatter(wav_um, flux, color='r', label='bandpass-convolved fluxes', s=30)
+        # plt.figure(figsize=(12, 4))
+        f, a = plt.subplots(2, 1, figsize=(14, 6), sharex=True, gridspec_kw={'height_ratios': [2, 1]})
+        a[0].set_title('sed uJy flux')
+        a[0].plot(sed_um_wave, 1e3*sed_mJy_flux, color='k', zorder=5, alpha=0.5)
+        a[0].scatter(wav_um, flux, color='r', label='bandpass-convolved fluxes', s=30)
         # plt.ylim(0, 1.2*np.max(flux))
-        plt.xlabel('um', fontsize=16)
-        plt.ylabel('uJy', fontsize=16)
-        plt.xlim(wav_um.min()*0.8, wav_um.max()*1.2)
-        plt.tick_params(labelsize=14)
-        plt.legend()
+        a[0].set_ylabel('uJy', fontsize=16)
+        a[0].set_xlim(wav_um.min()*0.8, wav_um.max()*1.2)
+        # plt.tick_params(labelsize=14)
+        # plt.legend()
+        
+        
+        a[1].set_title('Filter transmissions')
+        for central_idx in range(wav_um.shape[0]):
+            a[1].plot(bandpass_wavs[central_idx], bandpass_vals[central_idx], label=bandpass_names[central_idx])
+        
+        a[1].set_xlabel('um', fontsize=16)
         plt.show()
 
     return flux, appmag_ext, band_fluxes
