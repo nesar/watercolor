@@ -39,7 +39,7 @@ galaxy_tags, stellar_idx, metal_hydro, mass, age_hydro, x, y, z , vx, vy, vz = w
 ```
 
 ``` python
-galaxy_number = 4
+galaxy_number = 2
 unique_galaxy_tag = np.unique(galaxy_tags)[galaxy_number]
 print('Number of galaxies: %d'%np.unique(galaxy_tags).shape[0])
 logmstar = np.array([np.log10( np.sum(mass[galaxy_tags == unique_galaxy_tag]))])
@@ -195,6 +195,66 @@ survey_mags = appmag_ext_survey_satellite
 ```
 
 ![](index_files/figure-commonmark/cell-11-output-1.png)
+
+``` python
+##### Load survey filters 
+
+SURVEY_STRING = 'LSST'
+central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names = load_survey_filters(filtdir=ALL_FILTER_DIR+SURVEY_STRING, 
+                                                                                        to_um=True)
+
+
+##### Compute bandpasses
+
+# sed_um_wave = spec_wave_ssp/1e4
+# sed_mJy_flux = spec_csp*1e3
+sed_um_wave = redsh_wave/1e4
+sed_mJy_flux = redsh_spec*1e3
+
+flux_survey, appmag_ext_survey_satellite, band_fluxes_survey = photometry_from_spectra(central_wavelengths, 
+                                                                          sed_um_wave, 
+                                                                          sed_mJy_flux, 
+                                                                          bandpass_wavs, 
+                                                                          bandpass_vals, 
+                                                                          bandpass_names,
+                                                                          interp_kind='linear',
+                                                                          plot=True,
+                                                                          clip_bandpass=True)
+
+survey_mags = appmag_ext_survey_satellite
+```
+
+![](index_files/figure-commonmark/cell-12-output-1.png)
+
+``` python
+##### Load survey filters 
+
+SURVEY_STRING = 'cosmos'
+central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names = load_survey_filters(filtdir=ALL_FILTER_DIR+SURVEY_STRING, 
+                                                                                        to_um=True)
+
+
+##### Compute bandpasses
+
+# sed_um_wave = spec_wave_ssp/1e4
+# sed_mJy_flux = spec_csp*1e3
+sed_um_wave = redsh_wave/1e4
+sed_mJy_flux = redsh_spec*1e3
+
+flux_survey, appmag_ext_survey_satellite, band_fluxes_survey = photometry_from_spectra(central_wavelengths, 
+                                                                          sed_um_wave, 
+                                                                          sed_mJy_flux, 
+                                                                          bandpass_wavs, 
+                                                                          bandpass_vals, 
+                                                                          bandpass_names,
+                                                                          interp_kind='linear',
+                                                                          plot=True,
+                                                                          clip_bandpass=True)
+
+survey_mags = appmag_ext_survey_satellite
+```
+
+![](index_files/figure-commonmark/cell-13-output-1.png)
 
 <!-- ### One can also find luminosity profiles for the simulated galaxies -->
 <!-- #### 1. First we project the luminosity on to grids -->
