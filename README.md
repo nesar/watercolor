@@ -25,13 +25,17 @@ import watercolor
 from watercolor.load_sim_stellar_catalog import load_hacc_galaxy_data
 from watercolor.calculate_csp import calc_fluxes_for_galaxy
 from watercolor.load_sps_library import STELLAR_LIBRARY_DIR
+from watercolor.dust_attenuation import spectrum_dusted
+from watercolor.cosmic_distance_effects import combine_redshift_and_dimming_effect
+from watercolor.filter_convolution import load_survey_filters, photometry_from_spectra
+from watercolor.filter_convolution import ALL_FILTER_DIR
 ```
 
 #### 2. Then the galaxy-star catalog from HACC is loaded
 
 ``` python
 galaxy_star_catalog_file = '../watercolor/data/test_hacc_stellar_catalog/Gals_Z0_576.txt'
-galaxy_tags, stellar_idx, _, _, _, x, y, z, _, _, _ = watercolor.load_sim_stellar_catalog.load_hacc_galaxy_data(galaxy_star_catalog_file)
+galaxy_tags, stellar_idx, metal_hydro, mass, age_hydro, x, y, z , vx, vy, vz = watercolor.load_sim_stellar_catalog.load_hacc_galaxy_data(galaxy_star_catalog_file)
 ```
 
 #### 3. After selecting a unique galaxy tag, we calculate the SED. This is the rest-frame SED is due to spectral emission alone, and without dust attenuation.
@@ -97,6 +101,69 @@ plt.show()
 ```
 
 ![](index_files/figure-commonmark/cell-5-output-1.png)
+
+#### 5. CSPs are attenuation due to dust
+
+``` python
+logmstar = np.array([np.log10( np.sum(mass[galaxy_tags == unique_galaxy_tag]))])
+logZ = np.array([np.sum(metal_hydro[galaxy_tags == unique_galaxy_tag])])
+
+
+spec_wave_csp_dusted = spectrum_dusted(spec_csp, spec_wave_ssp, logmstar, logZ, 0.001)
+```
+
+    0.0 41.012193308819754
+    0.0 41.012193308819754
+    Library shape:  (22, 94, 1963)
+    Wavelength shape:  (1963,)
+
+``` python
+f, a = plt.subplots(1, 1, figsize=(12, 3))
+a.plot(spec_wave_ssp, spec_csp, label='No dust')
+a.plot(spec_wave_ssp, spec_wave_csp_dusted, label='With dust attenuation')
+
+a.set_xlim(3e3, 1e4)
+
+a.set_xlabel(r'${\rm wavelength\ [\AA]}$', fontsize = 'x-large')
+a.set_ylabel(r'$L_{\rm CSP}(\lambda)\ {\rm [L_{\odot}/\AA]}$', fontsize = 'x-large')
+a.legend(fontsize='x-large')
+```
+
+    <matplotlib.legend.Legend>
+
+![](index_files/figure-commonmark/cell-7-output-2.png)
+
+#### 6. The resulting dust attenuated spectra undergoes cosmic dimming and redshifting
+
+``` python
+redsh_wave, redsh_spec = combine_redshift_and_dimming_effect(wave=spec_wave_ssp, 
+                                                             spec=spec_wave_csp_dusted, 
+                                                             galaxy_redshift=0.001)
+```
+
+``` python
+f, a = plt.subplots(1, 1, figsize=(12, 3))
+a.plot(spec_wave_ssp, spec_csp, label='Pre-distance effects')
+a.plot(redsh_wave, redsh_spec*1e6, label='Redshift and dimming')
+
+
+
+# a.set_xlim(3e3, 1e4)
+a.set_xlim(3e3, 1e6)
+
+a.set_xscale('log')
+# a.set_yscale('log')
+
+a.set_xlabel(r'${\rm wavelength\ [\AA]}$', fontsize = 'x-large')
+a.set_ylabel(r'$L_{\rm CSP}(\lambda)\ {\rm [L_{\odot}/\AA]}$', fontsize = 'x-large')
+a.legend(fontsize='x-large')
+```
+
+    <matplotlib.legend.Legend>
+
+![](index_files/figure-commonmark/cell-9-output-2.png)
+
+#### 7. The final spectrum is convolved with telescope transmission curves to obtain magnitudes
 
 ### One can also find luminosity profiles for the simulated galaxies
 
@@ -179,7 +246,7 @@ ax[1].set_aspect('equal', adjustable='box')
 plt.show()
 ```
 
-![](index_files/figure-commonmark/cell-7-output-1.png)
+![](index_files/figure-commonmark/cell-12-output-1.png)
 
 ### Radial mass profile of the galaxy
 
@@ -250,14 +317,9 @@ ax3.set_xlabel('Normalized radius')
 ax3.set_ylabel('Luminosity')
 ```
 
-    /tmp/ipykernel_103314/3773410264.py:45: MatplotlibDeprecationWarning: Auto-removal of grids by pcolor() and pcolormesh() is deprecated since 3.5 and will be removed two minor releases later; please call grid(False) first.
-      pc2 = ax0.pcolormesh(A2, R2, np.repeat(hist.T, subdivs, axis=1), cmap='gist_heat_r')
-    /tmp/ipykernel_103314/3773410264.py:58: MatplotlibDeprecationWarning: Auto-removal of grids by pcolor() and pcolormesh() is deprecated since 3.5 and will be removed two minor releases later; please call grid(False) first.
-      pc3 = ax2.pcolormesh(A2, R2, np.repeat(grid_flux_polar.T, subdivs, axis=1), cmap='gist_heat_r')
-
     Text(0, 0.5, 'Luminosity')
 
-![](index_files/figure-commonmark/cell-8-output-3.png)
+![](index_files/figure-commonmark/cell-13-output-2.png)
 
 ``` python
 def azimuthalAverage(image, center=None):
@@ -312,7 +374,7 @@ ax[1].set_ylabel('Luminosity profile')
 
     Text(0, 0.5, 'Luminosity profile')
 
-![](index_files/figure-commonmark/cell-10-output-2.png)
+![](index_files/figure-commonmark/cell-15-output-2.png)
 
 ## Under the hood
 
@@ -342,7 +404,4 @@ a[1].set_xlabel('age')
 plt.show()
 ```
 
-    Library shape:  (22, 94, 1963)
-    Wavelength shape:  (1963,)
-
-![](index_files/figure-commonmark/cell-12-output-2.png)
+![](index_files/figure-commonmark/cell-17-output-1.png)

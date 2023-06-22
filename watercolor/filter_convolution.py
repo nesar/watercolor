@@ -6,6 +6,7 @@ __all__ = ['ALL_FILTER_DIR', 'load_filter_single', 'clip_bandpass_values', 'load
 # %% ../nbs/06_filter_convolve.ipynb 3
 import numpy as np
 import glob
+import matplotlib.pylab as plt
 from scipy.interpolate import interp1d as interp1d
 from .ssp_interpolation import spec_ssp_lookup
 
