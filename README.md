@@ -50,10 +50,6 @@ spec_wave_ssp, spec_flux_ssp, spec_csp, flux_proxy, gal_stellar_mass = watercolo
                                                                                                                STELLAR_LIBRARY_DIR)
 ```
 
-    Number of galaxies: 10
-    Library shape:  (22, 94, 1963)
-    Wavelength shape:  (1963,)
-
 #### 4. Finally, we plot SEDs from both SSPs and CSPs
 
 ``` python
@@ -100,8 +96,6 @@ a[1].set_ylabel(r'$L_{\rm CSP}(\lambda)\ {\rm [L_{\odot}/\AA]}$', fontsize = 'x-
 plt.show()
 ```
 
-![](index_files/figure-commonmark/cell-5-output-1.png)
-
 #### 5. CSPs are attenuation due to dust
 
 ``` python
@@ -111,11 +105,6 @@ logZ = np.array([np.sum(metal_hydro[galaxy_tags == unique_galaxy_tag])])
 
 spec_wave_csp_dusted = spectrum_dusted(spec_csp, spec_wave_ssp, logmstar, logZ, 0.001)
 ```
-
-    0.0 41.012193308819754
-    0.0 41.012193308819754
-    Library shape:  (22, 94, 1963)
-    Wavelength shape:  (1963,)
 
 ``` python
 f, a = plt.subplots(1, 1, figsize=(12, 3))
@@ -128,10 +117,6 @@ a.set_xlabel(r'${\rm wavelength\ [\AA]}$', fontsize = 'x-large')
 a.set_ylabel(r'$L_{\rm CSP}(\lambda)\ {\rm [L_{\odot}/\AA]}$', fontsize = 'x-large')
 a.legend(fontsize='x-large')
 ```
-
-    <matplotlib.legend.Legend>
-
-![](index_files/figure-commonmark/cell-7-output-2.png)
 
 #### 6. The resulting dust attenuated spectra undergoes cosmic dimming and redshifting
 
@@ -159,11 +144,35 @@ a.set_ylabel(r'$L_{\rm CSP}(\lambda)\ {\rm [L_{\odot}/\AA]}$', fontsize = 'x-lar
 a.legend(fontsize='x-large')
 ```
 
-    <matplotlib.legend.Legend>
-
-![](index_files/figure-commonmark/cell-9-output-2.png)
-
 #### 7. The final spectrum is convolved with telescope transmission curves to obtain magnitudes
+
+``` python
+##### Load survey filters 
+
+SURVEY_STRING = 'SPHEREx'
+central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names = load_survey_filters(filtdir=ALL_FILTER_DIR+SURVEY_STRING, 
+                                                                                        to_um=True)
+
+
+##### Compute bandpasses
+
+# sed_um_wave = spec_wave_ssp/1e4
+# sed_mJy_flux = spec_csp*1e3
+sed_um_wave = redsh_wave/1e4
+sed_mJy_flux = redsh_spec*1e3
+
+flux_survey, appmag_ext_survey_satellite, band_fluxes_survey = photometry_from_spectra(central_wavelengths, 
+                                                                          sed_um_wave, 
+                                                                          sed_mJy_flux, 
+                                                                          bandpass_wavs, 
+                                                                          bandpass_vals, 
+                                                                          bandpass_names,
+                                                                          interp_kind='linear',
+                                                                          plot=True,
+                                                                          clip_bandpass=True)
+
+survey_mags = appmag_ext_survey_satellite
+```
 
 ### One can also find luminosity profiles for the simulated galaxies
 
@@ -246,8 +255,6 @@ ax[1].set_aspect('equal', adjustable='box')
 plt.show()
 ```
 
-![](index_files/figure-commonmark/cell-12-output-1.png)
-
 ### Radial mass profile of the galaxy
 
 ``` python
@@ -317,10 +324,6 @@ ax3.set_xlabel('Normalized radius')
 ax3.set_ylabel('Luminosity')
 ```
 
-    Text(0, 0.5, 'Luminosity')
-
-![](index_files/figure-commonmark/cell-13-output-2.png)
-
 ``` python
 def azimuthalAverage(image, center=None):
     """
@@ -372,10 +375,6 @@ ax[0].set_ylabel('Stellar mass profile')
 ax[1].set_ylabel('Luminosity profile')
 ```
 
-    Text(0, 0.5, 'Luminosity profile')
-
-![](index_files/figure-commonmark/cell-15-output-2.png)
-
 ## Under the hood
 
 ``` python
@@ -403,5 +402,3 @@ a[1].set_xlabel('age')
 
 plt.show()
 ```
-
-![](index_files/figure-commonmark/cell-17-output-1.png)
