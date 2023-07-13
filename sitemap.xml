@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://nesar.github.io/watercolor/load_sim_stellar_catalog.html</loc>
+    <lastmod>2023-07-13T21:00:25.158Z</lastmod>
+  </url>
+  <url>
+    <loc>https://nesar.github.io/watercolor/calculate_csp.html</loc>
+    <lastmod>2023-07-13T21:00:24.502Z</lastmod>
+  </url>
+  <url>
+    <loc>https://nesar.github.io/watercolor/index.html</loc>
+    <lastmod>2023-07-13T21:00:23.698Z</lastmod>
+  </url>
+  <url>
+    <loc>https://nesar.github.io/watercolor/cosmic_dimming.html</loc>
+    <lastmod>2023-07-13T21:00:22.770Z</lastmod>
+  </url>
+  <url>
+    <loc>https://nesar.github.io/watercolor/ssp_interpolation.html</loc>
+    <lastmod>2023-07-13T21:00:21.962Z</lastmod>
+  </url>
+  <url>
+    <loc>https://nesar.github.io/watercolor/dust_attenuation.html</loc>
+    <lastmod>2023-07-13T21:00:23.058Z</lastmod>
+  </url>
+  <url>
+    <loc>https://nesar.github.io/watercolor/filter_convolve.html</loc>
+    <lastmod>2023-07-13T21:00:24.138Z</lastmod>
+  </url>
+  <url>
+    <loc>https://nesar.github.io/watercolor/load_sps_library.html</loc>
+    <lastmod>2023-07-13T21:00:24.818Z</lastmod>
+  </url>
+</urlset>
