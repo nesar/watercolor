@@ -27,7 +27,7 @@ from watercolor.calculate_csp import calc_fluxes_for_galaxy
 from watercolor.load_sps_library import STELLAR_LIBRARY_DIR
 from watercolor.dust_attenuation import spectrum_dusted
 from watercolor.cosmic_distance_effects import combine_redshift_and_dimming_effect
-from watercolor.filter_convolution import load_survey_filters, photometry_from_spectra
+from watercolor.filter_convolution import load_survey_pickle, photometry_from_spectra
 from watercolor.filter_convolution import ALL_FILTER_DIR
 ```
 
@@ -176,8 +176,7 @@ a.legend(fontsize='x-large')
 ##### Load survey filters 
 
 SURVEY_STRING = 'SPHEREx'
-central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names = load_survey_filters(filtdir=ALL_FILTER_DIR+SURVEY_STRING, 
-                                                                                        to_um=True)
+central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names = load_survey_pickle(ALL_FILTER_DIR+SURVEY_STRING)
 
 
 ##### Compute bandpasses
@@ -187,7 +186,7 @@ central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names = load_survey_
 sed_um_wave = redsh_wave/1e4
 sed_mJy_flux = redsh_spec*1e3
 
-flux_survey, appmag_ext_survey_satellite, band_fluxes_survey = photometry_from_spectra(central_wavelengths, 
+flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(central_wavelengths, 
                                                                           sed_um_wave, 
                                                                           sed_mJy_flux, 
                                                                           bandpass_wavs, 
@@ -197,7 +196,7 @@ flux_survey, appmag_ext_survey_satellite, band_fluxes_survey = photometry_from_s
                                                                           plot=True,
                                                                           clip_bandpass=True)
 
-survey_mags = appmag_ext_survey_satellite
+survey_mags = appmag_ext_survey
 ```
 
 ![](index_files/figure-commonmark/cell-12-output-1.png)
@@ -206,8 +205,7 @@ survey_mags = appmag_ext_survey_satellite
 ##### Load survey filters 
 
 SURVEY_STRING = 'LSST'
-central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names = load_survey_filters(filtdir=ALL_FILTER_DIR+SURVEY_STRING, 
-                                                                                        to_um=True)
+central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names = load_survey_pickle(ALL_FILTER_DIR+SURVEY_STRING)
 
 
 ##### Compute bandpasses
@@ -217,7 +215,7 @@ central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names = load_survey_
 sed_um_wave = redsh_wave/1e4
 sed_mJy_flux = redsh_spec*1e3
 
-flux_survey, appmag_ext_survey_satellite, band_fluxes_survey = photometry_from_spectra(central_wavelengths, 
+flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(central_wavelengths, 
                                                                           sed_um_wave, 
                                                                           sed_mJy_flux, 
                                                                           bandpass_wavs, 
@@ -227,31 +225,16 @@ flux_survey, appmag_ext_survey_satellite, band_fluxes_survey = photometry_from_s
                                                                           plot=True,
                                                                           clip_bandpass=True)
 
-survey_mags = appmag_ext_survey_satellite
+survey_mags = appmag_ext_survey
 ```
 
 ![](index_files/figure-commonmark/cell-13-output-1.png)
 
 ``` python
-u, g, r, i, z, Y = survey_mags
-```
-
-``` python
-u-g, g-r, i-z
-
-plt.scatter(u-g, g-r)
-```
-
-    <matplotlib.collections.PathCollection>
-
-![](index_files/figure-commonmark/cell-15-output-2.png)
-
-``` python
 ##### Load survey filters 
 
-SURVEY_STRING = 'cosmos'
-central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names = load_survey_filters(filtdir=ALL_FILTER_DIR+SURVEY_STRING, 
-                                                                                        to_um=True)
+SURVEY_STRING = 'COSMOS'
+central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names = load_survey_pickle(ALL_FILTER_DIR+SURVEY_STRING)
 
 
 ##### Compute bandpasses
@@ -261,7 +244,7 @@ central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names = load_survey_
 sed_um_wave = redsh_wave/1e4
 sed_mJy_flux = redsh_spec*1e3
 
-flux_survey, appmag_ext_survey_satellite, band_fluxes_survey = photometry_from_spectra(central_wavelengths, 
+flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(central_wavelengths, 
                                                                           sed_um_wave, 
                                                                           sed_mJy_flux, 
                                                                           bandpass_wavs, 
@@ -271,10 +254,10 @@ flux_survey, appmag_ext_survey_satellite, band_fluxes_survey = photometry_from_s
                                                                           plot=True,
                                                                           clip_bandpass=True)
 
-survey_mags = appmag_ext_survey_satellite
+survey_mags = appmag_ext_survey
 ```
 
-![](index_files/figure-commonmark/cell-16-output-1.png)
+![](index_files/figure-commonmark/cell-14-output-1.png)
 
 <!-- ### One can also find luminosity profiles for the simulated galaxies -->
 <!-- #### 1. First we project the luminosity on to grids -->
