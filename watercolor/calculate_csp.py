@@ -14,7 +14,7 @@ from .load_sim_stellar_catalog import load_hacc_galaxy_data
 from .load_sim_stellar_catalog import GALS_FILE
 from .load_sim_stellar_catalog import Z_SOLAR_PADOVA, H0
 
-# %% ../nbs/03_calculate_csp.ipynb 4
+# %% ../nbs/03_calculate_csp.ipynb 5
 def total_luminosity(spec_flux_ssp:np.ndarray, # SSP SEDs   
                      spec_wave:np.array # SED Wavelength
                     )-> np.float32: #Luminosity
@@ -34,7 +34,7 @@ def ssp_to_csp(spec_flux_ssp:np.ndarray # SSP SEDs
     spec_csp = np.sum(spec_flux_ssp, axis=0) ## CSP
     return spec_csp
 
-# %% ../nbs/03_calculate_csp.ipynb 5
+# %% ../nbs/03_calculate_csp.ipynb 6
 def calc_fluxes_for_galaxy(gal_file_in:str=GALS_FILE, # HACC stellar catalog
                            unique_gal_tag:np.float32=None, # Selected galaxy tag
                            spectral_library_path:str=STELLAR_LIBRARY_DIR, # Spectral library path

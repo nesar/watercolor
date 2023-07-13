@@ -3,20 +3,18 @@
 # %% auto 0
 __all__ = ['blockPrint', 'enablePrint', 'spectrum_dusted']
 
-# %% ../nbs/04_dust_attenuation.ipynb 3
+# %% ../nbs/04_dust_attenuation.ipynb 4
 import numpy as np
-
-# %% ../nbs/04_dust_attenuation.ipynb 5
 from .load_sim_stellar_catalog import load_hacc_galaxy_data
 from .calculate_csp import calc_fluxes_for_galaxy
 from .load_sps_library import STELLAR_LIBRARY_DIR
 
-# %% ../nbs/04_dust_attenuation.ipynb 8
+# %% ../nbs/04_dust_attenuation.ipynb 5
 import sys
 import os
 from duste.DustAttnCalc import DustAttnCalc # https://github.com/Astropianist/DustE
 
-# %% ../nbs/04_dust_attenuation.ipynb 11
+# %% ../nbs/04_dust_attenuation.ipynb 10
 # Disable
 def blockPrint():
     sys._jupyter_stdout = sys.stdout

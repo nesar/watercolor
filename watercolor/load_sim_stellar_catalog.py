@@ -9,16 +9,16 @@ import os
 import matplotlib.pylab as plt
 import pkg_resources
 
-# %% ../nbs/01_load_sim_stellar_catalog.ipynb 5
+# %% ../nbs/01_load_sim_stellar_catalog.ipynb 6
 GALS_DIR = "data/test_hacc_stellar_catalog/"
 GALS_FILE = pkg_resources.resource_stream("watercolor", GALS_DIR + "Gals_Z0.txt").name
 
-# %% ../nbs/01_load_sim_stellar_catalog.ipynb 6
+# %% ../nbs/01_load_sim_stellar_catalog.ipynb 7
 Z_SOLAR_HACC = 0.012899 # Solar metallicity value in HACC Hydro
 Z_SOLAR_PADOVA = 0.019 # Solar metallicity value in Padova 
 H0 = 71.0 # Hubble Constant in HACC Hydro
 
-# %% ../nbs/01_load_sim_stellar_catalog.ipynb 7
+# %% ../nbs/01_load_sim_stellar_catalog.ipynb 8
 def _convert_metallicity(hacc_metallicity:np.array=None, # Metallicity values from HACC  
                          Z_solar:np.float32=Z_SOLAR_PADOVA, # Z_solar value from Padova
                         )-> np.array: # Metallicity array in Z/Z_solar units
@@ -39,7 +39,7 @@ def _convert_age(hacc_age:np.array=None, #Age in 1/H0 units
     
     return age_hydro_gyr
 
-# %% ../nbs/01_load_sim_stellar_catalog.ipynb 8
+# %% ../nbs/01_load_sim_stellar_catalog.ipynb 9
 def load_hacc_galaxy_data(fileIn:str=GALS_FILE, # Input galaxy catalog file from HACC hydro sim
                               Z_solar:np.float32=Z_SOLAR_PADOVA, #Solar metallicity
                               H0:np.float32=H0, # Hubble constant
