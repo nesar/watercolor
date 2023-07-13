@@ -31,6 +31,12 @@ from watercolor.filter_convolution import load_survey_filters, photometry_from_s
 from watercolor.filter_convolution import ALL_FILTER_DIR
 ```
 
+``` python
+STELLAR_LIBRARY_DIR, ALL_FILTER_DIR
+```
+
+    ('data/sps_library_data/', '../watercolor/data/filter_specifics/')
+
 #### 2. Then the galaxy-star catalog from HACC is loaded, using a unique galaxy tag, we select a galaxy
 
 ``` python
@@ -105,7 +111,7 @@ a[1].set_ylabel(r'$L_{\rm CSP}(\lambda)\ {\rm [L_{\odot}/\AA]}$', fontsize = 'x-
 plt.show()
 ```
 
-![](index_files/figure-commonmark/cell-6-output-1.png)
+![](index_files/figure-commonmark/cell-7-output-1.png)
 
 #### 5. CSPs are attenuation due to dust
 
@@ -132,7 +138,7 @@ a.legend(fontsize='x-large')
 
     <matplotlib.legend.Legend>
 
-![](index_files/figure-commonmark/cell-8-output-2.png)
+![](index_files/figure-commonmark/cell-9-output-2.png)
 
 #### 6. The resulting dust attenuated spectra undergoes cosmic dimming and redshifting
 
@@ -162,7 +168,7 @@ a.legend(fontsize='x-large')
 
     <matplotlib.legend.Legend>
 
-![](index_files/figure-commonmark/cell-10-output-2.png)
+![](index_files/figure-commonmark/cell-11-output-2.png)
 
 #### 7. The final spectrum is convolved with telescope transmission curves to obtain magnitudes
 
@@ -194,7 +200,7 @@ flux_survey, appmag_ext_survey_satellite, band_fluxes_survey = photometry_from_s
 survey_mags = appmag_ext_survey_satellite
 ```
 
-![](index_files/figure-commonmark/cell-11-output-1.png)
+![](index_files/figure-commonmark/cell-12-output-1.png)
 
 ``` python
 ##### Load survey filters 
@@ -224,7 +230,21 @@ flux_survey, appmag_ext_survey_satellite, band_fluxes_survey = photometry_from_s
 survey_mags = appmag_ext_survey_satellite
 ```
 
-![](index_files/figure-commonmark/cell-12-output-1.png)
+![](index_files/figure-commonmark/cell-13-output-1.png)
+
+``` python
+u, g, r, i, z, Y = survey_mags
+```
+
+``` python
+u-g, g-r, i-z
+
+plt.scatter(u-g, g-r)
+```
+
+    <matplotlib.collections.PathCollection>
+
+![](index_files/figure-commonmark/cell-15-output-2.png)
 
 ``` python
 ##### Load survey filters 
@@ -254,7 +274,7 @@ flux_survey, appmag_ext_survey_satellite, band_fluxes_survey = photometry_from_s
 survey_mags = appmag_ext_survey_satellite
 ```
 
-![](index_files/figure-commonmark/cell-13-output-1.png)
+![](index_files/figure-commonmark/cell-16-output-1.png)
 
 <!-- ### One can also find luminosity profiles for the simulated galaxies -->
 <!-- #### 1. First we project the luminosity on to grids -->

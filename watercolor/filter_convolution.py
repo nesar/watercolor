@@ -21,6 +21,7 @@ from .calculate_csp import calc_fluxes_for_galaxy
 
 # %% ../nbs/06_filter_convolve.ipynb 8
 ALL_FILTER_DIR = '../watercolor/data/filter_specifics/'
+# ALL_FILTER_DIR = "data/sps_library_data/"
 
 # %% ../nbs/06_filter_convolve.ipynb 10
 def load_filter_single(filtfile:str=None, # Individual filter files 
