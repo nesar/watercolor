@@ -28,14 +28,8 @@ from watercolor.load_sps_library import STELLAR_LIBRARY_DIR
 from watercolor.dust_attenuation import spectrum_dusted
 from watercolor.cosmic_distance_effects import combine_redshift_and_dimming_effect
 from watercolor.filter_convolution import load_survey_pickle, photometry_from_spectra
-from watercolor.filter_convolution import ALL_FILTER_DIR
+# from watercolor.filter_convolution import ALL_FILTER_DIR
 ```
-
-``` python
-STELLAR_LIBRARY_DIR, ALL_FILTER_DIR
-```
-
-    ('data/sps_library_data/', '../watercolor/data/filter_specifics/')
 
 #### 2. Then the galaxy-star catalog from HACC is loaded, using a unique galaxy tag, we select a galaxy
 
@@ -45,7 +39,7 @@ galaxy_tags, stellar_idx, metal_hydro, mass, age_hydro, x, y, z , vx, vy, vz = w
 ```
 
 ``` python
-galaxy_number = 2
+galaxy_number = 1
 unique_galaxy_tag = np.unique(galaxy_tags)[galaxy_number]
 print('Number of galaxies: %d'%np.unique(galaxy_tags).shape[0])
 logmstar = np.array([np.log10( np.sum(mass[galaxy_tags == unique_galaxy_tag]))])
@@ -111,7 +105,7 @@ a[1].set_ylabel(r'$L_{\rm CSP}(\lambda)\ {\rm [L_{\odot}/\AA]}$', fontsize = 'x-
 plt.show()
 ```
 
-![](index_files/figure-commonmark/cell-7-output-1.png)
+![](index_files/figure-commonmark/cell-6-output-1.png)
 
 #### 5. CSPs are attenuation due to dust
 
@@ -138,7 +132,7 @@ a.legend(fontsize='x-large')
 
     <matplotlib.legend.Legend>
 
-![](index_files/figure-commonmark/cell-9-output-2.png)
+![](index_files/figure-commonmark/cell-8-output-2.png)
 
 #### 6. The resulting dust attenuated spectra undergoes cosmic dimming and redshifting
 
@@ -168,7 +162,7 @@ a.legend(fontsize='x-large')
 
     <matplotlib.legend.Legend>
 
-![](index_files/figure-commonmark/cell-11-output-2.png)
+![](index_files/figure-commonmark/cell-10-output-2.png)
 
 #### 7. The final spectrum is convolved with telescope transmission curves to obtain magnitudes
 
@@ -176,7 +170,7 @@ a.legend(fontsize='x-large')
 ##### Load survey filters 
 
 SURVEY_STRING = 'SPHEREx'
-central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names = load_survey_pickle(ALL_FILTER_DIR+SURVEY_STRING)
+central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names = load_survey_pickle(SURVEY_STRING)
 
 
 ##### Compute bandpasses
@@ -195,17 +189,15 @@ flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(cen
                                                                           interp_kind='linear',
                                                                           plot=True,
                                                                           clip_bandpass=True)
-
-survey_mags = appmag_ext_survey
 ```
 
-![](index_files/figure-commonmark/cell-12-output-1.png)
+![](index_files/figure-commonmark/cell-11-output-1.png)
 
 ``` python
 ##### Load survey filters 
 
 SURVEY_STRING = 'LSST'
-central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names = load_survey_pickle(ALL_FILTER_DIR+SURVEY_STRING)
+central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names = load_survey_pickle(SURVEY_STRING)
 
 
 ##### Compute bandpasses
@@ -224,17 +216,18 @@ flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(cen
                                                                           interp_kind='linear',
                                                                           plot=True,
                                                                           clip_bandpass=True)
-
-survey_mags = appmag_ext_survey
 ```
 
-![](index_files/figure-commonmark/cell-13-output-1.png)
+    /lcrc/project/cosmo_ai/nramachandra/Projects/Hydro_paint/watercolor/watercolor/filter_convolution.py:156: RuntimeWarning: divide by zero encountered in log10
+      appmag_ext = -2.5*np.log10(flux)+23.9
+
+![](index_files/figure-commonmark/cell-12-output-2.png)
 
 ``` python
 ##### Load survey filters 
 
 SURVEY_STRING = 'COSMOS'
-central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names = load_survey_pickle(ALL_FILTER_DIR+SURVEY_STRING)
+central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names = load_survey_pickle(SURVEY_STRING)
 
 
 ##### Compute bandpasses
@@ -253,11 +246,9 @@ flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(cen
                                                                           interp_kind='linear',
                                                                           plot=True,
                                                                           clip_bandpass=True)
-
-survey_mags = appmag_ext_survey
 ```
 
-![](index_files/figure-commonmark/cell-14-output-1.png)
+![](index_files/figure-commonmark/cell-13-output-1.png)
 
 <!-- ### One can also find luminosity profiles for the simulated galaxies -->
 <!-- #### 1. First we project the luminosity on to grids -->

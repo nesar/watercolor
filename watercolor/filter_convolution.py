@@ -21,12 +21,13 @@ from .load_sim_stellar_catalog import GALS_FILE
 from .load_sim_stellar_catalog import Z_SOLAR_PADOVA, H0
 
 from .calculate_csp import calc_fluxes_for_galaxy
+import pkg_resources
 
 # %% ../nbs/06_filter_convolve.ipynb 8
-ALL_FILTER_DIR = '../watercolor/data/filter_specifics/'
-# ALL_FILTER_DIR = "data/sps_library_data/"
+# ALL_FILTER_DIR = '../watercolor/data/filter_specifics/'
+ALL_FILTER_DIR = "data/filter_specifics/"
 
-# %% ../nbs/06_filter_convolve.ipynb 10
+# %% ../nbs/06_filter_convolve.ipynb 9
 def load_filter_single(filtfile:str=None, # Individual filter files 
                           norm:bool=True #Bandpass normalization condition
                          )->tuple: #Wavelengths, bandpass values, central wavelengths, filter name
@@ -50,7 +51,7 @@ def load_filter_single(filtfile:str=None, # Individual filter files
 
     return bandpass_wav, bandpass_val, cenwav, bandpass_name
 
-# %% ../nbs/06_filter_convolve.ipynb 11
+# %% ../nbs/06_filter_convolve.ipynb 10
 def clip_bandpass_values(bandpass_wavs:np.float32=None, # Bandpass wavelengths
                        bandpass_vals:np.float32=None # Bandpasses
                       )->tuple: #Clipped bandpass wavelengths, clipped bandpass values
@@ -66,7 +67,7 @@ def clip_bandpass_values(bandpass_wavs:np.float32=None, # Bandpass wavelengths
 
     return all_clip_bandpass_wav, all_clip_bandpass_vals
 
-# %% ../nbs/06_filter_convolve.ipynb 12
+# %% ../nbs/06_filter_convolve.ipynb 11
 def load_survey_filters(filtdir:str=ALL_FILTER_DIR+'LSST', #Input directory with all filter definitions
                         to_um:bool=True, #True/False to convert wavelengths to microns
                        )->tuple: #Central wavelengths, Bandpass wavelengths, Bandpass values, filter names 
@@ -109,16 +110,19 @@ def load_survey_filters(filtdir:str=ALL_FILTER_DIR+'LSST', #Input directory with
     return central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names
 
 
-# %% ../nbs/06_filter_convolve.ipynb 13
-def load_survey_pickle(filter_path_and_survey:str=ALL_FILTER_DIR+'LSST' #Input directory and Survey
+# %% ../nbs/06_filter_convolve.ipynb 12
+def load_survey_pickle(survey:str='LSST' #Survey
                       )->tuple: #Central wavelengths, Bandpass wavelengths, Bandpass values, filter names
     
-    with open( filter_path_and_survey + '.pickle' , 'rb') as f:
+    filter_path_and_survey = ALL_FILTER_DIR + survey
+    FILTER_NAMES_PKG = pkg_resources.resource_stream("watercolor", filter_path_and_survey + '.pickle').name
+    
+    with open( FILTER_NAMES_PKG , 'rb') as f:
      central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names = pickle.load(f)
     
     return central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names
 
-# %% ../nbs/06_filter_convolve.ipynb 14
+# %% ../nbs/06_filter_convolve.ipynb 13
 def photometry_from_spectra(central_wavelengths:np.array=None, # Central wavelengths
                      sed_um_wave:np.array=None, # SED wavelengths (in microns)
                      sed_mJy_flux:np.array=None, # SED fluxes (in mJy)
