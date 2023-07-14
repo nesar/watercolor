@@ -117,6 +117,8 @@ def load_survey_pickle(survey:str='LSST' #Survey
     filter_path_and_survey = ALL_FILTER_DIR + survey
     FILTER_NAMES_PKG = pkg_resources.resource_stream("watercolor", filter_path_and_survey + '.pickle').name
     
+    # print(FILTER_NAMES_PKG)
+    
     with open( FILTER_NAMES_PKG , 'rb') as f:
      central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names = pickle.load(f)
     
