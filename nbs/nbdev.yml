@@ -4,6 +4,6 @@ project:
 website:
   title: "watercolor"
   site-url: "https://nesar.github.io/watercolor"
-  description: "Painting hydro simulations with galaxy colors"
+  description: "Painting hydrodynamical simulations with galaxy colors"
   repo-branch: main
   repo-url: "https://github.com/nesar/watercolor"
