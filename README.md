@@ -218,7 +218,7 @@ flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(cen
                                                                           clip_bandpass=True)
 ```
 
-    /lcrc/project/cosmo_ai/nramachandra/Projects/Hydro_paint/watercolor/watercolor/filter_convolution.py:158: RuntimeWarning: divide by zero encountered in log10
+    /lcrc/project/cosmo_ai/nramachandra/Projects/Hydro_paint/watercolor/watercolor/filter_convolution.py:166: RuntimeWarning: divide by zero encountered in log10
       appmag_ext = -2.5*np.log10(flux)+23.9
 
 ![](index_files/figure-commonmark/cell-12-output-2.png)
