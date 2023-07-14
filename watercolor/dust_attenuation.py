@@ -7,7 +7,7 @@ __all__ = ['blockPrint', 'enablePrint', 'spectrum_dusted']
 import numpy as np
 from .load_sim_stellar_catalog import load_hacc_galaxy_data
 from .calculate_csp import calc_fluxes_for_galaxy
-from .load_sps_library import STELLAR_LIBRARY_DIR
+from .load_sps_library import LIBRARY_FLUX_FILE, LIBRARY_WAVE_FILE, LIBRARY_AGE_FILE, LIBRARY_METAL_FILE
 
 # %% ../nbs/04_dust_attenuation.ipynb 5
 import sys

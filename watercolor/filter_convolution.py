@@ -14,7 +14,7 @@ from scipy.interpolate import interp1d as interp1d
 from .ssp_interpolation import spec_ssp_lookup
 
 from .load_sps_library import load_fsps_spectral_library, load_fsps_age_metallicity
-from .load_sps_library import STELLAR_LIBRARY_DIR
+from .load_sps_library import LIBRARY_FLUX_FILE, LIBRARY_WAVE_FILE, LIBRARY_AGE_FILE, LIBRARY_METAL_FILE
 
 from .load_sim_stellar_catalog import load_hacc_galaxy_data
 from .load_sim_stellar_catalog import GALS_FILE

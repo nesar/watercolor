@@ -8,7 +8,7 @@ import numpy as np
 from .ssp_interpolation import spec_ssp_lookup
 
 from .load_sps_library import load_fsps_spectral_library, load_fsps_age_metallicity
-from .load_sps_library import STELLAR_LIBRARY_DIR
+from .load_sps_library import LIBRARY_FLUX_FILE, LIBRARY_WAVE_FILE, LIBRARY_AGE_FILE, LIBRARY_METAL_FILE
 
 from .load_sim_stellar_catalog import load_hacc_galaxy_data
 from .load_sim_stellar_catalog import GALS_FILE
@@ -37,11 +37,14 @@ def ssp_to_csp(spec_flux_ssp:np.ndarray # SSP SEDs
 # %% ../nbs/03_calculate_csp.ipynb 6
 def calc_fluxes_for_galaxy(gal_file_in:str=GALS_FILE, # HACC stellar catalog
                            unique_gal_tag:np.float32=None, # Selected galaxy tag
-                           spectral_library_path:str=STELLAR_LIBRARY_DIR, # Spectral library path
+                           spectral_library_flux:str=LIBRARY_FLUX_FILE, # Fluxes in the spectral library,
+                           spectral_library_wave:str=LIBRARY_WAVE_FILE, # Wavelengths in the spectral library,
+                           spectral_library_age:str=LIBRARY_AGE_FILE, # Age in the spectral library,
+                           spectral_library_metal:str=LIBRARY_METAL_FILE, # Metallicity in the spectral library,
                           )->tuple: # SED wavelength, individual SSP SEDs, CSP SED, Luminosity, Galaxy stellar mass  
     
-    spec_flux_library, spec_wave_library = load_fsps_spectral_library(spectral_library_path)
-    age_fsps_gyr, Z_padova_fsps = load_fsps_age_metallicity(spectral_library_path)
+    spec_flux_library, spec_wave_library = load_fsps_spectral_library(spectral_library_flux, spectral_library_wave)
+    age_fsps_gyr, Z_padova_fsps = load_fsps_age_metallicity(spectral_library_age, spectral_library_metal)
     gal_tags, _, metal_hydro, mass, age_hydro, _, _, _, _, _, _ = load_hacc_galaxy_data(gal_file_in)
 
 

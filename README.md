@@ -24,7 +24,7 @@ pip install watercolor
 import watercolor
 from watercolor.load_sim_stellar_catalog import load_hacc_galaxy_data
 from watercolor.calculate_csp import calc_fluxes_for_galaxy
-from watercolor.load_sps_library import STELLAR_LIBRARY_DIR
+from watercolor.load_sps_library import LIBRARY_FLUX_FILE, LIBRARY_WAVE_FILE, LIBRARY_AGE_FILE, LIBRARY_METAL_FILE
 from watercolor.dust_attenuation import spectrum_dusted
 from watercolor.cosmic_distance_effects import combine_redshift_and_dimming_effect
 from watercolor.filter_convolution import load_survey_pickle, photometry_from_spectra
@@ -51,8 +51,11 @@ logZ = np.array([np.sum(metal_hydro[galaxy_tags == unique_galaxy_tag])])
 
 ``` python
 spec_wave_ssp, spec_flux_ssp, spec_csp, flux_proxy, gal_stellar_mass = watercolor.calculate_csp.calc_fluxes_for_galaxy(galaxy_star_catalog_file,
-                                                                                                               unique_galaxy_tag,
-                                                                                                               STELLAR_LIBRARY_DIR)
+                                                                                                                       unique_galaxy_tag,
+                                                                                                                       LIBRARY_FLUX_FILE,
+                                                                                                                       LIBRARY_WAVE_FILE,
+                                                                                                                       LIBRARY_AGE_FILE,
+                                                                                                                       LIBRARY_METAL_FILE)
 ```
 
     Library shape:  (22, 94, 1963)
@@ -417,7 +420,7 @@ flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(cen
                                                                           clip_bandpass=True)
 ```
 
-    /lcrc/project/cosmo_ai/nramachandra/Projects/Hydro_paint/watercolor/watercolor/filter_convolution.py:156: RuntimeWarning: divide by zero encountered in log10
+    /lcrc/project/cosmo_ai/nramachandra/Projects/Hydro_paint/watercolor/watercolor/filter_convolution.py:158: RuntimeWarning: divide by zero encountered in log10
       appmag_ext = -2.5*np.log10(flux)+23.9
 
 ![](index_files/figure-commonmark/cell-13-output-2.png)

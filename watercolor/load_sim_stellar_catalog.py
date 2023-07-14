@@ -11,7 +11,7 @@ import pkg_resources
 
 # %% ../nbs/01_load_sim_stellar_catalog.ipynb 6
 GALS_DIR = "data/test_hacc_stellar_catalog/"
-GALS_FILE = pkg_resources.resource_stream("watercolor", GALS_DIR + "Gals_Z0.txt").name
+GALS_FILE = pkg_resources.resource_stream("watercolor", GALS_DIR + "Gals_Z0_576.txt").name
 
 # %% ../nbs/01_load_sim_stellar_catalog.ipynb 7
 Z_SOLAR_HACC = 0.012899 # Solar metallicity value in HACC Hydro
