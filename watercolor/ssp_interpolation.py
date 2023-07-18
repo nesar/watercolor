@@ -14,7 +14,7 @@ def spec_ssp_lookup(age_hydro_i:np.float32=None, # Age of the HACC stellar parti
              z_padova_fsps:np.float32=None, # Metallicities in SPS library
              spec_flux:np.array=None, # Stellar library SEDs 
              spec_wave:np.array=None, # Stellar library wavelengths
-            )-> tuple: # SSP Wavelength, SSP Luminosity 
+            )-> tuple: # SSP Wavelength (A), SSP Luminosity (Lsun/A)
     '''
     Lookup table for finding the closest SPS entry to HACC SSP
     '''
@@ -23,5 +23,6 @@ def spec_ssp_lookup(age_hydro_i:np.float32=None, # Age of the HACC stellar parti
     age_index = np.argmin(np.abs(age_fsps-age_hydro_i))
     met_index = np.argmin(np.abs(z_padova_fsps-metal_hydro_i))
     # print(age_index, met_index)
+    spec_flux_i = 1e10*mass_hydro_i*spec_flux[met_index, age_index]
     
-    return spec_wave, mass_hydro_i*spec_flux[met_index, age_index]
+    return spec_wave, spec_flux_i

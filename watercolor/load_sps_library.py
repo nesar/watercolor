@@ -27,8 +27,8 @@ def load_fsps_spectral_library(flux_fileIn:str=LIBRARY_FLUX_FILE, # Input flux f
                               ) -> tuple: #Fluxes, wavelengths 
     spec_flux = np.load(flux_fileIn)
     spec_wave = np.load(wave_fileIn)
-    print('Library shape: ', spec_flux.shape) 
-    print('Wavelength shape: ', spec_wave.shape)
+    # print('Library shape: ', spec_flux.shape) 
+    # print('Wavelength shape: ', spec_wave.shape)
     return spec_flux, spec_wave
 
 # %% ../nbs/00_load_sps_library.ipynb 7

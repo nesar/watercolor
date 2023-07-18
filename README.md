@@ -18,6 +18,39 @@ pip install watercolor
 
 ## Simple implementation to HACC hydro data
 
+``` python
+from watercolor.paint import photometry_from_catalog
+```
+
+``` python
+galaxy_star_catalog_file='../watercolor/data/test_hacc_stellar_catalog/Gals_Z0_576.txt'
+final_sed_uJy, final_wave_um, lsst_mags, spherex_mags, cosmos_mags = photometry_from_catalog(galaxy_star_catalog_file)
+```
+
+    Number of galaxies: 10
+
+``` python
+f, a = plt.subplots(1, 1, figsize=(8, 5))
+
+for gal_id in range(final_sed_uJy.shape[0]):
+    a.plot(final_wave_um[gal_id], final_sed_uJy[gal_id], label=str(gal_id))
+
+a.set_xlim(0.09, 4.2)
+a.set_ylim(1e-4, 1e5)
+a.set_xscale('log')
+a.set_yscale('log')
+
+a.set_xlabel(r'${\rm um}$', fontsize = 'x-large')
+a.set_ylabel(r'${\rm mJy}}$', fontsize = 'x-large')
+a.legend(fontsize='x-large', ncol=3, title='Galaxy id')
+```
+
+    <matplotlib.legend.Legend>
+
+![](index_files/figure-commonmark/cell-4-output-2.png)
+
+## Behind the scenes
+
 #### 1. First we import the following modules of hydro_colors
 
 ``` python
@@ -25,7 +58,7 @@ import watercolor
 from watercolor.load_sim_stellar_catalog import load_hacc_galaxy_data
 from watercolor.calculate_csp import calc_fluxes_for_galaxy
 from watercolor.load_sps_library import LIBRARY_FLUX_FILE, LIBRARY_WAVE_FILE, LIBRARY_AGE_FILE, LIBRARY_METAL_FILE
-from watercolor.dust_attenuation import spectrum_dusted
+from watercolor.dust_attenuation import spectrum_dusted, log_total_stellar_metal, log_total_stellar_mass
 from watercolor.cosmic_distance_effects import combine_redshift_and_dimming_effect
 from watercolor.filter_convolution import load_survey_pickle, photometry_from_spectra
 ```
@@ -38,11 +71,15 @@ galaxy_tags, stellar_idx, metal_hydro, mass, age_hydro, x, y, z , vx, vy, vz = w
 ```
 
 ``` python
-galaxy_number = 1
+galaxy_number = 0 # Choosing one of the galaxies in the catalog
 unique_galaxy_tag = np.unique(galaxy_tags)[galaxy_number]
 print('Number of galaxies: %d'%np.unique(galaxy_tags).shape[0])
-logmstar = np.array([np.log10( np.sum(mass[galaxy_tags == unique_galaxy_tag]))])
-logZ = np.array([np.sum(metal_hydro[galaxy_tags == unique_galaxy_tag])])
+
+mstar_i = mass[galaxy_tags == unique_galaxy_tag]
+metal_i = metal_hydro[galaxy_tags == unique_galaxy_tag]
+
+logZ = log_total_stellar_metal(metal_i, mstar_i)
+logmstar = log_total_stellar_mass(mstar_i)
 ```
 
     Number of galaxies: 10
@@ -57,9 +94,6 @@ spec_wave_ssp, spec_flux_ssp, spec_csp, flux_proxy, gal_stellar_mass = watercolo
                                                                                                                        LIBRARY_AGE_FILE,
                                                                                                                        LIBRARY_METAL_FILE)
 ```
-
-    Library shape:  (22, 94, 1963)
-    Wavelength shape:  (1963,)
 
 #### 4. We plot SEDs from both SSPs and CSPs
 
@@ -107,18 +141,13 @@ a[1].set_ylabel(r'$L_{\rm CSP}(\lambda)\ {\rm [L_{\odot}/\AA]}$', fontsize = 'x-
 plt.show()
 ```
 
-![](index_files/figure-commonmark/cell-6-output-1.png)
+![](index_files/figure-commonmark/cell-9-output-1.png)
 
 #### 5. CSPs are attenuation due to dust
 
 ``` python
 spec_wave_csp_dusted = spectrum_dusted(spec_csp, spec_wave_ssp, logmstar, logZ, 0.01)
 ```
-
-    0.0 41.012193308819754
-    0.0 41.012193308819754
-    Library shape:  (22, 94, 1963)
-    Wavelength shape:  (1963,)
 
 ``` python
 f, a = plt.subplots(1, 1, figsize=(12, 3))
@@ -134,7 +163,7 @@ a.legend(fontsize='x-large')
 
     <matplotlib.legend.Legend>
 
-![](index_files/figure-commonmark/cell-8-output-2.png)
+![](index_files/figure-commonmark/cell-11-output-2.png)
 
 #### 6. The resulting dust attenuated spectra undergoes cosmic dimming and redshifting
 
@@ -164,7 +193,7 @@ a.legend(fontsize='x-large')
 
     <matplotlib.legend.Legend>
 
-![](index_files/figure-commonmark/cell-10-output-2.png)
+![](index_files/figure-commonmark/cell-13-output-2.png)
 
 #### 7. The final spectrum is convolved with telescope transmission curves to obtain magnitudes
 
@@ -192,7 +221,7 @@ flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(cen
                                                                           clip_bandpass=True)
 ```
 
-![](index_files/figure-commonmark/cell-11-output-1.png)
+![](index_files/figure-commonmark/cell-14-output-1.png)
 
 ``` python
 ##### Load survey filters 
@@ -218,10 +247,7 @@ flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(cen
                                                                           clip_bandpass=True)
 ```
 
-    /lcrc/project/cosmo_ai/nramachandra/Projects/Hydro_paint/watercolor/watercolor/filter_convolution.py:166: RuntimeWarning: divide by zero encountered in log10
-      appmag_ext = -2.5*np.log10(flux)+23.9
-
-![](index_files/figure-commonmark/cell-12-output-2.png)
+![](index_files/figure-commonmark/cell-15-output-1.png)
 
 ``` python
 ##### Load survey filters 
@@ -248,7 +274,7 @@ flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(cen
                                                                           clip_bandpass=True)
 ```
 
-![](index_files/figure-commonmark/cell-13-output-1.png)
+![](index_files/figure-commonmark/cell-16-output-1.png)
 
 <!-- ### One can also find luminosity profiles for the simulated galaxies -->
 <!-- #### 1. First we project the luminosity on to grids -->

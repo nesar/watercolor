@@ -41,7 +41,7 @@ def calc_fluxes_for_galaxy(gal_file_in:str=GALS_FILE, # HACC stellar catalog
                            spectral_library_wave:str=LIBRARY_WAVE_FILE, # Wavelengths in the spectral library,
                            spectral_library_age:str=LIBRARY_AGE_FILE, # Age in the spectral library,
                            spectral_library_metal:str=LIBRARY_METAL_FILE, # Metallicity in the spectral library,
-                          )->tuple: # SED wavelength, individual SSP SEDs, CSP SED, Luminosity, Galaxy stellar mass  
+                          )->tuple: # SED wavelength (A), individual SSP SEDs (Lsun/A), CSP SED (Lsun/A), Luminosity, Galaxy stellar mass (Msun)  
     
     spec_flux_library, spec_wave_library = load_fsps_spectral_library(spectral_library_flux, spectral_library_wave)
     age_fsps_gyr, Z_padova_fsps = load_fsps_age_metallicity(spectral_library_age, spectral_library_metal)
