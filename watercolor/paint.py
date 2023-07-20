@@ -5,7 +5,7 @@ __all__ = ['photometry_from_catalog']
 
 # %% ../nbs/07_paint.ipynb 4
 import watercolor
-from .load_sim_stellar_catalog import load_hacc_galaxy_data
+from .load_sim_stellar_catalog import load_hacc_galaxy_data, GALS_FILE
 from .calculate_csp import calc_fluxes_for_galaxy
 from .load_sps_library import LIBRARY_FLUX_FILE, LIBRARY_WAVE_FILE, LIBRARY_AGE_FILE, LIBRARY_METAL_FILE
 from .dust_attenuation import spectrum_dusted, log_total_stellar_metal, log_total_stellar_mass
@@ -16,11 +16,11 @@ from .filter_convolution import load_survey_pickle, photometry_from_spectra
 import numpy as np
 
 # %% ../nbs/07_paint.ipynb 6
-def photometry_from_catalog(galaxy_star_catalog_file:str='../watercolor/data/test_hacc_stellar_catalog/Gals_Z0_576.txt', # Input galaxy catalog
+def photometry_from_catalog(galaxy_star_catalog_file:str=GALS_FILE, # Input galaxy catalog
                            )->tuple:# [SED, wavelengths, broadband magnitudes from lsst, cosmos, spherex]
     
     # load catalog from HACC
-    galaxy_tags, stellar_idx, metal_hydro, mass, age_hydro, x, y, z , vx, vy, vz = load_hacc_galaxy_data(galaxy_star_catalog_file)
+    fof_halo_tag, if_satellite, galaxy_tags, stellar_idx, metal_hydro, mass, age_hydro, x, y, z , vx, vy, vz = load_hacc_galaxy_data(galaxy_star_catalog_file)
     num_galaxies_in_catalog = np.unique(galaxy_tags).shape[0]
     print('Number of galaxies: %d'%num_galaxies_in_catalog)
 
