@@ -42,7 +42,7 @@ def spectrum_dusted(pcolor:np.array=None, # SED without dust attenuation
                   wave:np.array=None, # Wavelength in Angstorms
                   logmstar:np.float32=None, # Log(stellar mass) of the galaxy
                   metal:np.float32=None, # log(metallicity) of the galaxy
-                  redshift:np.float32=None # Redshift of the galaxy
+                  galaxy_redshift:np.float32=None # Redshift of the galaxy
                   )-> np.array: # Dust attenuated SED
      
     # blockPrint()
@@ -52,7 +52,7 @@ def spectrum_dusted(pcolor:np.array=None, # SED without dust attenuation
         dust_attn = DustAttnCalc(logM=logmstar, 
                                  # sfr=SFRz, 
                                  logZ=metal, 
-                                 z = redshift, 
+                                 z = galaxy_redshift, 
                                  bv=1, 
                                  eff=0, 
                                  wv_arr=wave); # Two-component bivariate dust model (fitting both optical depth and slope) 

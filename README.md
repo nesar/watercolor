@@ -23,11 +23,11 @@ from watercolor.paint import photometry_from_catalog
 ```
 
 ``` python
-galaxy_star_catalog_file='../watercolor/data/test_hacc_stellar_catalog/Gal_Z0.txt' # HACC galaxy catalog
+galaxy_star_catalog_file='../watercolor/data/test_hacc_stellar_catalog/Gal_Z1.txt' # HACC galaxy catalog
 final_sed_uJy, final_wave_um, lsst_mags, spherex_mags, cosmos_mags = photometry_from_catalog(galaxy_star_catalog_file)
 ```
 
-    Number of galaxies: 200
+    Number of galaxies: 168
 
 ``` python
 # Plotting SEDs and LSST colors
@@ -90,7 +90,7 @@ logZ = log_total_stellar_metal(metal_i, mstar_i)
 logmstar = log_total_stellar_mass(mstar_i)
 ```
 
-    Number of galaxies: 200
+    Number of galaxies: 168
 
 #### 3. After selecting a unique galaxy tag, we calculate the SED. This is the rest-frame SED is due to spectral emission alone, and without dust attenuation.
 

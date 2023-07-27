@@ -17,6 +17,7 @@ import numpy as np
 
 # %% ../nbs/07_paint.ipynb 6
 def photometry_from_catalog(galaxy_star_catalog_file:str=GALS_FILE, # Input galaxy catalog
+                            galaxy_redshift:np.float32=0.001, # Galaxy redshift
                            )->tuple:# [SED, wavelengths, broadband magnitudes from lsst, cosmos, spherex]
     
     # load catalog from HACC
@@ -50,12 +51,12 @@ def photometry_from_catalog(galaxy_star_catalog_file:str=GALS_FILE, # Input gala
                                                                                                                                LIBRARY_AGE_FILE,
                                                                                                                                LIBRARY_METAL_FILE)
         # Dust attenuation
-        spec_wave_csp_dusted = spectrum_dusted(spec_csp, spec_wave_ssp, logmstar, logZ, 0.01)
+        spec_wave_csp_dusted = spectrum_dusted(spec_csp, spec_wave_ssp, logmstar, logZ, galaxy_redshift)
         
         # Cosmic redshifting and dimming
         redsh_wave, redsh_spec = combine_redshift_and_dimming_effect(wave=spec_wave_ssp, 
                                                              spec=spec_wave_csp_dusted, 
-                                                             galaxy_redshift=0.001)
+                                                             galaxy_redshift=galaxy_redshift)
         
         sed_um_wave = redsh_wave/1e4
         sed_mJy_flux = redsh_spec*1e3
