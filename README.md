@@ -23,21 +23,21 @@ from watercolor.paint import photometry_from_catalog
 ```
 
 ``` python
-galaxy_star_catalog_file='../watercolor/data/test_hacc_stellar_catalog/Gal_Z1.txt' # HACC galaxy catalog
+galaxy_star_catalog_file='../watercolor/data/test_hacc_stellar_catalog/Gal_Z0.txt' # HACC galaxy catalog
 final_sed_uJy, final_wave_um, lsst_mags, spherex_mags, cosmos_mags = photometry_from_catalog(galaxy_star_catalog_file)
 ```
 
-    Number of galaxies: 168
+    Number of galaxies: 200
 
 ``` python
 # Plotting SEDs and LSST colors
 f, ax = plt.subplots(1, 2, figsize=(16, 5), gridspec_kw={'width_ratios': [2, 1]})
 
-for gal_id in np.random.randint(0, final_sed_uJy.shape[0], 24):
+for gal_id in np.random.randint(0, final_sed_uJy.shape[0], 12):
     ax[0].plot(final_wave_um[gal_id], final_sed_uJy[gal_id], label=str(gal_id), alpha=0.8)
 
 ax[0].set_xlim(0.09, 4.2)
-ax[0].set_ylim(1e-4, 1e5)
+ax[0].set_ylim(1e-5, 1e5)
 ax[0].set_xscale('log')
 ax[0].set_yscale('log')
 
@@ -90,7 +90,7 @@ logZ = log_total_stellar_metal(metal_i, mstar_i)
 logmstar = log_total_stellar_mass(mstar_i)
 ```
 
-    Number of galaxies: 168
+    Number of galaxies: 200
 
 #### 3. After selecting a unique galaxy tag, we calculate the SED. This is the rest-frame SED is due to spectral emission alone, and without dust attenuation.
 
@@ -149,7 +149,7 @@ a[1].set_ylabel(r'$L_{\rm CSP}(\lambda)\ {\rm [L_{\odot}/\AA]}$', fontsize = 'x-
 plt.show()
 ```
 
-![](index_files/figure-commonmark/cell-9-output-1.png)
+![](index_files/figure-commonmark/cell-13-output-1.png)
 
 #### 5. CSPs are attenuation due to dust
 
@@ -171,7 +171,7 @@ a.legend(fontsize='x-large')
 
     <matplotlib.legend.Legend>
 
-![](index_files/figure-commonmark/cell-11-output-2.png)
+![](index_files/figure-commonmark/cell-15-output-2.png)
 
 #### 6. The resulting dust attenuated spectra undergoes cosmic dimming and redshifting
 
@@ -201,7 +201,7 @@ a.legend(fontsize='x-large')
 
     <matplotlib.legend.Legend>
 
-![](index_files/figure-commonmark/cell-13-output-2.png)
+![](index_files/figure-commonmark/cell-17-output-2.png)
 
 #### 7. The final spectrum is convolved with telescope transmission curves to obtain magnitudes
 
@@ -229,7 +229,7 @@ flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(cen
                                                                           clip_bandpass=True)
 ```
 
-![](index_files/figure-commonmark/cell-14-output-1.png)
+![](index_files/figure-commonmark/cell-18-output-1.png)
 
 ``` python
 ##### Load survey filters 
@@ -255,7 +255,7 @@ flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(cen
                                                                           clip_bandpass=True)
 ```
 
-![](index_files/figure-commonmark/cell-15-output-1.png)
+![](index_files/figure-commonmark/cell-19-output-1.png)
 
 ``` python
 ##### Load survey filters 
@@ -282,7 +282,7 @@ flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(cen
                                                                           clip_bandpass=True)
 ```
 
-![](index_files/figure-commonmark/cell-16-output-1.png)
+![](index_files/figure-commonmark/cell-20-output-1.png)
 
 <!-- ### One can also find luminosity profiles for the simulated galaxies -->
 <!-- #### 1. First we project the luminosity on to grids -->
