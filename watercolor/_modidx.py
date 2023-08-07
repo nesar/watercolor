@@ -55,4 +55,6 @@ d = { 'settings': { 'branch': 'main',
                                                                                                          'watercolor/load_sps_library.py')},
             'watercolor.paint': {'watercolor.paint.photometry_from_catalog': ('paint.html#photometry_from_catalog', 'watercolor/paint.py')},
             'watercolor.ssp_interpolation': { 'watercolor.ssp_interpolation.spec_ssp_lookup': ( 'ssp_interpolation.html#spec_ssp_lookup',
-                                                                                                'watercolor/ssp_interpolation.py')}}}
+                                                                                                'watercolor/ssp_interpolation.py'),
+                                              'watercolor.ssp_interpolation.spec_ssp_lookup_nearest': ( 'ssp_interpolation.html#spec_ssp_lookup_nearest',
+                                                                                                        'watercolor/ssp_interpolation.py')}}}

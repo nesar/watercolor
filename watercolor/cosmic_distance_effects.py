@@ -17,7 +17,7 @@ from .load_sim_stellar_catalog import Z_SOLAR_PADOVA, H0
 
 from .calculate_csp import calc_fluxes_for_galaxy
 
-# %% ../nbs/05_cosmic_dimming.ipynb 10
+# %% ../nbs/05_cosmic_dimming.ipynb 11
 def spectrum_convert_from_ergscm2A(wave:np.array, # Input flux from 'erg/s/cm2/A'
                                     spec:np.array, # Wavelength 
                                     funit:str='Jy' # Output units
@@ -53,61 +53,63 @@ def spectrum_convert_from_uJy(wave:np.array, # Input flux from 'uJy'
 
     return spec_new
 
-# %% ../nbs/05_cosmic_dimming.ipynb 11
+# %% ../nbs/05_cosmic_dimming.ipynb 13
 def spectrum_dimmed_and_redshifted(DL_Gpc:np.float64=0.0, # Luminosity distance (LD) in unit of Gpc.
                       cosmo:str='flat_LCDM', # Choice of Astropy cosmology models ['flat_LCDM', 'WMAP9', 'Planck15']
                       H0:np.float64=70.0, # Hubble constant at z=0.
                       Om0:np.float64=0.3, # Omega matter at z=0.
                       galaxy_redshift:np.float64=0.01, # Redshift
-                      wave:np.array=[], # Wavelength grids of the input spectrum.
-                      spec: np.array=[] # Fluxes of the input spectrum.  
+                      wave:np.array=[], # Wavelength grids of the input spectrum in [A]
+                      spec: np.array=[] # Fluxes of the input spectrum in [L_bolometric A^-1]
                       ) -> tuple: # wavelength, SED of the redshifted and dimmed spectrum
 
     if DL_Gpc > 0.0:
-        DL = DL_Gpc
-        DL = DL*3.08568e+27
+        DL = DL_Gpc # in [Gpc]
+        DL = DL*3.08568e+27 #in [cm]
     else:
         if cosmo=='flat_LCDM' or cosmo==0:
             cosmo1 = FlatLambdaCDM(H0=H0, Om0=Om0)
-            DL = cosmo1.luminosity_distance(galaxy_redshift)      # in unit of Mpc
+            DL = cosmo1.luminosity_distance(galaxy_redshift)      # in unit of [Mpc]
         
         elif cosmo=='WMAP9' or cosmo==3:
-            DL = WMAP9.luminosity_distance(galaxy_redshift)
+            DL = WMAP9.luminosity_distance(galaxy_redshift) # in unit of [Mpc]
         
         elif cosmo=='Planck15' or cosmo==5:
-            DL = Planck15.luminosity_distance(galaxy_redshift)
+            DL = Planck15.luminosity_distance(galaxy_redshift) # in unit of [Mpc]
 
         
-        DL = DL.value/1.0e+3
-        DL = DL*3.08568e+27
+        DL = DL.value/1.0e+3 #in [Gpc]
+        DL = DL*3.08568e+27 # in [cm]
 
-    redsh_wave = (1.0+galaxy_redshift)*np.asarray(wave)
-    cor = 1.0/12.56637061/DL/DL/(1.0+galaxy_redshift)           # flux in L_solar cm^-2 A^-1
-    cor = cor*3.826e+33                           # flux in erg s^-1 cm^-2 A^-1
-    redsh_spec = cor*np.asarray(spec)
+    redsh_wave = (1.0+galaxy_redshift)*np.asarray(wave) # In [A]?
+    cor = 1.0/(4*np.pi*DL*DL)/(1.0+galaxy_redshift)    # In [cm^-2]     
+    # cor = cor*3.826e+33                           # in [erg s^-1 cm^-2 A^-1]
+    
+    redsh_spec = cor*np.asarray(spec) #  in [L_bolometric cm^-2 A^-1]
+    redsh_spec = redsh_spec*(3.0128*1e28) # in [W cm^-2 A^-1]
+    redsh_spec = redsh_spec*(1e8) # in [erg s^-1 cm^-2 A^-1]
+    
+    return redsh_wave, redsh_spec #[A] and [erg s^-1 cm^-2 A^-1]
 
-    return redsh_wave, redsh_spec
-
-# %% ../nbs/05_cosmic_dimming.ipynb 15
-def combine_redshift_and_dimming_effect(wave:np.array=[], # Wavelength grids of the input spectrum in Unit 
-                                        spec:np.array=[], # # Fluxes of the input spectrum.  
+# %% ../nbs/05_cosmic_dimming.ipynb 20
+def combine_redshift_and_dimming_effect(wave:np.array=[], # Wavelength grids of the input spectrum in Unit (A)
+                                        spec:np.array=[], # # Fluxes of the input spectrum. Fluxes of the input spectrum (in L_bolometric A^-1)
                                         galaxy_redshift:np.float64=0.01 # Redshift of the galaxy
                                        ) ->tuple: # Output of wavelength and spectra
     
-    spec_csp_ergscm2A = spectrum_convert_from_uJy(wave, 
-                                spec,
-                                funit='erg/s/cm2/A')
 
-    redsh_wave, redsh_spec = spectrum_dimmed_and_redshifted(DL_Gpc=0.0,
-                                               cosmo='flat_LCDM',
-                                               H0=70.0,
-                                               Om0=0.3,
-                                               galaxy_redshift=galaxy_redshift,
-                                               wave=wave,
-                                               spec=spec_csp_ergscm2A)
+    cosmo1 = FlatLambdaCDM(H0=70.0, Om0=0.3)
+    DL = cosmo1.luminosity_distance(galaxy_redshift)      # in unit of [Mpc]
+    DL = DL.value/1e3 #in [Gpc]
+    dL = DL*3.08568e+27 # in [cm]
+    # Redefine the speed of light in cm/s
+    c = 2.998e10
 
-    redsh_spec = spectrum_convert_from_ergscm2A(redsh_wave,
-                                    redsh_spec,
-                                    funit='Jy')*1e6
+    spec0 = spec*1e33 / (4*np.pi*(dL**2)*(1.0+galaxy_redshift))  # Convert luminosity to flux in erg/s/cm^2/A
+    spec0 *= wave**2 / c  # Convert flux per A to flux per Hz in erg/s/cm^2/Hz
+    spec0 *= 1e23  # Convert flux from erg/s/cm^2/Hz to Jy
+    spec0 *= 1e3  # Jy to mJy
     
-    return redsh_wave, redsh_spec
+    wave0 = (1.0+galaxy_redshift)*np.asarray(wave) # In [A]?
+    
+    return wave0, spec0 # redsh_wave in [A], redsh_spec in [mJy]

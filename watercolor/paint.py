@@ -26,7 +26,7 @@ def photometry_from_catalog(galaxy_star_catalog_file:str=GALS_FILE, # Input gala
     print('Number of galaxies: %d'%num_galaxies_in_catalog)
 
     
-    final_sed_uJy = np.zeros(shape=(num_galaxies_in_catalog, 1963)) ## SED resolution is 1963
+    final_sed_mJy = np.zeros(shape=(num_galaxies_in_catalog, 1963)) ## SED resolution is 1963
     final_wave_um = np.zeros(shape=(num_galaxies_in_catalog, 1963)) ## SED resolution is 1963
     lsst_mags = np.zeros(shape=(num_galaxies_in_catalog, 6)) ## 6 LSST bands
     spherex_mags = np.zeros(shape=(num_galaxies_in_catalog, 197)) ## 197 SPHEREx channels
@@ -51,15 +51,17 @@ def photometry_from_catalog(galaxy_star_catalog_file:str=GALS_FILE, # Input gala
                                                                                                                                LIBRARY_AGE_FILE,
                                                                                                                                LIBRARY_METAL_FILE)
         # Dust attenuation
-        spec_wave_csp_dusted = spectrum_dusted(spec_csp, spec_wave_ssp, logmstar, logZ, galaxy_redshift)
+        spec_wave_csp_dusted = spectrum_dusted(spec_csp, spec_wave_ssp, logmstar, logZ, galaxy_redshift) # (spec_csp in L_bolometric A^-1)
         
         # Cosmic redshifting and dimming
         redsh_wave, redsh_spec = combine_redshift_and_dimming_effect(wave=spec_wave_ssp, 
                                                              spec=spec_wave_csp_dusted, 
-                                                             galaxy_redshift=galaxy_redshift)
+                                                             galaxy_redshift=galaxy_redshift) # redsh_wave in [A], redsh_spec in [mJy]
         
-        sed_um_wave = redsh_wave/1e4
-        sed_mJy_flux = redsh_spec*1e3
+        
+        sed_um_wave = redsh_wave/1e4 # in um
+        sed_mJy_flux = redsh_spec/1e3  ## in mJy
+        
         
         # Filter convolution - LSST
         central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names = load_survey_pickle('LSST')
@@ -102,10 +104,10 @@ def photometry_from_catalog(galaxy_star_catalog_file:str=GALS_FILE, # Input gala
 
 
         # Appending the relevant quantities
-        final_sed_uJy[galaxy_number] = sed_mJy_flux
+        final_sed_mJy[galaxy_number] = sed_mJy_flux
         final_wave_um[galaxy_number] = sed_um_wave
         lsst_mags[galaxy_number] = appmag_ext_lsst
         spherex_mags[galaxy_number] = appmag_ext_spherex
         cosmos_mags[galaxy_number] = appmag_ext_cosmos
     
-    return final_sed_uJy, final_wave_um, lsst_mags, spherex_mags, cosmos_mags
+    return final_sed_mJy, final_wave_um, lsst_mags, spherex_mags, cosmos_mags
