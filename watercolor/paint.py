@@ -64,40 +64,40 @@ def photometry_from_catalog(galaxy_star_catalog_file:str=GALS_FILE, # Input gala
         
         
         # Filter convolution - LSST
-        central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names = load_survey_pickle('LSST')
+        central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names_lsst = load_survey_pickle('LSST')
         
         _, appmag_ext_lsst, _ = photometry_from_spectra(central_wavelengths, 
                                                         sed_um_wave, 
                                                         sed_mJy_flux, 
                                                         bandpass_wavs, 
                                                         bandpass_vals, 
-                                                        bandpass_names,
+                                                        bandpass_names_lsst,
                                                         interp_kind='linear',
                                                         plot=False,
                                                         clip_bandpass=True)
         
         # Filter convolution - SPHEREx
-        central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names = load_survey_pickle('SPHEREx')
+        central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names_spherex = load_survey_pickle('SPHEREx')
         
         _, appmag_ext_spherex, _ = photometry_from_spectra(central_wavelengths, 
                                                            sed_um_wave, 
                                                            sed_mJy_flux, 
                                                            bandpass_wavs, 
                                                            bandpass_vals, 
-                                                           bandpass_names,
+                                                           bandpass_names_spherex,
                                                            interp_kind='linear',
                                                            plot=False,
                                                            clip_bandpass=True)
         
         # Filter convolution - COSMOS
-        central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names = load_survey_pickle('COSMOS')
+        central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names_cosmos = load_survey_pickle('COSMOS')
         
         _, appmag_ext_cosmos, _ = photometry_from_spectra(central_wavelengths, 
                                                           sed_um_wave, 
                                                           sed_mJy_flux, 
                                                           bandpass_wavs, 
                                                           bandpass_vals, 
-                                                          bandpass_names,
+                                                          bandpass_names_cosmos,
                                                           interp_kind='linear',
                                                           plot=False,
                                                           clip_bandpass=True)

@@ -76,6 +76,8 @@ def spec_ssp_lookup(age_hydro_i:np.float32=None, # Age of the HACC stellar parti
     w10 = w10/diff_denom
     w11 = w11/diff_denom
     
+    print(age_min, met_min)
+    
     spec_flux_i = (w00*spec_flux_00) + (w01*spec_flux_01) + (w10*spec_flux_10) + (w11*spec_flux_11)
     
     spec_flux_i_mass_weighted = mass_hydro_i*spec_flux_i

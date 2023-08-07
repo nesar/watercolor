@@ -35,14 +35,16 @@ final_sed_mJy, final_wave_um, lsst_mags, spherex_mags, cosmos_mags = photometry_
 
 ``` python
 # Plotting SEDs and LSST colors
-f, ax = plt.subplots(1, 2, figsize=(16, 5), gridspec_kw={'width_ratios': [2, 1]})
+f, ax = plt.subplots(1, 3, figsize=(16, 3.5), gridspec_kw={'width_ratios': [2, 1, 1]})
 
 ax[0].set_title('Spectral Energy Distribution')
 ax[1].set_title('Color-Color plot (LSST bandpass)')
+ax[2].set_title('Color-Mag plot (LSST bandpass)')
 
 
+np.random.seed(432)
 for gal_id in np.random.randint(0, final_sed_mJy.shape[0], 12):
-    ax[0].plot(final_wave_um[gal_id], final_sed_mJy[gal_id], label=str(gal_id), alpha=0.8)
+    ax[0].plot(final_wave_um[gal_id], final_sed_mJy[gal_id], label=str(gal_id), alpha=0.94)
 
 ax[0].set_xlim(0.09, 3.2)
 ax[0].set_ylim(1e-8, 1e4)
@@ -52,12 +54,20 @@ ax[0].set_yscale('log')
 ax[0].set_xlabel(r'${\rm um}$', fontsize = 'x-large')
 ax[0].set_ylabel(r'${\rm mJy}}$', fontsize = 'x-large')
 # ax[0].legend(fontsize='x-large', ncol=3, title='Galaxy number')
-
+    
 u, g, r, i, z, Y = lsst_mags.T
 
-ax[1].scatter(g-r, r-i, c=range(final_sed_mJy.shape[0]))
-ax[1].set_xlabel(r'${\rm (g-r)}$', fontsize = 'x-large')
+ax[1].scatter(u-g, r-i, c=i)
+ax[1].set_xlabel(r'${\rm (u-g)}$', fontsize = 'x-large')
 ax[1].set_ylabel(r'${\rm (r-i)}$', fontsize = 'x-large')
+
+ax[2].scatter(u, g-r, c=u)
+ax[2].set_xlabel(r'${\rm (i)}$', fontsize = 'x-large')
+ax[2].set_ylabel(r'${\rm (g-r)}$', fontsize = 'x-large')
+# ax[2].axhline(y=1.3, color='red')
+# ax[2].axhline(y=0.1, color='blue')
+ax[2].fill_between( np.linspace(0.9*i.min(), 1.1*i.max(), 100), 1.3, 2.0,  facecolor='red', alpha=0.2, interpolate=True)
+ax[2].fill_between( np.linspace(0.9*i.min(), 1.1*i.max(), 100), -0.2, 0.1,  facecolor='blue', alpha=0.2, interpolate=True)
 
 plt.show()
 ```
@@ -133,7 +143,7 @@ plt.show()
 df_testVIPERS.shape, df_testSDSS.shape, df_testDEEP2.shape
 ```
 
-    ((4, 5), (1397, 5), (21, 5))
+    ((1, 5), (831, 5), (11, 5))
 
 ``` python
 ## Trying different redshifts
@@ -513,6 +523,8 @@ a[1].set_ylabel(r'$L_{\rm CSP}(\lambda)\ {\rm [L_{\odot}/\AA]}$', fontsize = 'x-
 plt.show()
 ```
 
+![](index_files/figure-commonmark/cell-46-output-1.png)
+
 #### 5. CSPs are attenuation due to dust
 
 ``` python
@@ -530,6 +542,10 @@ a.set_xlabel(r'${\rm wavelength\ [\AA]}$', fontsize = 'x-large')
 a.set_ylabel(r'$L_{\rm CSP}(\lambda)\ {\rm [L_{\odot}/\AA]}$', fontsize = 'x-large')
 a.legend(fontsize='x-large')
 ```
+
+    <matplotlib.legend.Legend>
+
+![](index_files/figure-commonmark/cell-48-output-2.png)
 
 #### 6. The resulting dust attenuated spectra undergoes cosmic dimming and redshifting
 
@@ -557,6 +573,10 @@ a.set_ylabel(r'$L_{\rm CSP}(\lambda)\ {\rm [L_{\odot}/\AA]}$', fontsize = 'x-lar
 a.legend(fontsize='x-large')
 ```
 
+    <matplotlib.legend.Legend>
+
+![](index_files/figure-commonmark/cell-50-output-2.png)
+
 #### 7. The final spectrum is convolved with telescope transmission curves to obtain magnitudes
 
 ``` python
@@ -583,6 +603,8 @@ flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(cen
                                                                           clip_bandpass=True)
 ```
 
+![](index_files/figure-commonmark/cell-51-output-1.png)
+
 ``` python
 ##### Load survey filters 
 
@@ -606,6 +628,8 @@ flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(cen
                                                                           plot=True,
                                                                           clip_bandpass=True)
 ```
+
+![](index_files/figure-commonmark/cell-52-output-1.png)
 
 ``` python
 ##### Load survey filters 
@@ -631,6 +655,8 @@ flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(cen
                                                                           plot=True,
                                                                           clip_bandpass=True)
 ```
+
+![](index_files/figure-commonmark/cell-53-output-1.png)
 
 <!-- ### One can also find luminosity profiles for the simulated galaxies -->
 <!-- #### 1. First we project the luminosity on to grids -->
