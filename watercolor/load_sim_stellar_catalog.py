@@ -35,7 +35,11 @@ def _convert_age(hacc_age:np.array=None, #Age in 1/H0 units
     
     H0_per_sec = H0*(1/(3.08*1e19)) #seconds
     one_over_H0 = 1/H0_per_sec/(3.1536*1e16)
-    age_hydro_gyr = hacc_age*one_over_H0
+    # age_hydro_gyr = hacc_age*one_over_H0     ### NOT SURE IF THE AGE is COSMIC (13.7 - age) or (age)
+
+    age_hydro_gyr = one_over_H0 - hacc_age*one_over_H0  
+    
+    # print(age_hydro_gyr, one_over_H0)
     
     return age_hydro_gyr
 

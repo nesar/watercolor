@@ -42,12 +42,12 @@ ax[1].set_title('Color-Color plot (LSST bandpass)')
 ax[2].set_title('Color-Mag plot (LSST bandpass)')
 
 
-np.random.seed(432)
+np.random.seed(2)
 for gal_id in np.random.randint(0, final_sed_mJy.shape[0], 12):
     ax[0].plot(final_wave_um[gal_id], final_sed_mJy[gal_id], label=str(gal_id), alpha=0.94)
 
 ax[0].set_xlim(0.09, 3.2)
-ax[0].set_ylim(1e-8, 1e4)
+ax[0].set_ylim(1e-10, 1e2)
 ax[0].set_xscale('log')
 ax[0].set_yscale('log')
 
@@ -57,11 +57,11 @@ ax[0].set_ylabel(r'${\rm mJy}}$', fontsize = 'x-large')
     
 u, g, r, i, z, Y = lsst_mags.T
 
-ax[1].scatter(u-g, r-i, c=i)
+ax[1].scatter(u-g, r-i, c=Y)
 ax[1].set_xlabel(r'${\rm (u-g)}$', fontsize = 'x-large')
 ax[1].set_ylabel(r'${\rm (r-i)}$', fontsize = 'x-large')
 
-ax[2].scatter(u, g-r, c=u)
+ax[2].scatter(i, g-r, c=u)
 ax[2].set_xlabel(r'${\rm (i)}$', fontsize = 'x-large')
 ax[2].set_ylabel(r'${\rm (g-r)}$', fontsize = 'x-large')
 # ax[2].axhline(y=1.3, color='red')
@@ -452,7 +452,7 @@ fof_halo_tag, if_satellite, galaxy_tags, stellar_idx, metal_hydro, mass, age_hyd
 ```
 
 ``` python
-galaxy_number = 8 # Choosing one of the galaxies in the catalog
+galaxy_number = 4 # Choosing one of the galaxies in the catalog
 unique_galaxy_tag = np.unique(galaxy_tags)[galaxy_number]
 print('Number of galaxies: %d'%np.unique(galaxy_tags).shape[0])
 
@@ -657,6 +657,152 @@ flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(cen
 ```
 
 ![](index_files/figure-commonmark/cell-53-output-1.png)
+
+## Profiles of the galaxies can be checked too
+
+``` python
+def radial_luminosity_profile(data, 
+                              num_bins=15):
+    # Calculate the radial distances for each point
+    
+    data[:, 0] = data[:, 0] - np.mean(data[:, 0])
+    data[:, 1] = data[:, 1] - np.mean(data[:, 1])
+    
+    r = np.sqrt(data[:, 0]**2 + data[:, 1]**2)
+    
+    # Bin data and sum luminosities within each bin
+    bin_edges = np.linspace(0, r.max(), num_bins+1)
+    luminosity, _ = np.histogram(r, bins=bin_edges, weights=data[:, 2])
+    
+    # Return the bin centers and corresponding luminosities
+    bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+    return bin_centers, luminosity
+
+def radial_mass_density_from_lum(data, 
+                                 num_bins=15):
+    
+    data[:, 0] = data[:, 0] - np.mean(data[:, 0])
+    data[:, 1] = data[:, 1] - np.mean(data[:, 1])
+    
+    # Calculate the radial distances for each point
+    r = np.sqrt(data[:, 0]**2 + data[:, 1]**2)
+    
+    # Bin data and sum "masses" (luminosities) within each bin
+    bin_edges = np.linspace(0, r.max(), num_bins+1)
+    total_mass, _ = np.histogram(r, bins=bin_edges, weights=data[:, 3])
+    
+    # Calculate the area of each annulus: π(R_outer^2 - R_inner^2)
+    areas = np.pi * (bin_edges[1:]**2 - bin_edges[:-1]**2)
+    
+    # Compute mass density
+    mass_density = total_mass / areas
+    
+    # Return the bin centers and corresponding mass densities
+    bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+    return bin_centers, mass_density
+```
+
+``` python
+gal_tag_cond = np.where(galaxy_tags == unique_galaxy_tag)
+
+x_select =  (x[gal_tag_cond])# - np.mean(x[gal_tag_cond]))/(np.max(x[gal_tag_cond]) - np.min(x[gal_tag_cond]))
+y_select =  (y[gal_tag_cond])# - np.mean(y[gal_tag_cond]))/(np.max(y[gal_tag_cond]) - np.min(y[gal_tag_cond]))
+
+z_select = np.trapz(spec_flux_ssp, spec_wave_ssp)
+m_select = mass[gal_tag_cond]
+```
+
+``` python
+bin_centers, mass_densities_direct = radial_mass_density_from_lum(np.array([x_select, y_select, z_select, m_select]).T)
+
+# # Plotting the radial mass density profile (direct from luminosity)
+f, a = plt.subplots(1, 2, figsize=(14, 4))
+
+
+# Plotting the radial mass density profile
+a[0].plot(bin_centers, mass_densities_direct, '-ko', label='Mass Density Profile')
+a[0].set_xlabel('Radial Distance (kpc)')
+a[0].set_ylabel('Mass Density (M_solar/kpc^2)')
+a[0].set_title('Radial Mass Density Profile')
+a[0].legend()
+
+
+
+bin_centers, luminosities = radial_luminosity_profile(np.array([x_select, y_select, z_select, m_select]).T)
+
+# Plotting the radial luminosity profile
+a[1].plot(bin_centers, luminosities, '-ko', label='Luminosity Profile')
+a[1].set_xlabel('Radial Distance (kpc)')
+a[1].set_ylabel('Luminosity (Jansky)')
+a[1].set_title('Radial Luminosity Profile')
+a[1].legend()
+plt.show()
+```
+
+![](index_files/figure-commonmark/cell-56-output-1.png)
+
+``` python
+from scipy.ndimage import gaussian_filter
+```
+
+``` python
+def canvas_plot(data, 
+                canvas_size = 128, 
+                gauss_sigma = 6):
+    
+    # Create a blank canvas
+    # size of the canvas for the image
+    canvas = np.zeros((canvas_size, canvas_size))
+
+    # Translate the x, y values to fit the canvas
+    x_scaled = ((data[:, 0] - data[:, 0].min()) / (data[:, 0].max() - data[:, 0].min()) * canvas_size).astype(int)
+    y_scaled = ((data[:, 1] - data[:, 1].min()) / (data[:, 1].max() - data[:, 1].min()) * canvas_size).astype(int)
+
+
+    # Adjust the scaling to ensure values are within the bounds of the canvas
+    x_scaled = np.clip(x_scaled, 0, canvas_size - 1)
+    y_scaled = np.clip(y_scaled, 0, canvas_size - 1)
+
+    # Reset the canvas
+    canvas = np.zeros((canvas_size, canvas_size))
+
+    # Place stars on the canvas using their luminosity
+    for x_ind, y_ind, quant_ind in zip(x_scaled, y_scaled, data[:, 2]):
+        canvas[y_ind, x_ind] += quant_ind
+
+    # Apply a Gaussian blur to emulate the glow of stars
+    blurred_canvas = gaussian_filter(canvas, sigma=gauss_sigma)
+    
+    return blurred_canvas
+```
+
+``` python
+blurred_canvas_lum = canvas_plot(np.array([x_select, y_select, z_select]).T)
+blurred_canvas_mass = canvas_plot(np.array([x_select, y_select, m_select]).T)
+```
+
+``` python
+f, a = plt.subplots(1, 2, figsize=(10, 4))
+cmap_select = 'magma'
+a[0].imshow(blurred_canvas_lum, cmap=cmap_select, origin='lower', extent=[x_select.min(), x_select.max(), y_select.min(), y_select.max()])
+# a[0].colorbar(label='Luminosity (Jansky)')
+a[0].set_title('Galaxy Luminosity Distribution')
+a[0].set_xlabel('x (Mpc)')
+a[0].set_ylabel('y (Mpc)')
+
+
+a[1].imshow(blurred_canvas_mass, cmap=cmap_select, origin='lower', extent=[x_select.min(), x_select.max(), y_select.min(), y_select.max()])
+# a[1].colorbar(label='Mass (Msol)')
+# a[1].scatter(x_scaled, y_scaled, s=1)
+a[1].set_title('Galaxy Mass Distribution')
+a[1].set_xlabel('x (Mpc)')
+a[1].set_ylabel('y (Mpc)')
+
+plt.tight_layout()
+plt.show()
+```
+
+![](index_files/figure-commonmark/cell-60-output-1.png)
 
 <!-- ### One can also find luminosity profiles for the simulated galaxies -->
 <!-- #### 1. First we project the luminosity on to grids -->
