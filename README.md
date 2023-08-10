@@ -104,7 +104,7 @@ fof_halo_tag, if_satellite, galaxy_tags, stellar_idx, metal_hydro, mass, age_hyd
 ```
 
 ``` python
-galaxy_number = 3 # Choosing one of the galaxies in the catalog
+galaxy_number = 4 # Choosing one of the galaxies in the catalog
 unique_galaxy_tag = np.unique(galaxy_tags)[galaxy_number]
 print('Number of galaxies: %d'%np.unique(galaxy_tags).shape[0])
 
@@ -175,7 +175,7 @@ a[1].set_ylabel(r'$L_{\rm CSP}(\lambda)\ {\rm [L_{\odot}/\AA]}$', fontsize = 'x-
 plt.show()
 ```
 
-![](index_files/figure-commonmark/cell-11-output-1.png)
+![](index_files/figure-commonmark/cell-10-output-1.png)
 
 #### 5. CSPs are attenuation due to dust
 
@@ -197,7 +197,7 @@ a.legend(fontsize='x-large')
 
     <matplotlib.legend.Legend>
 
-![](index_files/figure-commonmark/cell-13-output-2.png)
+![](index_files/figure-commonmark/cell-12-output-2.png)
 
 #### 6. The resulting dust attenuated spectra undergoes cosmic dimming and redshifting
 
@@ -227,7 +227,7 @@ a.legend(fontsize='x-large')
 
     <matplotlib.legend.Legend>
 
-![](index_files/figure-commonmark/cell-15-output-2.png)
+![](index_files/figure-commonmark/cell-14-output-2.png)
 
 #### 7. The final spectrum is convolved with telescope transmission curves to obtain magnitudes
 
@@ -255,7 +255,7 @@ flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(cen
                                                                           clip_bandpass=True)
 ```
 
-![](index_files/figure-commonmark/cell-16-output-1.png)
+![](index_files/figure-commonmark/cell-15-output-1.png)
 
 ``` python
 ##### Load survey filters 
@@ -281,7 +281,7 @@ flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(cen
                                                                           clip_bandpass=True)
 ```
 
-![](index_files/figure-commonmark/cell-17-output-1.png)
+![](index_files/figure-commonmark/cell-16-output-1.png)
 
 ``` python
 ##### Load survey filters 
@@ -308,7 +308,7 @@ flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(cen
                                                                           clip_bandpass=True)
 ```
 
-![](index_files/figure-commonmark/cell-18-output-1.png)
+![](index_files/figure-commonmark/cell-17-output-1.png)
 
 ## Profiles of the galaxies can be checked too
 
@@ -391,7 +391,7 @@ a[1].legend()
 plt.show()
 ```
 
-![](index_files/figure-commonmark/cell-21-output-1.png)
+![](index_files/figure-commonmark/cell-20-output-1.png)
 
 ``` python
 from scipy.ndimage import gaussian_filter
@@ -400,7 +400,7 @@ from scipy.ndimage import gaussian_filter
 ``` python
 def canvas_plot(data, 
                 canvas_size = 256, 
-                gauss_sigma = 8):
+                gauss_sigma = 12):
     
     # Create a blank canvas
     # size of the canvas for the image
@@ -434,7 +434,7 @@ blurred_canvas_mass = canvas_plot(np.array([x_select, y_select, m_select]).T)
 ```
 
 ``` python
-f, a = plt.subplots(1, 2, figsize=(14, 10))
+f, a = plt.subplots(1, 2, figsize=(14, 8))
 cmap_select = 'magma'
 a[0].imshow(blurred_canvas_lum, cmap=cmap_select, origin='lower', extent=[x_select.min(), x_select.max(), y_select.min(), y_select.max()])
 # a[0].colorbar(label='Luminosity (Jansky)')
@@ -456,7 +456,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-![](index_files/figure-commonmark/cell-25-output-1.png)
+![](index_files/figure-commonmark/cell-24-output-1.png)
 
 <!-- ### One can also find luminosity profiles for the simulated galaxies -->
 <!-- #### 1. First we project the luminosity on to grids -->
