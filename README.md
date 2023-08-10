@@ -34,40 +34,49 @@ final_sed_mJy, final_wave_um, lsst_mags, spherex_mags, cosmos_mags = photometry_
 #### The single-line command provides the SEDs and magnitudes from LSST, SPHEREx and COSMOS filters
 
 ``` python
-# Plotting SEDs and LSST colors
-f, ax = plt.subplots(1, 3, figsize=(16, 3.5), gridspec_kw={'width_ratios': [2, 1, 1]})
+# Create the main figure and a gridspec object
+fig = plt.figure(figsize=(10, 10))
+gs = gridspec.GridSpec(2, 2, height_ratios=[1,1])
 
-ax[0].set_title('Spectral Energy Distribution')
-ax[1].set_title('Color-Color plot (LSST bandpass)')
-ax[2].set_title('Color-Mag plot (LSST bandpass)')
+# Create the three subplots
+ax0 = fig.add_subplot(gs[0, :])  # Top panel spanning both columns
+ax1 = fig.add_subplot(gs[1, 0])  # Bottom left panel
+ax2 = fig.add_subplot(gs[1, 1])  # Bottom right panel
+
+
+
+
+ax0.set_title('Spectral Energy Distribution')
+ax1.set_title('Color-Color plot (LSST bandpass)')
+ax2.set_title('Color-Mag plot (LSST bandpass)')
 
 
 np.random.seed(2)
 for gal_id in np.random.randint(0, final_sed_mJy.shape[0], 12):
-    ax[0].plot(final_wave_um[gal_id], final_sed_mJy[gal_id], label=str(gal_id), alpha=0.94)
+    ax0.plot(final_wave_um[gal_id], final_sed_mJy[gal_id], label=str(gal_id), alpha=0.94)
 
-ax[0].set_xlim(0.09, 3.2)
-ax[0].set_ylim(1e-10, 1e2)
-ax[0].set_xscale('log')
-ax[0].set_yscale('log')
+ax0.set_xlim(0.09, 3.2)
+ax0.set_ylim(1e-10, 1e2)
+ax0.set_xscale('log')
+ax0.set_yscale('log')
 
-ax[0].set_xlabel(r'${\rm um}$', fontsize = 'x-large')
-ax[0].set_ylabel(r'${\rm mJy}}$', fontsize = 'x-large')
+ax0.set_xlabel(r'${\rm um}$', fontsize = 'x-large')
+ax0.set_ylabel(r'${\rm mJy}}$', fontsize = 'x-large')
 # ax[0].legend(fontsize='x-large', ncol=3, title='Galaxy number')
     
 u, g, r, i, z, Y = lsst_mags.T
 
-ax[1].scatter(u-g, r-i, c=Y)
-ax[1].set_xlabel(r'${\rm (u-g)}$', fontsize = 'x-large')
-ax[1].set_ylabel(r'${\rm (r-i)}$', fontsize = 'x-large')
+ax1.scatter(u-g, r-i, c=Y)
+ax1.set_xlabel(r'${\rm (u-g)}$', fontsize = 'x-large')
+ax1.set_ylabel(r'${\rm (r-i)}$', fontsize = 'x-large')
 
-ax[2].scatter(i, g-r, c=u)
-ax[2].set_xlabel(r'${\rm (i)}$', fontsize = 'x-large')
-ax[2].set_ylabel(r'${\rm (g-r)}$', fontsize = 'x-large')
+ax2.scatter(i, g-r, c=u)
+ax2.set_xlabel(r'${\rm (i)}$', fontsize = 'x-large')
+ax2.set_ylabel(r'${\rm (g-r)}$', fontsize = 'x-large')
 # ax[2].axhline(y=1.3, color='red')
 # ax[2].axhline(y=0.1, color='blue')
-ax[2].fill_between( np.linspace(0.9*i.min(), 1.1*i.max(), 100), 1.3, 2.0,  facecolor='red', alpha=0.2, interpolate=True)
-ax[2].fill_between( np.linspace(0.9*i.min(), 1.1*i.max(), 100), -0.2, 0.1,  facecolor='blue', alpha=0.2, interpolate=True)
+ax2.fill_between( np.linspace(0.9*i.min(), 1.1*i.max(), 100), 1.3, 2.0,  facecolor='red', alpha=0.2, interpolate=True)
+ax2.fill_between( np.linspace(0.9*i.min(), 1.1*i.max(), 100), -0.2, 0.1,  facecolor='blue', alpha=0.2, interpolate=True)
 
 plt.show()
 ```
@@ -95,7 +104,7 @@ fof_halo_tag, if_satellite, galaxy_tags, stellar_idx, metal_hydro, mass, age_hyd
 ```
 
 ``` python
-galaxy_number = 4 # Choosing one of the galaxies in the catalog
+galaxy_number = 3 # Choosing one of the galaxies in the catalog
 unique_galaxy_tag = np.unique(galaxy_tags)[galaxy_number]
 print('Number of galaxies: %d'%np.unique(galaxy_tags).shape[0])
 
@@ -425,13 +434,14 @@ blurred_canvas_mass = canvas_plot(np.array([x_select, y_select, m_select]).T)
 ```
 
 ``` python
-f, a = plt.subplots(1, 2, figsize=(9, 6))
+f, a = plt.subplots(1, 2, figsize=(14, 10))
 cmap_select = 'magma'
 a[0].imshow(blurred_canvas_lum, cmap=cmap_select, origin='lower', extent=[x_select.min(), x_select.max(), y_select.min(), y_select.max()])
 # a[0].colorbar(label='Luminosity (Jansky)')
 a[0].set_title('Galaxy Luminosity Distribution')
 a[0].set_xlabel('x (Mpc)')
 a[0].set_ylabel('y (Mpc)')
+a[0].set_aspect('equal', 'box')
 
 
 a[1].imshow(blurred_canvas_mass, cmap=cmap_select, origin='lower', extent=[x_select.min(), x_select.max(), y_select.min(), y_select.max()])
@@ -440,6 +450,7 @@ a[1].imshow(blurred_canvas_mass, cmap=cmap_select, origin='lower', extent=[x_sel
 a[1].set_title('Galaxy Mass Distribution')
 a[1].set_xlabel('x (Mpc)')
 a[1].set_ylabel('y (Mpc)')
+a[1].set_aspect('equal', 'box')
 
 plt.tight_layout()
 plt.show()
