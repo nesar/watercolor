@@ -72,365 +72,6 @@ ax[2].fill_between( np.linspace(0.9*i.min(), 1.1*i.max(), 100), -0.2, 0.1,  face
 plt.show()
 ```
 
-![](index_files/figure-commonmark/cell-4-output-1.png)
-
-``` python
-## Checking the same galaxies at different redshifts
-```
-
-``` python
-# #| hide
-
-# galaxy_star_catalog_file0='../watercolor/data/test_hacc_stellar_catalog/Z_0New.txt' # HACC galaxy catalog
-# _, _, lsst_mags_0, spherex_mags_0, cosmos_mags_0 = photometry_from_catalog(galaxy_star_catalog_file0)
-```
-
-``` python
-# #| hide
-
-# galaxy_star_catalog_file02='../watercolor/data/test_hacc_stellar_catalog/Z_02New.txt' # HACC galaxy catalog
-# _, _, lsst_mags_02, spherex_mags_02, cosmos_mags_02 = photometry_from_catalog(galaxy_star_catalog_file02)
-```
-
-``` python
-# #| hide 
-
-# u0, g0, r0, i0, z0, Y0 = lsst_mags_0.T
-# u02, g02, r02, i02, z02, Y02 = lsst_mags_02.T
-
-
-# # Plotting SEDs and LSST colors
-# f, ax = plt.subplots(1, 1, figsize=(5, 5))
-
-# ax.scatter(g-r, r-i, c='g', label='z=0 v1', alpha=0.5)
-# ax.scatter(g0-r0, r0-i0, c='r', label='z=0 v2', alpha=0.5)
-# ax.scatter(g02-r02, r02-i02, c='blue', label='z=0.2 v2', alpha=0.5)
-
-# ax.set_xlabel(r'${\rm (g-r)}$', fontsize = 'x-large')
-# ax.set_ylabel(r'${\rm (r-i)}$', fontsize = 'x-large')
-
-# plt.legend()
-
-# plt.show()
-```
-
-``` python
-# #| hide 
-
-# mpl.rcParams["axes.labelsize"] = 32
-
-# df = pd.DataFrame(np.array([u0-g0, g0-r0, r0-i0, i0-z0, z0-Y0, i0]).T, 
-#                             columns=['u-g', 'g-r','r-i','i-z', 'z-Y', 'i']);
-
-
-# gr = sns.PairGrid(df);
-
-# gr.map_lower(plt.scatter);
-# gr.map_upper(sns.kdeplot);
-# # gr.map_upper(hide_current_axis)
-# gr.map_diag(sns.histplot, kde=True, stat='density', bins=20);
-
-# _ = gr.add_legend(fontsize=40)
-
-# plt.show()
-```
-
-``` python
-## Compare with observational data
-```
-
-``` python
-df_testVIPERS.shape, df_testSDSS.shape, df_testDEEP2.shape
-```
-
-    ((1, 5), (831, 5), (11, 5))
-
-``` python
-## Trying different redshifts
-```
-
-``` python
-# #| hide
-
-# galaxy_star_catalog_file0='../watercolor/data/test_hacc_stellar_catalog/Gal_Z0.txt' # HACC galaxy catalog
-# _, _, lsst_mags_0, spherex_mags_0, cosmos_mags_0 = photometry_from_catalog(galaxy_star_catalog_file0)
-```
-
-``` python
-# #| hide
-
-# galaxy_star_catalog_file02='../watercolor/data/test_hacc_stellar_catalog/Gal_Z02.txt' # HACC galaxy catalog
-# _, _, lsst_mags_02, spherex_mags_02, cosmos_mags_02 = photometry_from_catalog(galaxy_star_catalog_file02)
-```
-
-``` python
-# #| hide
-
-# galaxy_star_catalog_file1='../watercolor/data/test_hacc_stellar_catalog/Gal_Z1.txt' # HACC galaxy catalog
-# _, _, lsst_mags_1, spherex_mags_1, cosmos_mags_1 = photometry_from_catalog(galaxy_star_catalog_file1)
-```
-
-``` python
-# #| hide
-
-# galaxy_star_catalog_file2='../watercolor/data/test_hacc_stellar_catalog/Gal_Z2.txt' # HACC galaxy catalog
-# _, _, lsst_mags_2, spherex_mags_2, cosmos_mags_2 = photometry_from_catalog(galaxy_star_catalog_file2)
-```
-
-``` python
-# #| hide
-
-# galaxy_star_catalog_file3='../watercolor/data/test_hacc_stellar_catalog/Gal_Z3.txt' # HACC galaxy catalog
-# _, _, lsst_mags_3, spherex_mags_3, cosmos_mags_3 = photometry_from_catalog(galaxy_star_catalog_file3)
-```
-
-``` python
-# #| hide 
-
-# u0, g0, r0, i0, z0, Y0 = lsst_mags_0.T
-# u02, g02, r02, i02, z02, Y02 = lsst_mags_02.T
-# u1, g1, r1, i1, z1, Y1 = lsst_mags_1.T
-# u2, g2, r2, i2, z2, Y2 = lsst_mags_2.T
-# u3, g3, r3, i3, z3, Y3 = lsst_mags_3.T
-```
-
-``` python
-# #| hide 
-
-# # Plotting SEDs and LSST colors
-# f, ax = plt.subplots(1, 1, figsize=(5, 5))
-
-# ax.scatter(g0-r0, r0-i0, c='r', label='z=0', alpha=0.5)
-# ax.scatter(g1-r1, r1-i1, c='g', label='z=1', alpha=0.5)
-# ax.scatter(g2-r2, r2-i2, c='b', label='z=2', alpha=0.5)
-# ax.scatter(g3-r3, r3-i3, c='k', label='z=3', alpha=0.5)
-# # ax.scatter(g02-r02, r02-i02, c='brown', label='z=0.2')
-
-# ax.set_xlabel(r'${\rm (g-r)}$', fontsize = 'x-large')
-# ax.set_ylabel(r'${\rm (r-i)}$', fontsize = 'x-large')
-
-# plt.legend()
-
-# plt.show()
-```
-
-``` python
-# #| hide 
-
-# # Plotting SEDs and LSST colors
-# f, ax = plt.subplots(1, 1, figsize=(5, 5))
-
-# ax.scatter(g0-r0, i0, c='r', label='z=0', alpha=0.5)
-# ax.scatter(g1-r1, i1, c='g', label='z=1', alpha=0.5)
-# ax.scatter(g2-r2, i2, c='b', label='z=2', alpha=0.5)
-# ax.scatter(g3-r3, i3, c='k', label='z=3', alpha=0.5)
-# # ax.scatter(g02-r02, r02-i02, c='brown', label='z=0.2')
-
-# ax.set_xlabel(r'${\rm (g-r)}$', fontsize = 'x-large')
-# ax.set_ylabel(r'${\rm (i)}$', fontsize = 'x-large')
-
-# plt.legend()
-
-# plt.show()
-```
-
-``` python
-# #| hide 
-
-# nbins=17
-# # Plotting SEDs and LSST colors
-# f, ax = plt.subplots(1, 3, figsize=(16, 4))
-
-
-# H, bins = np.histogram(i0, bins=nbins, range=(7, 15))
-# ax[0].plot(bins[:-1],H/H.max(), label='z=0')
-
-# H, bins = np.histogram(i02, bins=nbins, range=(7, 15))
-# ax[0].plot(bins[:-1],H/H.max(), label='z=0.2')
-
-# H, bins = np.histogram(i1, bins=nbins, range=(7, 15))
-# ax[0].plot(bins[:-1],H/H.max(), label='z=1')
-
-# H, bins = np.histogram(i2, bins=nbins, range=(7, 15))
-# ax[0].plot(bins[:-1],H/H.max(), label='z=2')
-
-# H, bins = np.histogram(i3, bins=nbins, range=(7, 15))
-# ax[0].plot(bins[:-1],H/H.max(), label='z=2')
-
-
-# ax[0].set_ylabel(r'${\rm P(i)}$', fontsize = 'x-large')
-# ax[0].set_xlabel(r'${\rm i}$', fontsize = 'x-large')
-
-# ####################
-
-# H, bins = np.histogram(g0-r0, bins=nbins, range=(0, 1.5))
-# ax[1].plot(bins[:-1],H/H.max(), label='z=0')
-
-# H, bins = np.histogram(g02-r02, bins=nbins, range=(0, 1.5))
-# ax[1].plot(bins[:-1],H/H.max(), label='z=0.2')
-
-# H, bins = np.histogram(g1-r1, bins=nbins, range=(0, 1.5))
-# ax[1].plot(bins[:-1],H/H.max(), label='z=1')
-
-# H, bins = np.histogram(g2-r2, bins=nbins, range=(0, 1.5))
-# ax[1].plot(bins[:-1],H/H.max(), label='z=2')
-
-# H, bins = np.histogram(g3-r3, bins=nbins, range=(0, 1.5))
-# ax[1].plot(bins[:-1],H/H.max(), label='z=2')
-
-
-# ax[1].set_ylabel(r'${\rm P(g-r)}$', fontsize = 'x-large')
-# ax[1].set_xlabel(r'${\rm g-r}$', fontsize = 'x-large')
-
-
-# ####################
-
-# H, bins = np.histogram(u0-g0, bins=nbins, range=(-3, 1.5))
-# ax[2].plot(bins[:-1],H/H.max(), label='z=0')
-
-# H, bins = np.histogram(u02-g02, bins=nbins, range=(-3, 1.5))
-# ax[2].plot(bins[:-1],H/H.max(), label='z=0.2')
-
-# H, bins = np.histogram(u1-g1, bins=nbins, range=(-3, 1.5))
-# ax[2].plot(bins[:-1],H/H.max(), label='z=1')
-
-# H, bins = np.histogram(u2-g2, bins=nbins, range=(-3, 1.5))
-# ax[2].plot(bins[:-1],H/H.max(), label='z=2')
-
-# H, bins = np.histogram(u3-g3, bins=nbins, range=(-3, 1.5))
-# ax[2].plot(bins[:-1],H/H.max(), label='z=2')
-
-
-# ax[2].set_ylabel(r'${\rm P(u-g)}$', fontsize = 'x-large')
-# ax[2].set_xlabel(r'${\rm u-g}$', fontsize = 'x-large')
-
-
-# ####################
-
-
-
-# ax[0].legend()
-
-# plt.show()
-```
-
-``` python
-# #| hide
-
-# import watercolor
-# from watercolor.load_sim_stellar_catalog import load_hacc_galaxy_data
-# from watercolor.calculate_csp import calc_fluxes_for_galaxy
-# from watercolor.load_sps_library import LIBRARY_FLUX_FILE, LIBRARY_WAVE_FILE, LIBRARY_AGE_FILE, LIBRARY_METAL_FILE
-# from watercolor.dust_attenuation import spectrum_dusted, log_total_stellar_metal, log_total_stellar_mass
-# from watercolor.cosmic_distance_effects import combine_redshift_and_dimming_effect
-# from watercolor.filter_convolution import load_survey_pickle, photometry_from_spectra
-
-# import pandas as pd
-# import seaborn as sns
-# import matplotlib as mpl
-```
-
-``` python
-# #| hide
-
-# fof_halo_tag, if_satellite, galaxy_tags, stellar_idx, metal_hydro, mass, age_hydro, x, y, z , vx, vy, vz = load_hacc_galaxy_data(galaxy_star_catalog_file)
-```
-
-``` python
-# #| hide
-
-# print('Number of galaxies: %d'%np.unique(galaxy_tags).shape[0])
-
-# logZ_all = np.zeros(shape=(np.unique(galaxy_tags).shape[0], ))
-# logmstar_all = np.zeros(shape=(np.unique(galaxy_tags).shape[0], ))
-# satellite_cond_all = np.zeros(shape=(np.unique(galaxy_tags).shape[0], ))
-# u, g, r, i, z, Y = lsst_mags.T
-
-# for galaxy_number in range(np.unique(galaxy_tags).shape[0]):
-#     unique_galaxy_tag = np.unique(galaxy_tags)[galaxy_number]
-    
-
-#     mstar_i = mass[galaxy_tags == unique_galaxy_tag]
-#     metal_i = metal_hydro[galaxy_tags == unique_galaxy_tag]
-    
-    
-#     if_satellite_i = if_satellite[galaxy_tags == unique_galaxy_tag]
-
-#     logZ = log_total_stellar_metal(metal_i, mstar_i)[0]
-#     logmstar = log_total_stellar_mass(mstar_i)[0]
-#     satellite_cond = np.max(if_satellite_i)
-    
-#     logZ_all[galaxy_number] = logZ
-#     logmstar_all[galaxy_number] = logmstar
-#     satellite_cond_all[galaxy_number] = satellite_cond
-
-# satellite_cond_all[satellite_cond_all !=0] = 1
-    
-# # if_central_str = np.array(satellite_cond_all.shape[0]*['dummy'])
-# # if_central_str[satellite_cond_all !=0] = 'Sat'
-# # if_central_str[satellite_cond_all ==0] = 'Cen'
-```
-
-``` python
-# #| hide 
-
-# def scatter_subset(x, y, hue, mask, **kws):
-#     sns.scatterplot(x=x[mask], y=y[mask], hue=hue[mask], **kws)
-    
-# def hide_current_axis(*args, **kwds):
-#     plt.gca().set_visible(False)
-```
-
-``` python
-# #| hide 
-
-# mpl.rcParams["axes.labelsize"] = 32
-
-# df = pd.DataFrame(np.array([u-g, g-r, r-i, i-z, z-Y, i, logZ_all, logmstar_all, satellite_cond_all]).T, 
-#                             columns=['u-g', 'g-r','r-i','i-z', 'z-Y', 'i', 'logZ', 'logmstar', 'if_satellite']);
-
-
-# gr = sns.PairGrid(df, hue='if_satellite');
-
-# gr.map_lower(plt.scatter);
-# gr.map_upper(sns.kdeplot);
-# # gr.map_upper(hide_current_axis)
-# gr.map_diag(sns.histplot, kde=True, stat='density', bins=20);
-
-# _ = gr.add_legend(fontsize=40)
-
-# # plt.savefig('/lcrc/project/cosmo_ai/nramachandra/Projects/Hydro_paint/Plots/' + 'color_catalog.png')
-```
-
-``` python
-# #| hide 
-
-# u, g, r, i, z, Y = lsst_mags.T
-
-# plt.figure(figsize=(5,5))
-# plt.scatter( (g-r)[satellite_cond_all != 0], (u-g)[satellite_cond_all != 0], c='red', alpha=0.5, label='central')
-# plt.scatter( (g-r)[satellite_cond_all != 1], (u-g)[satellite_cond_all != 1], c='blue', alpha=0.5, label='satellite')
-
-# plt.xlabel(r'${\rm (g-r)}$', fontsize = 'x-large')
-# plt.ylabel(r'${\rm (r-i)}$', fontsize = 'x-large')
-
-# plt.show()
-```
-
-``` python
-# #| hide 
-
-# print(u.max(), u.min())
-# print(g.max(), g.min())
-# print(r.max(), r.min())
-# print(i.max(), i.min())
-# print(z.max(), z.min())
-# print(Y.max(), Y.min())
-
-# # # red # g-r > 1.3
-# # # blue # g-r < 0.1
-```
-
 ## Behind the scenes
 
 #### 1. First we import the following modules of hydro_colors
@@ -463,8 +104,6 @@ if_satellite_i = if_satellite[galaxy_tags == unique_galaxy_tag]
 logZ = log_total_stellar_metal(metal_i, mstar_i)
 logmstar = log_total_stellar_mass(mstar_i)
 ```
-
-    Number of galaxies: 200
 
 #### 3. After selecting a unique galaxy tag, we calculate the SED. This is the rest-frame SED is due to spectral emission alone, and without dust attenuation.
 
@@ -523,8 +162,6 @@ a[1].set_ylabel(r'$L_{\rm CSP}(\lambda)\ {\rm [L_{\odot}/\AA]}$', fontsize = 'x-
 plt.show()
 ```
 
-![](index_files/figure-commonmark/cell-46-output-1.png)
-
 #### 5. CSPs are attenuation due to dust
 
 ``` python
@@ -542,10 +179,6 @@ a.set_xlabel(r'${\rm wavelength\ [\AA]}$', fontsize = 'x-large')
 a.set_ylabel(r'$L_{\rm CSP}(\lambda)\ {\rm [L_{\odot}/\AA]}$', fontsize = 'x-large')
 a.legend(fontsize='x-large')
 ```
-
-    <matplotlib.legend.Legend>
-
-![](index_files/figure-commonmark/cell-48-output-2.png)
 
 #### 6. The resulting dust attenuated spectra undergoes cosmic dimming and redshifting
 
@@ -573,10 +206,6 @@ a.set_ylabel(r'$L_{\rm CSP}(\lambda)\ {\rm [L_{\odot}/\AA]}$', fontsize = 'x-lar
 a.legend(fontsize='x-large')
 ```
 
-    <matplotlib.legend.Legend>
-
-![](index_files/figure-commonmark/cell-50-output-2.png)
-
 #### 7. The final spectrum is convolved with telescope transmission curves to obtain magnitudes
 
 ``` python
@@ -603,8 +232,6 @@ flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(cen
                                                                           clip_bandpass=True)
 ```
 
-![](index_files/figure-commonmark/cell-51-output-1.png)
-
 ``` python
 ##### Load survey filters 
 
@@ -628,8 +255,6 @@ flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(cen
                                                                           plot=True,
                                                                           clip_bandpass=True)
 ```
-
-![](index_files/figure-commonmark/cell-52-output-1.png)
 
 ``` python
 ##### Load survey filters 
@@ -655,8 +280,6 @@ flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(cen
                                                                           plot=True,
                                                                           clip_bandpass=True)
 ```
-
-![](index_files/figure-commonmark/cell-53-output-1.png)
 
 ## Profiles of the galaxies can be checked too
 
@@ -739,8 +362,6 @@ a[1].legend()
 plt.show()
 ```
 
-![](index_files/figure-commonmark/cell-56-output-1.png)
-
 ``` python
 from scipy.ndimage import gaussian_filter
 ```
@@ -801,8 +422,6 @@ a[1].set_ylabel('y (Mpc)')
 plt.tight_layout()
 plt.show()
 ```
-
-![](index_files/figure-commonmark/cell-60-output-1.png)
 
 <!-- ### One can also find luminosity profiles for the simulated galaxies -->
 <!-- #### 1. First we project the luminosity on to grids -->
