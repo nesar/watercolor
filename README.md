@@ -78,172 +78,12 @@ ax2.set_ylabel(r'${\rm (g-r)}$', fontsize = 'x-large')
 ax2.fill_between( np.linspace(0.9*i.min(), 1.1*i.max(), 100), 1.3, 2.0,  facecolor='red', alpha=0.2, interpolate=True)
 ax2.fill_between( np.linspace(0.9*i.min(), 1.1*i.max(), 100), -0.2, 0.1,  facecolor='blue', alpha=0.2, interpolate=True)
 
+
+
 plt.show()
 ```
 
 ![](index_files/figure-commonmark/cell-4-output-1.png)
-
-``` python
-# #| hide
-
-# dirIn = '/lcrc/project/cosmo_ai/nramachandra/Projects/SPHEREx/MAH/HACCnPaint/'
-# fileCSV = 'Richard_GAMA_SED_103122_median_stack_z_Mstar_bins.csv'
-
-# df = pd.read_csv(dirIn + fileCSV)
-
-# wave_csv = df['lambda_micron']
-# df.keys()
-```
-
-``` python
-# #| hide
-
-# plt.figure(figsize=(10,5))
-
-# plt.plot(wave_csv*10_000 , df['f_nu_mJy_z0.2_m10.0'], label='Richard: f_nu_mJy_z0.2_m10.0');
-# # plt.plot(wave_csv*10_000 , df['f_nu_mJy_z0.2_m10.5'], label='Richard: f_nu_mJy_z0.2_m10.5');
-# plt.plot(wave_csv*10_000 , df['f_nu_mJy_z0.2_m11.0'], label='Richard: f_nu_mJy_z0.2_m11.0');
-
-
-# plt.plot(final_wave_um[142]*10_000 , final_sed_mJy[142], label='0, M=?');
-# plt.plot(final_wave_um[100]*10_000 , final_sed_mJy[100], label='1, M=?');
-
-# plt.plot(final_wave_um[20]*10_000 , final_sed_mJy[20], label='2, M=?');
-# plt.plot(final_wave_um[30]*10_000 , final_sed_mJy[30], label='3, M=?');
-
-
-
-# plt.ylabel('Flux per unit wavelength (mJy)', fontsize=16)
-# plt.xlabel('Restframe Wavelength (Angstrom) ', fontsize=16)
-
-# plt.axvline(x=3727, label = '[OII]', linestyle='dashed', alpha=0.9, color='black')
-# plt.axvline(x=4050, label = '[OIII]', linestyle='dashed', alpha=0.9, color='purple')
-# plt.axvline(x=4861, label = 'H-beta', linestyle='dashed', alpha=0.9, color='orangered')
-# plt.axvline(x=5007, label = '[OIII]', linestyle='dashed', alpha=0.9, color='purple')
-# plt.axvline(x=6563, label = 'H-alpha', linestyle='dashed', alpha=0.9, color='gray')
-
-# plt.yscale('log')
-# plt.legend(ncol=1, fontsize=16 , bbox_to_anchor=(1.05, 1.0), loc='upper left')
-
-# # plt.xlim(8e2, 2e4)
-# plt.xlim(2900, 10000)
-# plt.ylim(1e-5, 1e1)
-```
-
-``` python
-# #| hide 
-
-# ## Compare with observational data
-
-# def loadTest(dirIn = '/lcrc/project/cosmo_ai/nramachandra/Projects/SPHEREx/phoZ/Data/fromGalaxev/photozs/datasets/data_feb_2021/'):
-#     Testset = 'OBSuq'
-#     test_data = np.load(dirIn + 'test_' + Testset + '.npy') 
-
-#     X_test = test_data[: , :-1]
-#     y_test = test_data[: , -1]
-
-#     X_err = np.load(dirIn + 'test_' + Testset +'_err.npy') 
-#     test_labels = np.load(dirIn + 'test_' + Testset + '_label.npy') 
-
-#     return X_test, y_test, X_err, test_labels
-```
-
-``` python
-# #| hide 
-
-# X_test, y_test, X_err, label_test = loadTest()
-```
-
-``` python
-# #| hide 
-
-# z_cond = np.where(y_test < 0.3)
-# X_test = X_test[z_cond]
-# y_test = y_test[z_cond]
-# X_err = X_err[z_cond]
-# label_test = label_test[z_cond]
-```
-
-``` python
-# #| hide 
-
-# if True: 
-#     df_testSDSS = pd.DataFrame()
-#     SDSS_select = np.where(label_test == 0)
-
-#     # Add columns
-#     df_testSDSS['u-g'] = X_test[SDSS_select][:, 0]
-#     df_testSDSS['g-r'] = X_test[SDSS_select][:, 1]
-#     df_testSDSS['r-i'] = X_test[SDSS_select][:, 2]
-#     df_testSDSS['i-z'] = X_test[SDSS_select][:, 3]
-#     df_testSDSS['mag(i)'] = X_test[SDSS_select][:, 4]
-# #     df_testSDSS['redshift'] = y_test[SDSS_select][:]
-
-
-#     df_testVIPERS = pd.DataFrame()
-#     VIPERS_select = np.where(label_test == 1)
-
-#     # Add columns
-#     df_testVIPERS['u-g'] = X_test[VIPERS_select][:, 0]
-#     df_testVIPERS['g-r'] = X_test[VIPERS_select][:, 1]
-#     df_testVIPERS['r-i'] = X_test[VIPERS_select][:, 2]
-#     df_testVIPERS['i-z'] = X_test[VIPERS_select][:, 3]
-#     df_testVIPERS['mag(i)'] = X_test[VIPERS_select][:, 4]
-# #     df_testVIPERS['redshift'] = y_test[VIPERS_select][:]
-
-
-
-#     df_testDEEP2 = pd.DataFrame()
-#     DEEP2_select = np.where(label_test == 3)
-
-#     # Add columns
-#     df_testDEEP2['u-g'] = X_test[DEEP2_select][:, 0]
-#     df_testDEEP2['g-r'] = X_test[DEEP2_select][:, 1]
-#     df_testDEEP2['r-i'] = X_test[DEEP2_select][:, 2]
-#     df_testDEEP2['i-z'] = X_test[DEEP2_select][:, 3]
-#     df_testDEEP2['mag(i)'] = X_test[DEEP2_select][:, 4]
-# #     df_testDEEP2['redshift'] = y_test[DEEP2_select][:]
-
-    
-#     df_hydro = pd.DataFrame()
-#     df_hydro['u-g'] = u-g
-#     df_hydro['g-r'] = g-r
-#     df_hydro['r-i'] = r-i
-#     df_hydro['i-z'] = i-z
-# #     df_hydro['z-Y'] = z0-Y0
-#     df_hydro['mag(i)'] = i
-```
-
-``` python
-# #| hide 
-
-# allLabels = ['u-g', 'g-i', 'i-r', 'r-z', 'mag(i)']
-# line_labels = ['Synthetic', 'VIPERS', 'SDSS', 'Watercolor']
-
-# s2 = df_testVIPERS.values 
-# samples2 = MCSamples(samples=s2, names= allLabels , labels=allLabels, label = line_labels[1])
-
-# s3 = df_testSDSS.values 
-# samples3 = MCSamples(samples=s3, names= allLabels , labels=allLabels, label = line_labels[2])
-
-# s0 = df_hydro.values
-# samples0 = MCSamples(samples=s0, names= allLabels , labels=allLabels, label = line_labels[3])
-
-
-# g = plots.get_subplot_plotter(subplot_size=4)
-# g.settings.axes_fontsize=27
-# g.settings.axes_labelsize = 27
-# g.settings.legend_fontsize = 27
-# g.settings.fontsize = 27
-# g.settings.alpha_filled_add=0.4
-# g.settings.solid_contour_palefactor = 0.25
-# g.settings.num_plot_contours = 2
-
-# # g.triangle_plot([samples0, samples2, samples3], allLabels , filled=True, contour_lws=3) 
-# g.triangle_plot([samples0, samples3], allLabels , filled=True, contour_lws=3) 
-
-# plt.show()
-```
 
 ## Behind the scenes
 
@@ -337,7 +177,7 @@ a[1].set_ylabel(r'$L_{\rm CSP}(\lambda)\ {\rm [L_{\odot}/\AA]}$', fontsize = 'x-
 plt.show()
 ```
 
-![](index_files/figure-commonmark/cell-17-output-1.png)
+![](index_files/figure-commonmark/cell-10-output-1.png)
 
 #### 5. CSPs are attenuation due to dust
 
@@ -359,7 +199,7 @@ a.legend(fontsize='x-large')
 
     <matplotlib.legend.Legend>
 
-![](index_files/figure-commonmark/cell-19-output-2.png)
+![](index_files/figure-commonmark/cell-12-output-2.png)
 
 #### 6. The resulting dust attenuated spectra undergoes cosmic dimming and redshifting
 
@@ -389,7 +229,7 @@ a.legend(fontsize='x-large')
 
     <matplotlib.legend.Legend>
 
-![](index_files/figure-commonmark/cell-21-output-2.png)
+![](index_files/figure-commonmark/cell-14-output-2.png)
 
 #### 7. The final spectrum is convolved with telescope transmission curves to obtain magnitudes
 
@@ -417,7 +257,7 @@ flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(cen
                                                                           clip_bandpass=True)
 ```
 
-![](index_files/figure-commonmark/cell-22-output-1.png)
+![](index_files/figure-commonmark/cell-15-output-1.png)
 
 ``` python
 ##### Load survey filters 
@@ -443,7 +283,7 @@ flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(cen
                                                                           clip_bandpass=True)
 ```
 
-![](index_files/figure-commonmark/cell-23-output-1.png)
+![](index_files/figure-commonmark/cell-16-output-1.png)
 
 ``` python
 ##### Load survey filters 
@@ -470,7 +310,7 @@ flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(cen
                                                                           clip_bandpass=True)
 ```
 
-![](index_files/figure-commonmark/cell-24-output-1.png)
+![](index_files/figure-commonmark/cell-17-output-1.png)
 
 ## Profiles of the galaxies can be checked too
 
@@ -553,7 +393,7 @@ a[1].legend()
 plt.show()
 ```
 
-![](index_files/figure-commonmark/cell-27-output-1.png)
+![](index_files/figure-commonmark/cell-20-output-1.png)
 
 ``` python
 from scipy.ndimage import gaussian_filter
@@ -618,7 +458,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-![](index_files/figure-commonmark/cell-31-output-1.png)
+![](index_files/figure-commonmark/cell-24-output-1.png)
 
 <!-- ### One can also find luminosity profiles for the simulated galaxies -->
 <!-- #### 1. First we project the luminosity on to grids -->

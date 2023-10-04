@@ -29,7 +29,7 @@ def photometry_from_catalog(galaxy_star_catalog_file:str=GALS_FILE, # Input gala
     final_sed_mJy = np.zeros(shape=(num_galaxies_in_catalog, 1963)) ## SED resolution is 1963
     final_wave_um = np.zeros(shape=(num_galaxies_in_catalog, 1963)) ## SED resolution is 1963
     lsst_mags = np.zeros(shape=(num_galaxies_in_catalog, 6)) ## 6 LSST bands
-    spherex_mags = np.zeros(shape=(num_galaxies_in_catalog, 197)) ## 197 SPHEREx channels
+    spherex_mags = np.zeros(shape=(num_galaxies_in_catalog, 102)) ## 102 SPHEREx channels
     cosmos_mags = np.zeros(shape=(num_galaxies_in_catalog, 31)) ## 31 COSMOS bands
     
     for galaxy_number in range(np.unique(galaxy_tags).shape[0]):
