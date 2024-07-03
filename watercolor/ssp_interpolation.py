@@ -53,9 +53,6 @@ def spec_ssp_lookup(age_hydro_i:np.float32=None, # Age of the HACC stellar parti
     age_min = np.min([age_index[1], age_index[0]])
     met_min = np.min([met_index[1], met_index[0]])
     
-    age_diff_grid = np.abs(age_fsps[age_min + 1] - age_fsps[age_min])
-    metal_diff_grid = np.abs(z_padova_fsps[met_min + 1] - z_padova_fsps[met_min])
-    diff_denom = age_diff_grid*metal_diff_grid
     
     age_0 = np.abs(age_fsps[age_min] - age_hydro_i)
     met_0 = np.abs(z_padova_fsps[met_min] - metal_hydro_i)
@@ -70,6 +67,16 @@ def spec_ssp_lookup(age_hydro_i:np.float32=None, # Age of the HACC stellar parti
     w01 = (1-age_0)*met_0
     w10 = age_0*(1-met_0)
     w11 = age_0*met_0
+    
+    
+    #### Test why this re-scaling was used before
+    # age_diff_grid = np.abs(age_fsps[age_min + 1] - age_fsps[age_min])
+    # metal_diff_grid = np.abs(z_padova_fsps[met_min + 1] - z_padova_fsps[met_min])
+    # diff_denom = age_diff_grid*metal_diff_grid
+    
+    #### Normalization such that sum(weights) = 1. 
+    diff_denom = np.sum([w00, w01, w10, w11])
+    
     
     w00 = w00/diff_denom
     w01 = w01/diff_denom

@@ -61,7 +61,7 @@ ax0.set_xscale('log')
 ax0.set_yscale('log')
 
 ax0.set_xlabel(r'${\rm um}$', fontsize = 'x-large')
-ax0.set_ylabel(r'${\rm mJy}}$', fontsize = 'x-large')
+ax0.set_ylabel(r'${\rm mJy}$', fontsize = 'x-large')
 # ax[0].legend(fontsize='x-large', ncol=3, title='Galaxy number')
     
 u, g, r, i, z, Y = lsst_mags.T
