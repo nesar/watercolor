@@ -22,6 +22,9 @@ pip install watercolor
 from watercolor.paint import photometry_from_catalog
 ```
 
+    /lcrc/project/cosmo_ai/nramachandra/opencosmo_env/lib/python3.11/site-packages/watercolor/load_sim_stellar_catalog.py:10: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+      import pkg_resources
+
 #### First we load the galaxy catalog. The main physical quantities required for painting the colors are the metallicities, stellar mass and age of the star particles of a galaxy.
 
 ``` python
@@ -106,7 +109,7 @@ fof_halo_tag, if_satellite, galaxy_tags, stellar_idx, metal_hydro, mass, age_hyd
 ```
 
 ``` python
-galaxy_number = 4 # Choosing one of the galaxies in the catalog
+galaxy_number = 42 # Choosing one of the galaxies in the catalog
 unique_galaxy_tag = np.unique(galaxy_tags)[galaxy_number]
 print('Number of galaxies: %d'%np.unique(galaxy_tags).shape[0])
 
@@ -134,8 +137,12 @@ spec_wave_ssp, spec_flux_ssp, spec_csp, flux_proxy, gal_stellar_mass = watercolo
 #### 4. We plot SEDs from both SSPs and CSPs
 
 ``` python
-fig, a = plt.subplots(2,1, figsize=(14, 12), sharex=True, sharey=False)
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+
+
+fig, a = plt.subplots(2,1, figsize=(10, 6), sharex=True, sharey=False, height_ratios=[3, 2])
 c_norm = mpl.colors.Normalize(vmin=np.min(flux_proxy), vmax=np.max(flux_proxy))
+# c_norm = mpl.colors.Normalize(vmin=np.min(np.log10(mass)), vmax=np.max(np.log10(mass)))
 c_map  = mpl.cm.coolwarm
 
 s_map  = mpl.cm.ScalarMappable(cmap=c_map, norm=c_norm)
@@ -149,12 +156,16 @@ for idx in range(spec_flux_ssp.shape[0]):
               # color=s_map.to_rgba(np.log10(mass[ssp_id])), 
               color=s_map.to_rgba(flux_proxy[idx]), 
               alpha=0.5)
-
-fig.colorbar(s_map, ax = a[0], 
-             orientation = 'horizontal', 
-             # label=r'stellar mass', pad=0.2)
-             label=r'flux proxy', pad=0.2)
     
+    
+cbaxes = inset_axes(a[0], width="40%", height="4%", loc=2) 
+# plt.colorbar(cax=cbaxes, ticks=[0.,1], orientation='horizontal')
+
+cbar = plt.colorbar(s_map, cax = cbaxes, 
+             orientation = 'horizontal')
+             # pad=0.1)
+    
+cbar.set_label(r'Flux (rescaled)', fontsize=16)
 
 #####################################################################
 
@@ -167,17 +178,20 @@ a[1].plot(spec_wave_ssp, spec_csp)
 # a[1].set_xscale('log')
 a[1].set_xlim(3e3, 1e4)
 
+# a[0].set_xlabel(r'${\rm Wavelength\ [\AA]}$', fontsize = 'xx-large')
+a[1].set_xlabel(r'${\rm Wavelength\ [\AA]}$', fontsize = 'xx-large')
+a[0].set_ylabel(r'$L_{\rm SSP}(\lambda)\ {\rm [L_{\odot}/\AA]}$', fontsize = 'xx-large')
+a[1].set_ylabel(r'$L_{\rm CSP}(\lambda)\ {\rm [L_{\odot}/\AA]}$', fontsize = 'xx-large')
 
-a[0].set_xlabel(r'${\rm wavelength\ [\AA]}$', fontsize = 'x-large')
-a[1].set_xlabel(r'${\rm wavelength\ [\AA]}$', fontsize = 'x-large')
-a[0].set_ylabel(r'$L_{\rm SSP}(\lambda)\ {\rm [L_{\odot}/\AA]}$', fontsize = 'x-large')
-a[1].set_ylabel(r'$L_{\rm CSP}(\lambda)\ {\rm [L_{\odot}/\AA]}$', fontsize = 'x-large')
+fig.tight_layout()
 
-
-plt.show()
+plt.savefig('../../Plots/ssp_csp_spec.png', dpi=300)
 ```
 
-![](index_files/figure-commonmark/cell-10-output-1.png)
+    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_4356/1573131946.py:47: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+      fig.tight_layout()
+
+![](index_files/figure-commonmark/cell-10-output-2.png)
 
 #### 5. CSPs are attenuation due to dust
 
@@ -374,7 +388,7 @@ f, a = plt.subplots(1, 2, figsize=(14, 4))
 
 
 # Plotting the radial mass density profile
-a[0].plot(bin_centers, mass_densities_direct, '-ko', label='Mass Density Profile')
+a[0].plot(bin_centers*1e3, mass_densities_direct, '-ko', label='Mass Density Profile')
 a[0].set_xlabel('Radial Distance (kpc)')
 a[0].set_ylabel('Mass Density (M_solar/kpc^2)')
 a[0].set_title('Radial Mass Density Profile')
@@ -385,7 +399,7 @@ a[0].legend()
 bin_centers, luminosities = radial_luminosity_profile(np.array([x_select, y_select, z_select, m_select]).T)
 
 # Plotting the radial luminosity profile
-a[1].plot(bin_centers, luminosities, '-ko', label='Luminosity Profile')
+a[1].plot(bin_centers*1e3, luminosities, '-ko', label='Luminosity Profile')
 a[1].set_xlabel('Radial Distance (kpc)')
 a[1].set_ylabel('Luminosity (Jansky)')
 a[1].set_title('Radial Luminosity Profile')
