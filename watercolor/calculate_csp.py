@@ -12,7 +12,7 @@ from .ssp_interpolation import spec_ssp_lookup
 from .load_sps_library import load_fsps_spectral_library, load_fsps_age_metallicity
 from .load_sps_library import LIBRARY_FLUX_FILE, LIBRARY_WAVE_FILE, LIBRARY_AGE_FILE, LIBRARY_METAL_FILE
 
-from .load_sim_stellar_catalog import load_hacc_galaxy_data
+from .load_sim_stellar_catalog import load_hacc_galaxy_data, load_hacc_galaxy_data_opencosmo
 from .load_sim_stellar_catalog import GALS_FILE
 from .load_sim_stellar_catalog import Z_SOLAR_PADOVA, H0
 
@@ -37,7 +37,8 @@ def ssp_to_csp(spec_flux_ssp:np.ndarray # SSP SEDs
     return spec_csp
 
 # %% ../nbs/03_calculate_csp.ipynb 6
-def calc_fluxes_for_galaxy(gal_file_in:str=GALS_FILE, # HACC stellar catalog
+def calc_fluxes_for_galaxy(gal_file_in:str=GALS_FILE, # HACC stellar catalog, 
+                           particle_file_in:str=None, # HACC particle catalog,
                            unique_gal_tag:np.float32=None, # Selected galaxy tag
                            spectral_library_flux:str=LIBRARY_FLUX_FILE, # Fluxes in the spectral library,
                            spectral_library_wave:str=LIBRARY_WAVE_FILE, # Wavelengths in the spectral library,
@@ -47,7 +48,8 @@ def calc_fluxes_for_galaxy(gal_file_in:str=GALS_FILE, # HACC stellar catalog
     
     spec_flux_library, spec_wave_library = load_fsps_spectral_library(spectral_library_flux, spectral_library_wave)
     age_fsps_gyr, Z_padova_fsps = load_fsps_age_metallicity(spectral_library_age, spectral_library_metal)
-    _, _, gal_tags, _, metal_hydro, mass, age_hydro, _, _, _, _, _, _ = load_hacc_galaxy_data(gal_file_in)
+    # _, _, gal_tags, _, metal_hydro, mass, age_hydro, _, _, _, _, _, _ = load_hacc_galaxy_data(gal_file_in)
+    _, _, gal_tags, _, metal_hydro, mass, age_hydro, _, _, _, _, _, _ = load_hacc_galaxy_data_opencosmo(particle_file_in, gal_file_in)
 
 
     gal_tag_cond = np.where(gal_tags == unique_gal_tag)

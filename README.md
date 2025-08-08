@@ -19,20 +19,78 @@ pip install watercolor
 ## Simple implementation
 
 ``` python
-from watercolor.paint import photometry_from_catalog
+from watercolor.paint import photometry_from_catalog, photometry_from_catalog_opencosmo
 ```
 
-    /lcrc/project/cosmo_ai/nramachandra/opencosmo_env/lib/python3.11/site-packages/watercolor/load_sim_stellar_catalog.py:10: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+    /lcrc/project/cosmo_ai/nramachandra/Projects/Hydro_paint/watercolor/watercolor/load_sim_stellar_catalog.py:13: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
       import pkg_resources
 
 #### First we load the galaxy catalog. The main physical quantities required for painting the colors are the metallicities, stellar mass and age of the star particles of a galaxy.
 
 ``` python
 galaxy_star_catalog_file='../watercolor/data/test_hacc_stellar_catalog/Gal_z0_hbin.txt' # HACC galaxy catalog
-final_sed_mJy, final_wave_um, lsst_mags, spherex_mags, cosmos_mags = photometry_from_catalog(galaxy_star_catalog_file)
+
+# final_sed_mJy, final_wave_um, lsst_mags, spherex_mags, cosmos_mags = photometry_from_catalog(galaxy_star_catalog_file)
+
+particle_file_path = "/lcrc/project/cosmo_ai/nramachandra/Projects/Hydro_paint/Data/fromFE/haloparticles_2gpc.hdf5"
+dirIn0 = "/lcrc/project/cosmo_ai/nramachandra/Projects/Hydro_paint/Data/fromSciDAC/128MPC_RUNS_HACC_5PARAM/reformat/"
+dirIn1 = "KAPPA_2.127_EGW_0.479_SEED_7.143e5_VKIN_3794_EPS_9.752/output/"
+dirIn2 = "step_624/"
+dirIn3a = "galaxyparticles/"
+dirIn3b = "galaxyproperties/"
+
+
+particle_file_path = os.path.join(dirIn0, dirIn1, dirIn2, dirIn3a, "m000p-624.galaxyparticles.hdf5")
+catalog_file_path = os.path.join(dirIn0, dirIn1, dirIn2, dirIn3b, "m000p-624.galaxyproperties.hdf5")
+
+
+final_sed_mJy, final_wave_um, lsst_mags, spherex_mags, cosmos_mags = photometry_from_catalog_opencosmo(galaxy_star_catalog_file=catalog_file_path,
+                                                                                              galaxy_star_particle_file=particle_file_path)
 ```
 
-    Number of galaxies: 200
+    Number of available haloes in the catalog:  43087
+    Number of available haloes selected:  10
+    Loaded 526 particles from 13 galaxies in 10 haloes 
+    Number of galaxies: 13
+    Number of available haloes in the catalog:  43087
+    Number of available haloes selected:  10
+    Loaded 526 particles from 13 galaxies in 10 haloes 
+    Number of available haloes in the catalog:  43087
+    Number of available haloes selected:  10
+    Loaded 526 particles from 13 galaxies in 10 haloes 
+    Number of available haloes in the catalog:  43087
+    Number of available haloes selected:  10
+    Loaded 526 particles from 13 galaxies in 10 haloes 
+    Number of available haloes in the catalog:  43087
+    Number of available haloes selected:  10
+    Loaded 526 particles from 13 galaxies in 10 haloes 
+    Number of available haloes in the catalog:  43087
+    Number of available haloes selected:  10
+    Loaded 526 particles from 13 galaxies in 10 haloes 
+    Number of available haloes in the catalog:  43087
+    Number of available haloes selected:  10
+    Loaded 526 particles from 13 galaxies in 10 haloes 
+    Number of available haloes in the catalog:  43087
+    Number of available haloes selected:  10
+    Loaded 526 particles from 13 galaxies in 10 haloes 
+    Number of available haloes in the catalog:  43087
+    Number of available haloes selected:  10
+    Loaded 526 particles from 13 galaxies in 10 haloes 
+    Number of available haloes in the catalog:  43087
+    Number of available haloes selected:  10
+    Loaded 526 particles from 13 galaxies in 10 haloes 
+    Number of available haloes in the catalog:  43087
+    Number of available haloes selected:  10
+    Loaded 526 particles from 13 galaxies in 10 haloes 
+    Number of available haloes in the catalog:  43087
+    Number of available haloes selected:  10
+    Loaded 526 particles from 13 galaxies in 10 haloes 
+    Number of available haloes in the catalog:  43087
+    Number of available haloes selected:  10
+    Loaded 526 particles from 13 galaxies in 10 haloes 
+    Number of available haloes in the catalog:  43087
+    Number of available haloes selected:  10
+    Loaded 526 particles from 13 galaxies in 10 haloes 
 
 #### The single-line command provides the SEDs and magnitudes from LSST, SPHEREx and COSMOS filters
 
@@ -94,7 +152,7 @@ plt.show()
 
 ``` python
 import watercolor
-from watercolor.load_sim_stellar_catalog import load_hacc_galaxy_data
+from watercolor.load_sim_stellar_catalog import load_hacc_galaxy_data, load_hacc_galaxy_data_opencosmo
 from watercolor.calculate_csp import calc_fluxes_for_galaxy
 from watercolor.load_sps_library import LIBRARY_FLUX_FILE, LIBRARY_WAVE_FILE, LIBRARY_AGE_FILE, LIBRARY_METAL_FILE
 from watercolor.dust_attenuation import spectrum_dusted, log_total_stellar_metal, log_total_stellar_mass
@@ -105,13 +163,19 @@ from watercolor.filter_convolution import load_survey_pickle, photometry_from_sp
 #### 2. Then the galaxy-star catalog from HACC is loaded, using a unique galaxy tag, we select a galaxy
 
 ``` python
-fof_halo_tag, if_satellite, galaxy_tags, stellar_idx, metal_hydro, mass, age_hydro, x, y, z , vx, vy, vz = watercolor.load_sim_stellar_catalog.load_hacc_galaxy_data(galaxy_star_catalog_file)
+# fof_halo_tag, if_satellite, galaxy_tags, stellar_idx, metal_hydro, mass, age_hydro, x, y, z , vx, vy, vz = watercolor.load_sim_stellar_catalog.load_hacc_galaxy_data(galaxy_star_catalog_file)
+
+fof_halo_tag, if_satellite, galaxy_tags, stellar_idx, metal_hydro, mass, age_hydro, x, y, z , vx, vy, vz = load_hacc_galaxy_data_opencosmo(particle_file_path=particle_file_path, 
+                                                                                                                    catalog_file_path=catalog_file_path)
 ```
 
+    Number of available haloes in the catalog:  43087
+    Number of available haloes selected:  10
+    Loaded 526 particles from 13 galaxies in 10 haloes 
+
 ``` python
-galaxy_number = 42 # Choosing one of the galaxies in the catalog
+galaxy_number = 8# Choosing one of the galaxies in the catalog
 unique_galaxy_tag = np.unique(galaxy_tags)[galaxy_number]
-print('Number of galaxies: %d'%np.unique(galaxy_tags).shape[0])
 
 mstar_i = mass[galaxy_tags == unique_galaxy_tag]
 metal_i = metal_hydro[galaxy_tags == unique_galaxy_tag]
@@ -119,20 +183,26 @@ if_satellite_i = if_satellite[galaxy_tags == unique_galaxy_tag]
 
 logZ = log_total_stellar_metal(metal_i, mstar_i)
 logmstar = log_total_stellar_mass(mstar_i)
+print('Total stars:', mstar_i.size, 'logmstar:', logmstar)
 ```
 
-    Number of galaxies: 200
+    Total stars: 112 logmstar: [10.376839]
 
 #### 3. After selecting a unique galaxy tag, we calculate the SED. This is the rest-frame SED is due to spectral emission alone, and without dust attenuation.
 
 ``` python
-spec_wave_ssp, spec_flux_ssp, spec_csp, flux_proxy, gal_stellar_mass = watercolor.calculate_csp.calc_fluxes_for_galaxy(galaxy_star_catalog_file,
+spec_wave_ssp, spec_flux_ssp, spec_csp, flux_proxy, gal_stellar_mass = watercolor.calculate_csp.calc_fluxes_for_galaxy(catalog_file_path,
+                                                                                                                       particle_file_path,
                                                                                                                        unique_galaxy_tag,
                                                                                                                        LIBRARY_FLUX_FILE,
                                                                                                                        LIBRARY_WAVE_FILE,
                                                                                                                        LIBRARY_AGE_FILE,
                                                                                                                        LIBRARY_METAL_FILE)
 ```
+
+    Number of available haloes in the catalog:  43087
+    Number of available haloes selected:  10
+    Loaded 526 particles from 13 galaxies in 10 haloes 
 
 #### 4. We plot SEDs from both SSPs and CSPs
 
@@ -188,7 +258,7 @@ fig.tight_layout()
 plt.savefig('../../Plots/ssp_csp_spec.png', dpi=300)
 ```
 
-    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_4356/1573131946.py:47: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_717106/1573131946.py:47: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
       fig.tight_layout()
 
 ![](index_files/figure-commonmark/cell-10-output-2.png)
@@ -231,10 +301,11 @@ a.plot(redsh_wave, redsh_spec*1e6, label='Redshift and dimming')
 
 
 # a.set_xlim(3e3, 1e4)
-a.set_xlim(3e3, 1e6)
+# a.set_xlim(3e3, 1e7)
 
 a.set_xscale('log')
-# a.set_yscale('log')
+a.set_yscale('log')
+
 
 a.set_xlabel(r'${\rm wavelength\ [\AA]}$', fontsize = 'x-large')
 a.set_ylabel(r'$L_{\rm CSP}(\lambda)\ {\rm [L_{\odot}/\AA]}$', fontsize = 'x-large')
@@ -415,8 +486,8 @@ from scipy.ndimage import gaussian_filter
 
 ``` python
 def canvas_plot(data, 
-                canvas_size = 256, 
-                gauss_sigma = 8):
+                canvas_size = 128, 
+                gauss_sigma = 4):
     
     # Create a blank canvas
     # size of the canvas for the image
@@ -450,29 +521,33 @@ blurred_canvas_mass = canvas_plot(np.array([x_select, y_select, m_select]).T)
 ```
 
 ``` python
-f, a = plt.subplots(1, 2, figsize=(14, 8))
-cmap_select = 'magma'
-a[0].imshow(blurred_canvas_lum, cmap=cmap_select, origin='lower', extent=[x_select.min(), x_select.max(), y_select.min(), y_select.max()])
+f, a = plt.subplots(1, 2, figsize=(10, 4), gridspec_kw={'wspace': 0.1, 'hspace': 0.1}, sharex=True, sharey=True)
+
+cmap_select = 'inferno'
+a[1].imshow(blurred_canvas_lum, cmap=cmap_select, origin='lower', extent=[x_select.min(), x_select.max(), y_select.min(), y_select.max()])
 # a[0].colorbar(label='Luminosity (Jansky)')
-a[0].set_title('Galaxy Luminosity Distribution')
-a[0].set_xlabel('x (Mpc)')
-a[0].set_ylabel('y (Mpc)')
-a[0].set_aspect('equal', 'box')
-
-
-a[1].imshow(blurred_canvas_mass, cmap=cmap_select, origin='lower', extent=[x_select.min(), x_select.max(), y_select.min(), y_select.max()])
-# a[1].colorbar(label='Mass (Msol)')
-# a[1].scatter(x_scaled, y_scaled, s=1)
-a[1].set_title('Galaxy Mass Distribution')
+a[1].set_title('Galaxy Luminosity Distribution')
 a[1].set_xlabel('x (Mpc)')
 a[1].set_ylabel('y (Mpc)')
 a[1].set_aspect('equal', 'box')
+
+
+a[0].imshow(blurred_canvas_mass, cmap=cmap_select, origin='lower', extent=[x_select.min(), x_select.max(), y_select.min(), y_select.max()])
+# a[0].colorbar(label='Mass (Msol)')
+# a[0].scatter(x_scaled, y_scaled, s=1)
+a[0].set_title('Galaxy Mass Distribution')
+a[0].set_xlabel('x (Mpc)')
+# a[0].set_ylabel('y (Mpc)')
+a[0].set_aspect('equal', 'box')
 
 plt.tight_layout()
 plt.show()
 ```
 
-![](index_files/figure-commonmark/cell-24-output-1.png)
+    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_717106/1841314578.py:20: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+      plt.tight_layout()
+
+![](index_files/figure-commonmark/cell-24-output-2.png)
 
 <!-- ### One can also find luminosity profiles for the simulated galaxies -->
 <!-- #### 1. First we project the luminosity on to grids -->
