@@ -28,20 +28,15 @@ from watercolor.paint import photometry_from_catalog, photometry_from_catalog_op
 #### First we load the galaxy catalog. The main physical quantities required for painting the colors are the metallicities, stellar mass and age of the star particles of a galaxy.
 
 ``` python
-galaxy_star_catalog_file='../watercolor/data/test_hacc_stellar_catalog/Gal_z0_hbin.txt' # HACC galaxy catalog
-
+# galaxy_star_catalog_file='../watercolor/data/test_hacc_stellar_catalog/Gal_z0_hbin.txt' # HACC galaxy catalog
 # final_sed_mJy, final_wave_um, lsst_mags, spherex_mags, cosmos_mags = photometry_from_catalog(galaxy_star_catalog_file)
 
-particle_file_path = "/lcrc/project/cosmo_ai/nramachandra/Projects/Hydro_paint/Data/fromFE/haloparticles_2gpc.hdf5"
-dirIn0 = "/lcrc/project/cosmo_ai/nramachandra/Projects/Hydro_paint/Data/fromSciDAC/128MPC_RUNS_HACC_5PARAM/reformat/"
-dirIn1 = "KAPPA_2.127_EGW_0.479_SEED_7.143e5_VKIN_3794_EPS_9.752/output/"
-dirIn2 = "step_624/"
+home_dir = dirIn0 + dirIn1 + dirIn2
 dirIn3a = "galaxyparticles/"
 dirIn3b = "galaxyproperties/"
 
-
-particle_file_path = os.path.join(dirIn0, dirIn1, dirIn2, dirIn3a, "m000p-624.galaxyparticles.hdf5")
-catalog_file_path = os.path.join(dirIn0, dirIn1, dirIn2, dirIn3b, "m000p-624.galaxyproperties.hdf5")
+particle_file_path = os.path.join(home_dir, dirIn3a, "m000p-624.galaxyparticles.hdf5")
+catalog_file_path = os.path.join(home_dir, dirIn3b, "m000p-624.galaxyproperties.hdf5")
 
 
 final_sed_mJy, final_wave_um, lsst_mags, spherex_mags, cosmos_mags = photometry_from_catalog_opencosmo(galaxy_star_catalog_file=catalog_file_path,
@@ -258,7 +253,7 @@ fig.tight_layout()
 plt.savefig('../../Plots/ssp_csp_spec.png', dpi=300)
 ```
 
-    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_717106/1573131946.py:47: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_753436/1573131946.py:47: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
       fig.tight_layout()
 
 ![](index_files/figure-commonmark/cell-10-output-2.png)
@@ -544,7 +539,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_717106/1841314578.py:20: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_753436/1841314578.py:20: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
       plt.tight_layout()
 
 ![](index_files/figure-commonmark/cell-24-output-2.png)
