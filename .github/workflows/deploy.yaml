@@ -11,4 +11,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    with:
+      python: 3.12
     steps: [uses: fastai/workflows/quarto-ghp@master]

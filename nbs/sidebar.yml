@@ -1,0 +1,12 @@
+website:
+  sidebar:
+    contents:
+      - index.ipynb
+      - 00_load_sps_library.ipynb
+      - 01_load_sim_stellar_catalog.ipynb
+      - 02_ssp_interpolation.ipynb
+      - 03_calculate_csp.ipynb
+      - 04_dust_attenuation.ipynb
+      - 05_cosmic_dimming.ipynb
+      - 06_filter_convolve.ipynb
+      - 07_paint.ipynb

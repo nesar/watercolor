@@ -4,8 +4,8 @@ on: [workflow_dispatch, pull_request, push]
 jobs:
   test:
     runs-on: ubuntu-latest
+    with:
+      python: 3.12
     steps:
       - uses: actions/checkout@v4
       - uses: fastai/workflows/nbdev-ci@master
-        with:
-          python-version: '3.12'
