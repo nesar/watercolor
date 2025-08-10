@@ -31,12 +31,11 @@ from watercolor.paint import photometry_from_catalog, photometry_from_catalog_op
 # galaxy_star_catalog_file='../watercolor/data/test_hacc_stellar_catalog/Gal_z0_hbin.txt' # HACC galaxy catalog
 # final_sed_mJy, final_wave_um, lsst_mags, spherex_mags, cosmos_mags = photometry_from_catalog(galaxy_star_catalog_file)
 
-home_dir = dirIn0 + dirIn1 + dirIn2
-dirIn3a = "galaxyparticles/"
-dirIn3b = "galaxyproperties/"
+galparticle_dir = "galaxyparticles/"
+galproperty_dir = "galaxyproperties/"
 
-particle_file_path = os.path.join(home_dir, dirIn3a, "m000p-624.galaxyparticles.hdf5")
-catalog_file_path = os.path.join(home_dir, dirIn3b, "m000p-624.galaxyproperties.hdf5")
+particle_file_path = os.path.join(data_dir, galparticle_dir, "m000p-624.galaxyparticles.hdf5")
+catalog_file_path = os.path.join(data_dir, galproperty_dir, "m000p-624.galaxyproperties.hdf5")
 
 
 final_sed_mJy, final_wave_um, lsst_mags, spherex_mags, cosmos_mags = photometry_from_catalog_opencosmo(galaxy_star_catalog_file=catalog_file_path,
@@ -158,6 +157,19 @@ from watercolor.filter_convolution import load_survey_pickle, photometry_from_sp
 #### 2. Then the galaxy-star catalog from HACC is loaded, using a unique galaxy tag, we select a galaxy
 
 ``` python
+particle_file_path = "/lcrc/project/cosmo_ai/nramachandra/Projects/Hydro_paint/Data/fromFE/haloparticles_2gpc.hdf5"
+dirIn0 = "/lcrc/project/cosmo_ai/nramachandra/Projects/Hydro_paint/Data/fromSciDAC/128MPC_RUNS_HACC_5PARAM/reformat/"
+dirIn1 = "KAPPA_2.127_EGW_0.479_SEED_7.143e5_VKIN_3794_EPS_9.752/output/"
+dirIn2 = "step_624/"
+dirIn3a = "galaxyparticles/"
+dirIn3b = "galaxyproperties/"
+
+
+particle_file_path = os.path.join(dirIn0, dirIn1, dirIn2, dirIn3a, "m000p-624.galaxyparticles.hdf5")
+catalog_file_path = os.path.join(dirIn0, dirIn1, dirIn2, dirIn3b, "m000p-624.galaxyproperties.hdf5")
+```
+
+``` python
 # fof_halo_tag, if_satellite, galaxy_tags, stellar_idx, metal_hydro, mass, age_hydro, x, y, z , vx, vy, vz = watercolor.load_sim_stellar_catalog.load_hacc_galaxy_data(galaxy_star_catalog_file)
 
 fof_halo_tag, if_satellite, galaxy_tags, stellar_idx, metal_hydro, mass, age_hydro, x, y, z , vx, vy, vz = load_hacc_galaxy_data_opencosmo(particle_file_path=particle_file_path, 
@@ -253,10 +265,10 @@ fig.tight_layout()
 plt.savefig('../../Plots/ssp_csp_spec.png', dpi=300)
 ```
 
-    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_753436/1573131946.py:47: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_1915492/2893587426.py:49: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
       fig.tight_layout()
 
-![](index_files/figure-commonmark/cell-10-output-2.png)
+![](index_files/figure-commonmark/cell-11-output-2.png)
 
 #### 5. CSPs are attenuation due to dust
 
@@ -278,7 +290,7 @@ a.legend(fontsize='x-large')
 
     <matplotlib.legend.Legend>
 
-![](index_files/figure-commonmark/cell-12-output-2.png)
+![](index_files/figure-commonmark/cell-13-output-2.png)
 
 #### 6. The resulting dust attenuated spectra undergoes cosmic dimming and redshifting
 
@@ -309,7 +321,7 @@ a.legend(fontsize='x-large')
 
     <matplotlib.legend.Legend>
 
-![](index_files/figure-commonmark/cell-14-output-2.png)
+![](index_files/figure-commonmark/cell-15-output-2.png)
 
 #### 7. The final spectrum is convolved with telescope transmission curves to obtain magnitudes
 
@@ -337,7 +349,7 @@ flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(cen
                                                                           clip_bandpass=True)
 ```
 
-![](index_files/figure-commonmark/cell-15-output-1.png)
+![](index_files/figure-commonmark/cell-16-output-1.png)
 
 ``` python
 ##### Load survey filters 
@@ -363,7 +375,7 @@ flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(cen
                                                                           clip_bandpass=True)
 ```
 
-![](index_files/figure-commonmark/cell-16-output-1.png)
+![](index_files/figure-commonmark/cell-17-output-1.png)
 
 ``` python
 ##### Load survey filters 
@@ -390,7 +402,7 @@ flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(cen
                                                                           clip_bandpass=True)
 ```
 
-![](index_files/figure-commonmark/cell-17-output-1.png)
+![](index_files/figure-commonmark/cell-18-output-1.png)
 
 ## Profiles of the galaxies can be checked too
 
@@ -473,7 +485,7 @@ a[1].legend()
 plt.show()
 ```
 
-![](index_files/figure-commonmark/cell-20-output-1.png)
+![](index_files/figure-commonmark/cell-21-output-1.png)
 
 ``` python
 from scipy.ndimage import gaussian_filter
@@ -539,13 +551,272 @@ plt.tight_layout()
 plt.show()
 ```
 
-    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_753436/1841314578.py:20: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_1915492/2558093784.py:22: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
       plt.tight_layout()
 
-![](index_files/figure-commonmark/cell-24-output-2.png)
+![](index_files/figure-commonmark/cell-25-output-2.png)
 
 <!-- ### One can also find luminosity profiles for the simulated galaxies -->
 <!-- #### 1. First we project the luminosity on to grids -->
+
+``` python
+# gal_tag_cond = np.where(galaxy_tags == unique_galaxy_tag)
+
+# x_centered_scaled =  (x[gal_tag_cond] - np.min(x[gal_tag_cond]))/(np.max(x[gal_tag_cond]) - np.min(x[gal_tag_cond]))
+# y_centered_scaled =  (y[gal_tag_cond] - np.min(y[gal_tag_cond]))/(np.max(y[gal_tag_cond]) - np.min(y[gal_tag_cond]))
+
+x_centered_scaled =  (x[gal_tag_cond] - np.mean(x[gal_tag_cond]))/(np.max(x[gal_tag_cond]) - np.min(x[gal_tag_cond]))
+y_centered_scaled =  (y[gal_tag_cond] - np.mean(y[gal_tag_cond]))/(np.max(y[gal_tag_cond]) - np.min(y[gal_tag_cond]))
+
+nbins = 60
+
+
+xedges = np.linspace(x_centered_scaled.min(), x_centered_scaled.max(), nbins) 
+yedges = np.linspace(y_centered_scaled.min(), y_centered_scaled.max(), nbins) 
+
+
+H, xedges, yedges, binnumber = stats.binned_statistic_2d(x_centered_scaled, y_centered_scaled, 
+                                                         None, 'count', bins=[xedges, yedges],
+                                                         expand_binnumbers=True)
+
+
+grid_flux = np.zeros_like(H)
+
+for idx, ssp_id in enumerate(gal_tag_cond[0]):
+    grid_flux[binnumber[:, idx][0]-1, binnumber[:, idx][1]-1] = np.trapz(spec_flux_ssp[idx], spec_wave_ssp)
+```
+
 <!-- #### 2. Next we plot the stellar density and luminosity profiles -->
+
+``` python
+fig, ax = plt.subplots(1, 2, figsize=(14, 4))
+c_norm = mpl.colors.Normalize(vmin=1, vmax=np.max(H))
+c_map  = mpl.cm.coolwarm
+
+
+ax[0].set_title('Particle binning')
+
+im = ax[0].imshow(H, interpolation='nearest', origin='lower', 
+                extent=[xedges[0], xedges[-1], yedges[0], yedges[-1]], 
+                cmap=c_map)
+
+fig.colorbar(im, ax = ax[0], 
+             orientation = 'vertical', 
+             # label=r'stellar mass', pad=0.2)
+             label=r'stellar density', pad=0.2)
+
+
+# Normalize the array vals so they can be mapped to a color
+c_norm = mpl.colors.Normalize(vmin=np.min(grid_flux.min()), vmax=np.max(grid_flux))
+c_norm = mpl.colors.Normalize(vmin=0.004, vmax=np.max(grid_flux))
+
+# # Pick a colormap
+# c_map  = mpl.cm.magma
+
+
+ax[1].set_title('Luminosity profile')
+im = ax[1].imshow(grid_flux, interpolation='nearest', origin='lower', extent=[xedges[0], xedges[-1], yedges[0], yedges[-1]], cmap=c_map)
+
+# Adding the colorbar
+fig.colorbar(im, ax = ax[1], 
+             orientation = 'vertical', 
+             # label=r'stellar mass', pad=0.2)
+             label=r'Luminosity', pad=0.2)
+
+
+ax[0].set_xlabel('x[Mpc]')
+ax[0].set_ylabel('y[Mpc]')
+ax[1].set_xlabel('x[Mpc]')
+ax[1].set_ylabel('y[Mpc]')
+
+ax[0].set_aspect('equal', adjustable='box')
+ax[1].set_aspect('equal', adjustable='box')
+
+
+plt.show()
+```
+
+![](index_files/figure-commonmark/cell-27-output-1.png)
+
 <!-- ### Radial mass profile of the galaxy -->
+
+``` python
+def cart2pol(x, y):
+    rho = np.sqrt(x**2 + y**2)
+    phi = np.arctan2(y, x)
+    return(rho, phi)
+
+radius, azimut = cart2pol(x_centered_scaled, y_centered_scaled)
+azimut += np.pi
+
+# define binning
+rbins = np.linspace(0,radius.max(), 10)
+abins = np.linspace(0,2*np.pi, 2)
+
+
+subdivs = 40
+abins2 = np.linspace(0, 2 * np.pi, (len(abins) - 1) * subdivs + 1)
+
+
+
+#calculate histogram for mass density
+# hist, _, _ = np.histogram2d(azimut, radius, bins=(abins, rbins))
+hist, _, _, binnumbers = stats.binned_statistic_2d(azimut, radius, 
+                                                         None, 'count', bins=[abins, rbins],
+                                                         expand_binnumbers=True)
+
+
+# Luminosity
+grid_flux_polar = np.zeros_like(hist)
+
+for idx, ssp_id in enumerate(gal_tag_cond[0]):
+    grid_flux_polar[binnumbers[:, idx][0]-1, binnumbers[:, idx][1]-1] = np.trapz(spec_flux_ssp[idx], spec_wave_ssp)
+    
+    
+    
+
+A, R = np.meshgrid(abins, rbins)
+A2, R2 = np.meshgrid(abins2, rbins)
+
+# plot
+
+fig = plt.figure(figsize=(14 , 14))
+ax0 = plt.subplot(221, projection="polar")
+ax1 = plt.subplot(222)
+
+# pc = ax.pcolormesh(A, R, hist.T, cmap="magma_r")
+pc2 = ax0.pcolormesh(A2, R2, np.repeat(hist.T, subdivs, axis=1), cmap='gist_heat_r')
+pc3 = ax0.scatter(azimut, radius, alpha=1, marker='o', s=1, color='k')
+fig.colorbar(pc2, ax=ax0)
+
+ax1.plot(0.5*(rbins[1:] + rbins[:-1]), np.sum(hist, axis=0));
+ax1.set_xlabel('Normalized radius')
+ax1.set_ylabel('Density')
+
+
+ax2 = plt.subplot(223, projection="polar")
+ax3 = plt.subplot(224)
+
+# pc = ax.pcolormesh(A, R, hist.T, cmap="magma_r")
+pc3 = ax2.pcolormesh(A2, R2, np.repeat(grid_flux_polar.T, subdivs, axis=1), cmap='gist_heat_r')
+pc4 = ax2.scatter(azimut, radius, alpha=1, marker='o', s=1, color='k')
+fig.colorbar(pc3, ax=ax2)
+
+ax3.plot(0.5*(rbins[1:] + rbins[:-1]), np.sum(grid_flux_polar, axis=0));
+ax3.set_xlabel('Normalized radius')
+ax3.set_ylabel('Luminosity')
+```
+
+    Text(0, 0.5, 'Luminosity')
+
+![](index_files/figure-commonmark/cell-28-output-2.png)
+
+``` python
+from scipy.interpolate import griddata
+import scipy.ndimage as ndi
+```
+
+``` python
+def azimuthalAverage(image, center=None):
+    """
+    Calculate the azimuthally averaged radial profile.
+
+    image - The 2D image
+    center - The [x,y] pixel coordinates used as the center. The default is 
+             None, which then uses the center of the image (including 
+             fracitonal pixels).
+    
+    """
+    # Calculate the indices from the image
+    y, x = np.indices(image.shape)
+
+    if not center:
+        center = np.array([(x.max()-x.min())/2.0, (y.max()-y.min())/2.0])
+
+    r = np.hypot(x - center[0], y - center[1])
+
+    # Get sorted radii
+    ind = np.argsort(r.flat)
+    r_sorted = r.flat[ind]
+    i_sorted = image.flat[ind]
+
+    # Get the integer part of the radii (bin size = 1)
+    r_int = r_sorted.astype(int)
+
+    # Find all pixels that fall within each radial bin.
+    deltar = r_int[1:] - r_int[:-1]  # Assumes all radii represented
+    rind = np.where(deltar)[0]       # location of changed radius
+    nr = rind[1:] - rind[:-1]        # number of radius bin
+    
+    # Cumulative sum to figure out sums for each radius bin
+    csim = np.cumsum(i_sorted, dtype=float)
+    tbin = csim[rind[1:]] - csim[rind[:-1]]
+
+    radial_prof = tbin / nr
+
+    return radial_prof
+```
+
+``` python
+def radial_profile(data):
+    y, x = np.indices((data.shape)) # first determine radii of all pixels
+    
+    # x = xedges[0] + ((x - np.min(x))*(xedges[1] - xedges[0])/(np.max(x) - np.min(x)))
+    # y = yedges[0] + ((y - np.min(y))*(yedges[1] - yedges[0])/(np.max(y) - np.min(y)))
+    
+    center = np.array([(x.max()-x.min())/2.0, (y.max()-y.min())/2.0])
+    r = np.sqrt((x-center[0])**2+(y-center[1])**2)    
+
+    # radius of the image.
+    r_max = np.max(r) 
+    print(r.min(), r.max())
+
+    ring_brightness, radius = np.histogram(r, weights=data, bins= np.int32(r_max/2))
+    # ring_brightness, radius = np.histogram(r, weights=data, bins= 10)
+    
+    
+    x2_prime = ((x-center[0])*(xedges[1] - xedges[0])/(x.max()-x.min()))**2
+    y2_prime = ((y-center[1])*(yedges[1] - yedges[0])/(y.max()-y.min()))**2
+    
+    r_prime = np.sqrt(x2_prime + y2_prime)
+
+    plt.plot(radius[1:], ring_brightness)
+    # plt.xlim(np.min(r), np.max(r))
+    plt.show()
+```
+
+``` python
+radial_profile(H)
+radial_profile(grid_flux)
+```
+
+    0.0 41.012193308819754
+    0.0 41.012193308819754
+
+![](index_files/figure-commonmark/cell-32-output-2.png)
+
+![](index_files/figure-commonmark/cell-32-output-3.png)
+
+``` python
+fig, ax = plt.subplots(1, 2, figsize=(13, 3))
+
+ax[0].plot(azimuthalAverage(H), '-', alpha=0.6)
+ax[1].plot(azimuthalAverage(grid_flux), '-', alpha=0.6)
+
+ax[0].set_ylabel('Stellar mass profile')
+ax[1].set_ylabel('Luminosity profile')
+```
+
+    Text(0, 0.5, 'Luminosity profile')
+
+![](index_files/figure-commonmark/cell-33-output-2.png)
+
 <!-- ## Under the hood -->
+
+``` python
+# # convert array into dataframe
+# DF = pd.DataFrame(sample_data)
+
+# # save the dataframe as a csv file
+# DF.to_csv("data1.csv", header=['x', 'y', 'luminosity', 'mass'])
+```
