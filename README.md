@@ -22,9 +22,6 @@ pip install watercolor
 from watercolor.paint import photometry_from_catalog, photometry_from_catalog_opencosmo
 ```
 
-    /lcrc/project/cosmo_ai/nramachandra/Projects/Hydro_paint/watercolor/watercolor/load_sim_stellar_catalog.py:13: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
-      import pkg_resources
-
 #### First we load the galaxy catalog. The main physical quantities required for painting the colors are the metallicities, stellar mass and age of the star particles of a galaxy.
 
 ``` python
@@ -297,32 +294,6 @@ a.legend(fontsize='x-large')
 ``` python
 ##### Load survey filters 
 
-SURVEY_STRING = 'SPHEREx'
-central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names = load_survey_pickle(SURVEY_STRING)
-
-##### Compute bandpasses
-
-# sed_um_wave = spec_wave_ssp/1e4
-# sed_mJy_flux = spec_csp*1e3
-sed_um_wave = redsh_wave/1e4
-sed_mJy_flux = redsh_spec*1e3
-
-flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(central_wavelengths, 
-                                                                          sed_um_wave, 
-                                                                          sed_mJy_flux, 
-                                                                          bandpass_wavs, 
-                                                                          bandpass_vals, 
-                                                                          bandpass_names,
-                                                                          interp_kind='linear',
-                                                                          plot=True,
-                                                                          clip_bandpass=True)
-```
-
-![](index_files/figure-commonmark/cell-16-output-1.png)
-
-``` python
-##### Load survey filters 
-
 SURVEY_STRING = 'LSST'
 central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names = load_survey_pickle(SURVEY_STRING)
 
@@ -344,34 +315,7 @@ flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(cen
                                                                           clip_bandpass=True)
 ```
 
-![](index_files/figure-commonmark/cell-17-output-1.png)
-
-``` python
-##### Load survey filters 
-
-SURVEY_STRING = 'COSMOS'
-central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names = load_survey_pickle(SURVEY_STRING)
-
-
-##### Compute bandpasses
-
-# sed_um_wave = spec_wave_ssp/1e4
-# sed_mJy_flux = spec_csp*1e3
-sed_um_wave = redsh_wave/1e4
-sed_mJy_flux = redsh_spec*1e3
-
-flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(central_wavelengths, 
-                                                                          sed_um_wave, 
-                                                                          sed_mJy_flux, 
-                                                                          bandpass_wavs, 
-                                                                          bandpass_vals, 
-                                                                          bandpass_names,
-                                                                          interp_kind='linear',
-                                                                          plot=True,
-                                                                          clip_bandpass=True)
-```
-
-![](index_files/figure-commonmark/cell-18-output-1.png)
+![](index_files/figure-commonmark/cell-16-output-1.png)
 
 ## Luminosity distribution of galaxies can be checked too
 
@@ -443,7 +387,7 @@ plot_galaxy_profiles(
     /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_1615613/312085280.py:370: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
       plt.tight_layout()
 
-![](index_files/figure-commonmark/cell-22-output-2.png)
+![](index_files/figure-commonmark/cell-20-output-2.png)
 
     Galaxy Properties:
       Total mass: 2.63e+10 M☉
