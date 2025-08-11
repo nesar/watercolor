@@ -234,7 +234,7 @@ fig.tight_layout()
 plt.savefig('../../Plots/ssp_csp_spec.png', dpi=300)
 ```
 
-    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_2079701/2893587426.py:49: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_1615613/2893587426.py:49: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
       fig.tight_layout()
 
 ![](index_files/figure-commonmark/cell-11-output-2.png)
@@ -375,8 +375,6 @@ flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(cen
 
 ## Luminosity distribution of galaxies can be checked too
 
-### Or radial profiles
-
 <!-- ### One can also find luminosity profiles for the simulated galaxies -->
 <!-- #### 1. First we project the luminosity on to grids -->
 <!-- #### 2. Next we plot the stellar density and luminosity profiles -->
@@ -434,13 +432,18 @@ plot_galaxy_profiles(
     y=y_select, 
     masses=m_select,
     luminosities=z_select,
-    num_bins=14,
-    figsize=(18, 12),  
+    num_bins=13,
+    figsize=(20, 10),  
     fit_sersic=True
 )
 ```
 
-![](index_files/figure-commonmark/cell-22-output-1.png)
+    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_1615613/312085280.py:363: UserWarning: Attempt to set non-positive xlim on a log-scaled axis will be ignored.
+      ax.set_xlim(0, max_extent)
+    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_1615613/312085280.py:370: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+      plt.tight_layout()
+
+![](index_files/figure-commonmark/cell-22-output-2.png)
 
     Galaxy Properties:
       Total mass: 2.63e+10 M☉
