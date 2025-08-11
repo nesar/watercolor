@@ -234,7 +234,7 @@ fig.tight_layout()
 plt.savefig('../../Plots/ssp_csp_spec.png', dpi=300)
 ```
 
-    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_1521395/2893587426.py:49: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_2073806/2893587426.py:49: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
       fig.tight_layout()
 
 ![](index_files/figure-commonmark/cell-11-output-2.png)
@@ -455,7 +455,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_1521395/3921579169.py:30: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_2073806/3921579169.py:30: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
       plt.tight_layout()
 
 ![](index_files/figure-commonmark/cell-22-output-2.png)
@@ -787,5 +787,333 @@ ax[1].set_ylabel('Luminosity profile')
     Text(0, 0.5, 'Luminosity profile')
 
 ![](index_files/figure-commonmark/cell-33-output-2.png)
+
+``` python
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.ndimage import gaussian_filter
+from scipy import stats
+import warnings
+```
+
+``` python
+def calculate_galaxy_center(x: np.array, # X coordinates of particles
+                           y: np.array, # Y coordinates of particles  
+                           masses: np.array, # Particle masses
+                           method: str = 'mass_weighted' # Centering method
+                          ) -> tuple: # (center_x, center_y)
+    '''
+    Calculate galaxy center using mass-weighted or geometric methods
+    '''
+    if method == 'mass_weighted':
+        total_mass = np.sum(masses)
+        center_x = np.sum(x * masses) / total_mass
+        center_y = np.sum(y * masses) / total_mass
+    elif method == 'median':
+        center_x, center_y = np.median(x), np.median(y)
+    else:  # mean
+        center_x, center_y = np.mean(x), np.mean(y)
+    
+    return center_x, center_y
+
+
+def calculate_radial_profile(x: np.array, # X coordinates of particles
+                            y: np.array, # Y coordinates of particles
+                            quantities: np.array, # Masses or luminosities
+                            num_bins: int = 20, # Number of radial bins
+                            center: tuple = None # Galaxy center (if None, will calculate)
+                           ) -> tuple: # (bin_centers, surface_density, errors)
+    '''
+    Calculate radial surface density profile with proper area normalization
+    '''
+    # Calculate center if not provided
+    if center is None:
+        center_x, center_y = calculate_galaxy_center(x, y, quantities)
+    else:
+        center_x, center_y = center
+    
+    # Center coordinates and calculate radii
+    x_centered = x - center_x
+    y_centered = y - center_y
+    radii = np.sqrt(x_centered**2 + y_centered**2)
+    
+    # Create radial bins
+    r_max = np.percentile(radii, 95)
+    bin_edges = np.linspace(0, r_max, num_bins + 1)
+    bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
+    
+    # Calculate quantities in each bin
+    total_quantity, _ = np.histogram(radii, bins=bin_edges, weights=quantities)
+    particle_counts, _ = np.histogram(radii, bins=bin_edges)
+    
+    # Calculate annular areas
+    annular_areas = np.pi * (bin_edges[1:]**2 - bin_edges[:-1]**2)
+    
+    # Surface density and errors
+    surface_density = total_quantity / annular_areas
+    avg_weight = np.where(particle_counts > 0, total_quantity / particle_counts, 0)
+    errors = np.sqrt(particle_counts) * avg_weight / annular_areas
+    
+    return bin_centers, surface_density, errors
+
+
+def fit_sersic_profile(radii: np.array, # Radial bin centers
+                      surface_density: np.array, # Surface density values
+                      errors: np.array = None # Errors on surface density
+                     ) -> tuple: # (fitted_params, fitted_curve_radii, fitted_curve_values)
+    '''
+    Fit Sersic profile to radial surface density data
+    '''
+    from scipy.optimize import curve_fit
+    
+    def sersic_function(r, I_e, r_e, n):
+        b_n = 2*n - 1/3 + 4/(405*n) + 46/(25515*n**2)
+        return I_e * np.exp(-b_n * ((r/r_e)**(1/n) - 1))
+    
+    # Remove zero/negative values
+    mask = surface_density > 0
+    r_fit = radii[mask]
+    sigma_fit = surface_density[mask]
+    
+    if errors is not None:
+        sigma_err = errors[mask]
+        sigma_err = sigma_err[sigma_err > 0]
+        if len(sigma_err) != len(sigma_fit):
+            sigma_err = None
+    else:
+        sigma_err = None
+    
+    # Initial guess
+    I_e_guess = np.max(sigma_fit)
+    r_e_guess = r_fit[len(r_fit)//2]
+    n_guess = 1.0
+    
+    try:
+        popt, _ = curve_fit(sersic_function, r_fit, sigma_fit, 
+                           sigma=sigma_err, p0=[I_e_guess, r_e_guess, n_guess],
+                           bounds=([0, 0, 0.1], [np.inf, np.inf, 10]))
+        
+        # Generate smooth curve for plotting
+        r_model = np.linspace(r_fit.min(), r_fit.max(), 100)
+        sigma_model = sersic_function(r_model, *popt)
+        
+        return popt, r_model, sigma_model
+    except:
+        return None, None, None
+
+
+def create_2d_surface_density_map(x: np.array, # X coordinates
+                                 y: np.array, # Y coordinates  
+                                 quantities: np.array, # Masses or luminosities
+                                 grid_size: int = 128, # Grid resolution
+                                 gauss_sigma: float = 2.0, # Gaussian smoothing sigma
+                                 center: tuple = None # Galaxy center
+                                ) -> tuple: # (density_map, extent)
+    '''
+    Create smoothed 2D surface density map for realistic visualization
+    '''
+    from scipy.ndimage import gaussian_filter
+    
+    if center is None:
+        center_x, center_y = calculate_galaxy_center(x, y, quantities)
+    else:
+        center_x, center_y = center
+    
+    # Center coordinates
+    x_centered = x - center_x
+    y_centered = y - center_y
+    
+    # Define grid extent based on 95th percentile
+    max_extent = np.percentile(np.sqrt(x_centered**2 + y_centered**2), 95)
+    extent = [-max_extent, max_extent, -max_extent, max_extent]
+    
+    # Create blank canvas
+    canvas = np.zeros((grid_size, grid_size))
+    
+    # Scale coordinates to grid indices
+    x_scaled = ((x_centered - extent[0]) / (extent[1] - extent[0]) * grid_size).astype(int)
+    y_scaled = ((y_centered - extent[2]) / (extent[3] - extent[2]) * grid_size).astype(int)
+    
+    # Clip to grid bounds
+    x_scaled = np.clip(x_scaled, 0, grid_size - 1)
+    y_scaled = np.clip(y_scaled, 0, grid_size - 1)
+    
+    # Place quantities on canvas
+    for x_idx, y_idx, quantity in zip(x_scaled, y_scaled, quantities):
+        canvas[y_idx, x_idx] += quantity
+    
+    # Apply Gaussian smoothing
+    smoothed_canvas = gaussian_filter(canvas, sigma=gauss_sigma)
+    
+    # Convert to surface density (per unit area)
+    pixel_area = ((extent[1] - extent[0]) / grid_size) * ((extent[3] - extent[2]) / grid_size)
+    density_map = smoothed_canvas / pixel_area
+    
+    return density_map, extent
+
+
+def plot_galaxy_profiles(x: np.array, # X coordinates
+                        y: np.array, # Y coordinates
+                        masses: np.array, # Particle masses
+                        luminosities: np.array = None, # Particle luminosities (optional)
+                        num_bins: int = 20, # Number of radial bins
+                        figsize: tuple = (15, 10), # Figure size
+                        fit_sersic: bool = True # Whether to fit Sersic profiles
+                       ) -> None:
+    '''
+    Create comprehensive galaxy profile plots with 2D maps and 1D profiles
+    '''
+    import matplotlib.pyplot as plt
+    
+    # Use masses as luminosities if not provided
+    if luminosities is None:
+        luminosities = masses.copy()
+    
+    # Calculate galaxy center (mass-weighted)
+    center = calculate_galaxy_center(x, y, masses, method='mass_weighted')
+    
+    # Calculate extent once for consistent scaling
+    x_centered = x - center[0]
+    y_centered = y - center[1]
+    max_extent = np.percentile(np.sqrt(x_centered**2 + y_centered**2), 95)
+    extent = [-max_extent, max_extent, -max_extent, max_extent]
+    
+    # Create figure
+    fig, axes = plt.subplots(2, 3, figsize=figsize)
+    
+    # === TOP ROW: 2D SURFACE DENSITY MAPS ===
+    
+    # Mass distribution
+    mass_map, _ = create_2d_surface_density_map(x, y, masses, center=center, gauss_sigma=3.0)
+    
+    im1 = axes[0,0].imshow(mass_map, extent=extent, origin='lower', 
+                          cmap='hot', aspect='equal', interpolation='bilinear')
+    axes[0,0].set_title('Mass Surface Density')
+    axes[0,0].set_xlabel('x')
+    axes[0,0].set_ylabel('y')
+    axes[0,0].set_xlim(extent[0], extent[1])
+    axes[0,0].set_ylim(extent[2], extent[3])
+    plt.colorbar(im1, ax=axes[0,0], label='M☉/unit²', shrink=0.7)
+    
+    # Luminosity distribution
+    if not np.array_equal(masses, luminosities):
+        lum_map, _ = create_2d_surface_density_map(x, y, luminosities, center=center, gauss_sigma=3.0)
+        im2 = axes[0,1].imshow(lum_map, extent=extent, origin='lower', 
+                              cmap='hot', aspect='equal', interpolation='bilinear')
+        axes[0,1].set_title('Luminosity Surface Density')
+        plt.colorbar(im2, ax=axes[0,1], label='L☉/unit²', shrink=0.7)
+    else:
+        # Show mass map again if luminosity = mass
+        im2 = axes[0,1].imshow(mass_map, extent=extent, origin='lower', 
+                              cmap='hot', aspect='equal', interpolation='bilinear')
+        axes[0,1].set_title('Luminosity Surface Density\n(same as mass)')
+        plt.colorbar(im2, ax=axes[0,1], label='M☉/unit²', shrink=0.7)
+    
+    axes[0,1].set_xlabel('x')
+    axes[0,1].set_xlim(extent[0], extent[1])
+    axes[0,1].set_ylim(extent[2], extent[3])
+    
+    # Particle positions overlay with mass-weighted colors
+    mass_norm = plt.Normalize(vmin=np.percentile(masses, 5), vmax=np.percentile(masses, 95))
+    scatter = axes[0,2].scatter(x_centered, y_centered, s=0.5, alpha=0.6, 
+                               c=masses, cmap='viridis', norm=mass_norm)
+    axes[0,2].set_xlim(extent[0], extent[1])
+    axes[0,2].set_ylim(extent[2], extent[3])
+    axes[0,2].set_title('Particle Distribution')
+    axes[0,2].set_xlabel('x')
+    axes[0,2].set_ylabel('y')
+    axes[0,2].set_aspect('equal')
+    plt.colorbar(scatter, ax=axes[0,2], label='Particle Mass [M☉]', shrink=0.7)
+    
+    # === BOTTOM ROW: 1D RADIAL PROFILES ===
+    
+    # Mass profile
+    r_mass, sigma_mass, err_mass = calculate_radial_profile(
+        x, y, masses, num_bins=num_bins, center=center)
+    
+    axes[1,0].errorbar(r_mass, sigma_mass, yerr=err_mass, 
+                      fmt='ko-', capsize=3, markersize=4, linewidth=1.5)
+    axes[1,0].set_ylabel('Mass Surface Density [M☉/unit²]')
+    axes[1,0].set_yscale('log')
+    axes[1,0].grid(True, alpha=0.3)
+    
+    # Sersic fit for mass
+    if fit_sersic:
+        mass_params, r_model, sigma_model = fit_sersic_profile(r_mass, sigma_mass, err_mass)
+        if mass_params is not None:
+            axes[1,0].plot(r_model, sigma_model, 'r--', linewidth=2,
+                          label=f'Sersic n={mass_params[2]:.2f}')
+            axes[1,0].legend()
+    
+    # Luminosity profile
+    if not np.array_equal(masses, luminosities):
+        r_lum, sigma_lum, err_lum = calculate_radial_profile(
+            x, y, luminosities, num_bins=num_bins, center=center)
+        
+        axes[1,1].errorbar(r_lum, sigma_lum, yerr=err_lum, 
+                          fmt='bo-', capsize=3, markersize=4, linewidth=1.5)
+        axes[1,1].set_ylabel('Luminosity Surface Density [L☉/unit²]')
+        axes[1,1].set_yscale('log')
+        axes[1,1].grid(True, alpha=0.3)
+        
+        # Sersic fit for luminosity
+        if fit_sersic:
+            lum_params, r_model_lum, sigma_model_lum = fit_sersic_profile(
+                r_lum, sigma_lum, err_lum)
+            if lum_params is not None:
+                axes[1,1].plot(r_model_lum, sigma_model_lum, 'r--', linewidth=2,
+                              label=f'Sersic n={lum_params[2]:.2f}')
+                axes[1,1].legend()
+    else:
+        # Plot mass profile again
+        axes[1,1].errorbar(r_mass, sigma_mass, yerr=err_mass, 
+                          fmt='ko-', capsize=3, markersize=4, linewidth=1.5)
+        axes[1,1].set_ylabel('Surface Density [M☉/unit²]')
+        axes[1,1].set_yscale('log')
+        axes[1,1].grid(True, alpha=0.3)
+        if fit_sersic and mass_params is not None:
+            axes[1,1].plot(r_model, sigma_model, 'r--', linewidth=2,
+                          label=f'Sersic n={mass_params[2]:.2f}')
+            axes[1,1].legend()
+    
+    # Mass-to-light ratio profile (if different)
+    if not np.array_equal(masses, luminosities):
+        # Calculate M/L ratio in each bin
+        ml_ratio = sigma_mass / (sigma_lum + 1e-20)  # Avoid division by zero
+        ml_ratio_err = ml_ratio * np.sqrt((err_mass/(sigma_mass + 1e-20))**2 + 
+                                         (err_lum/(sigma_lum + 1e-20))**2)
+        
+        axes[1,2].errorbar(r_mass, ml_ratio, yerr=ml_ratio_err,
+                          fmt='go-', capsize=3, markersize=4, linewidth=1.5)
+        axes[1,2].set_ylabel('Mass-to-Light Ratio')
+        axes[1,2].set_title('M/L Profile')
+        axes[1,2].grid(True, alpha=0.3)
+    else:
+        axes[1,2].axhline(y=1, color='gray', linestyle='--', linewidth=2)
+        axes[1,2].set_ylabel('Mass-to-Light Ratio')
+        axes[1,2].set_ylim(0.5, 1.5)
+        axes[1,2].grid(True, alpha=0.3)
+        axes[1,2].text(0.5, 0.5, 'M/L = 1\n(Mass = Luminosity)', 
+                      transform=axes[1,2].transAxes, ha='center', va='center',
+                      fontsize=12, bbox=dict(boxstyle="round", facecolor='wheat'))
+    
+    # Set common x-axis labels and limits for bottom row
+    for ax in axes[1,:]:
+        ax.set_xlabel('Radius')
+        ax.set_xlim(0, max_extent)
+    
+    plt.tight_layout()
+    plt.show()
+    
+    # Print galaxy properties
+    total_mass = np.sum(masses)
+    total_luminosity = np.sum(luminosities)
+    print(f"Galaxy Properties:")
+    print(f"  Total mass: {total_mass:.2e} M☉")
+    print(f"  Total luminosity: {total_luminosity:.2e} L☉")
+    print(f"  Center: ({center[0]:.6f}, {center[1]:.6f})")
+    print(f"  Number of particles: {len(masses)}")
+    print(f"  Maximum extent: {max_extent:.4f} units")
+```
 
 <!-- ## Under the hood -->
