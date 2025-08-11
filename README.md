@@ -234,7 +234,7 @@ fig.tight_layout()
 plt.savefig('../../Plots/ssp_csp_spec.png', dpi=300)
 ```
 
-    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_1514282/2893587426.py:49: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_1521395/2893587426.py:49: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
       fig.tight_layout()
 
 ![](index_files/figure-commonmark/cell-11-output-2.png)
@@ -373,7 +373,94 @@ flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(cen
 
 ![](index_files/figure-commonmark/cell-18-output-1.png)
 
-## Profiles of the galaxies can be checked too
+## Luminosity distribution of galaxies can be checked too
+
+``` python
+from scipy.ndimage import gaussian_filter
+```
+
+``` python
+def canvas_plot(data, 
+                canvas_size = 128, 
+                gauss_sigma = 4):
+    
+    # Create a blank canvas
+    # size of the canvas for the image
+    canvas = np.zeros((canvas_size, canvas_size))
+
+    # Translate the x, y values to fit the canvas
+    x_scaled = ((data[:, 0] - data[:, 0].min()) / (data[:, 0].max() - data[:, 0].min()) * canvas_size).astype(int)
+    y_scaled = ((data[:, 1] - data[:, 1].min()) / (data[:, 1].max() - data[:, 1].min()) * canvas_size).astype(int)
+
+
+    # Adjust the scaling to ensure values are within the bounds of the canvas
+    x_scaled = np.clip(x_scaled, 0, canvas_size - 1)
+    y_scaled = np.clip(y_scaled, 0, canvas_size - 1)
+
+    # Reset the canvas
+    canvas = np.zeros((canvas_size, canvas_size))
+
+    # Place stars on the canvas using their luminosity
+    for x_ind, y_ind, quant_ind in zip(x_scaled, y_scaled, data[:, 2]):
+        canvas[y_ind, x_ind] += quant_ind
+
+    # Apply a Gaussian blur to emulate the glow of stars
+    blurred_canvas = gaussian_filter(canvas, sigma=gauss_sigma)
+    
+    return blurred_canvas
+```
+
+``` python
+gal_tag_cond = np.where(galaxy_tags == unique_galaxy_tag)
+
+x_select =  (x[gal_tag_cond])# - np.mean(x[gal_tag_cond]))/(np.max(x[gal_tag_cond]) - np.min(x[gal_tag_cond]))
+y_select =  (y[gal_tag_cond])# - np.mean(y[gal_tag_cond]))/(np.max(y[gal_tag_cond]) - np.min(y[gal_tag_cond]))
+
+z_select = np.trapz(spec_flux_ssp, spec_wave_ssp)
+m_select = mass[gal_tag_cond]
+
+blurred_canvas_lum = canvas_plot(np.array([x_select, y_select, z_select]).T)
+blurred_canvas_mass = canvas_plot(np.array([x_select, y_select, m_select]).T)
+```
+
+``` python
+f, a = plt.subplots(1, 2, figsize=(8, 4), gridspec_kw={'wspace': 0.1, 'hspace': 0.03}, sharex=False, sharey=True)
+
+cmap_select = 'hot'
+im0 = a[0].imshow(blurred_canvas_mass, cmap=cmap_select, origin='lower', 
+            extent=[x_select.min(), x_select.max(), y_select.min(), y_select.max()], 
+            aspect='equal')
+# plt.colorbar(label='Mass (Msol)', ax=a[0])
+# a[0].scatter(x_scaled, y_scaled, s=1)
+a[0].set_title('Galaxy Mass Distribution')
+a[0].set_xlabel('x (Mpc)')
+a[0].set_ylabel('y (Mpc)')
+# a[0].set_aspect('equal', 'box')
+plt.colorbar(im0, ax=a[0], label='Mass (M☉)')
+
+
+cmap_select = 'hot'
+im1 = a[1].imshow(blurred_canvas_lum, cmap=cmap_select, origin='lower', 
+            extent=[x_select.min(), x_select.max(), y_select.min(), y_select.max()], 
+            aspect='equal')
+a[1].set_title('Galaxy Luminosity Distribution')
+a[1].set_xlabel('x (Mpc)')
+# a[1].set_ylabel('y (Mpc)')
+# a[1].set_aspect('equal', 'box')
+plt.colorbar(im1, label='Luminosity (Jy)', ax=a[1])
+
+
+
+plt.tight_layout()
+plt.show()
+```
+
+    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_1521395/3921579169.py:30: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+      plt.tight_layout()
+
+![](index_files/figure-commonmark/cell-22-output-2.png)
+
+### Or radial profiles
 
 ``` python
 def radial_luminosity_profile(data, 
@@ -418,16 +505,6 @@ def radial_mass_density_from_lum(data,
 ```
 
 ``` python
-gal_tag_cond = np.where(galaxy_tags == unique_galaxy_tag)
-
-x_select =  (x[gal_tag_cond])# - np.mean(x[gal_tag_cond]))/(np.max(x[gal_tag_cond]) - np.min(x[gal_tag_cond]))
-y_select =  (y[gal_tag_cond])# - np.mean(y[gal_tag_cond]))/(np.max(y[gal_tag_cond]) - np.min(y[gal_tag_cond]))
-
-z_select = np.trapz(spec_flux_ssp, spec_wave_ssp)
-m_select = mass[gal_tag_cond]
-```
-
-``` python
 bin_centers, mass_densities_direct = radial_mass_density_from_lum(np.array([x_select, y_select, z_select, m_select]).T)
 
 # # Plotting the radial mass density profile (direct from luminosity)
@@ -454,76 +531,7 @@ a[1].legend()
 plt.show()
 ```
 
-![](index_files/figure-commonmark/cell-21-output-1.png)
-
-``` python
-from scipy.ndimage import gaussian_filter
-```
-
-``` python
-def canvas_plot(data, 
-                canvas_size = 128, 
-                gauss_sigma = 4):
-    
-    # Create a blank canvas
-    # size of the canvas for the image
-    canvas = np.zeros((canvas_size, canvas_size))
-
-    # Translate the x, y values to fit the canvas
-    x_scaled = ((data[:, 0] - data[:, 0].min()) / (data[:, 0].max() - data[:, 0].min()) * canvas_size).astype(int)
-    y_scaled = ((data[:, 1] - data[:, 1].min()) / (data[:, 1].max() - data[:, 1].min()) * canvas_size).astype(int)
-
-
-    # Adjust the scaling to ensure values are within the bounds of the canvas
-    x_scaled = np.clip(x_scaled, 0, canvas_size - 1)
-    y_scaled = np.clip(y_scaled, 0, canvas_size - 1)
-
-    # Reset the canvas
-    canvas = np.zeros((canvas_size, canvas_size))
-
-    # Place stars on the canvas using their luminosity
-    for x_ind, y_ind, quant_ind in zip(x_scaled, y_scaled, data[:, 2]):
-        canvas[y_ind, x_ind] += quant_ind
-
-    # Apply a Gaussian blur to emulate the glow of stars
-    blurred_canvas = gaussian_filter(canvas, sigma=gauss_sigma)
-    
-    return blurred_canvas
-```
-
-``` python
-blurred_canvas_lum = canvas_plot(np.array([x_select, y_select, z_select]).T)
-blurred_canvas_mass = canvas_plot(np.array([x_select, y_select, m_select]).T)
-```
-
-``` python
-f, a = plt.subplots(1, 2, figsize=(10, 4), gridspec_kw={'wspace': 0.1, 'hspace': 0.1}, sharex=True, sharey=True)
-
-cmap_select = 'inferno'
-a[1].imshow(blurred_canvas_lum, cmap=cmap_select, origin='lower', extent=[x_select.min(), x_select.max(), y_select.min(), y_select.max()])
-# a[0].colorbar(label='Luminosity (Jansky)')
-a[1].set_title('Galaxy Luminosity Distribution')
-a[1].set_xlabel('x (Mpc)')
-a[1].set_ylabel('y (Mpc)')
-a[1].set_aspect('equal', 'box')
-
-
-a[0].imshow(blurred_canvas_mass, cmap=cmap_select, origin='lower', extent=[x_select.min(), x_select.max(), y_select.min(), y_select.max()])
-# a[0].colorbar(label='Mass (Msol)')
-# a[0].scatter(x_scaled, y_scaled, s=1)
-a[0].set_title('Galaxy Mass Distribution')
-a[0].set_xlabel('x (Mpc)')
-# a[0].set_ylabel('y (Mpc)')
-a[0].set_aspect('equal', 'box')
-
-plt.tight_layout()
-plt.show()
-```
-
-    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_1514282/2558093784.py:22: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
-      plt.tight_layout()
-
-![](index_files/figure-commonmark/cell-25-output-2.png)
+![](index_files/figure-commonmark/cell-25-output-1.png)
 
 <!-- ### One can also find luminosity profiles for the simulated galaxies -->
 <!-- #### 1. First we project the luminosity on to grids -->
@@ -781,11 +789,3 @@ ax[1].set_ylabel('Luminosity profile')
 ![](index_files/figure-commonmark/cell-33-output-2.png)
 
 <!-- ## Under the hood -->
-
-``` python
-# # convert array into dataframe
-# DF = pd.DataFrame(sample_data)
-
-# # save the dataframe as a csv file
-# DF.to_csv("data1.csv", header=['x', 'y', 'luminosity', 'mass'])
-```
