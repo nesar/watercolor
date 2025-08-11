@@ -25,7 +25,7 @@ from .load_sim_stellar_catalog import Z_SOLAR_PADOVA, H0
 from .cosmic_distance_effects import combine_redshift_and_dimming_effect
 
 
-from .calculate_csp import calc_fluxes_for_galaxy
+from .calculate_csp import calc_fluxes_for_individual_galaxy
 import pkg_resources
 
 # %% ../nbs/06_filter_convolve.ipynb 8

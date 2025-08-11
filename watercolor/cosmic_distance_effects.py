@@ -17,7 +17,7 @@ from .load_sim_stellar_catalog import load_hacc_galaxy_data, load_hacc_galaxy_da
 from .load_sim_stellar_catalog import GALS_FILE
 from .load_sim_stellar_catalog import Z_SOLAR_PADOVA, H0
 
-from .calculate_csp import calc_fluxes_for_galaxy
+from .calculate_csp import calc_fluxes_for_individual_galaxy
 
 # %% ../nbs/05_cosmic_dimming.ipynb 11
 def spectrum_convert_from_ergscm2A(wave:np.array, # Input flux from 'erg/s/cm2/A'

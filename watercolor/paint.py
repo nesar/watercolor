@@ -8,7 +8,7 @@ __all__ = ['photometry_from_catalog', 'photometry_from_catalog_opencosmo']
 # %% ../nbs/07_paint.ipynb 4
 import watercolor
 from .load_sim_stellar_catalog import load_hacc_galaxy_data, GALS_FILE, load_hacc_galaxy_data_opencosmo
-from .calculate_csp import calc_fluxes_for_galaxy
+from .calculate_csp import calc_fluxes_for_individual_galaxy
 from .load_sps_library import LIBRARY_FLUX_FILE, LIBRARY_WAVE_FILE, LIBRARY_AGE_FILE, LIBRARY_METAL_FILE
 from .dust_attenuation import spectrum_dusted, log_total_stellar_metal, log_total_stellar_mass
 from .cosmic_distance_effects import combine_redshift_and_dimming_effect
@@ -154,13 +154,25 @@ def photometry_from_catalog_opencosmo(galaxy_star_catalog_file:str=None, # Input
         #                                                                                               LIBRARY_AGE_FILE,
         #                                                                                               LIBRARY_METAL_FILE)
         
-        spec_wave_ssp, spec_flux_ssp, spec_csp, flux_proxy, gal_stellar_mass = calc_fluxes_for_galaxy(galaxy_star_catalog_file, 
-                                                                                              galaxy_star_particle_file,
-                                                                                              unique_galaxy_tag,
-                                                                                              LIBRARY_FLUX_FILE,
-                                                                                              LIBRARY_WAVE_FILE,
-                                                                                              LIBRARY_AGE_FILE,
-                                                                                              LIBRARY_METAL_FILE)
+        # spec_wave_ssp, spec_flux_ssp, spec_csp, flux_proxy, gal_stellar_mass = calc_fluxes_for_galaxy(galaxy_star_catalog_file, 
+        #                                                                                       galaxy_star_particle_file,
+        #                                                                                       unique_galaxy_tag,
+        #                                                                                       LIBRARY_FLUX_FILE,
+        #                                                                                       LIBRARY_WAVE_FILE,
+        #                                                                                       LIBRARY_AGE_FILE,
+        #                                                                                       LIBRARY_METAL_FILE)
+        
+        
+        spec_wave_ssp, spec_flux_ssp, spec_csp, flux_proxy, gal_stellar_mass = calc_fluxes_for_individual_galaxy(
+            galaxy_tags, 
+            metal_hydro,
+            mass,
+            age_hydro,
+            unique_galaxy_tag,
+            LIBRARY_FLUX_FILE,
+            LIBRARY_WAVE_FILE,
+            LIBRARY_AGE_FILE,
+            LIBRARY_METAL_FILE)
         
 
         # Dust attenuation

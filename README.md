@@ -46,87 +46,6 @@ final_sed_mJy, final_wave_um, lsst_mags, spherex_mags, cosmos_mags = photometry_
     Number of available haloes selected:  20
     Loaded 2612 particles from 27 galaxies in 20 haloes 
     Number of galaxies: 27
-    Number of available haloes in the catalog:  43087
-    Number of available haloes selected:  20
-    Loaded 2612 particles from 27 galaxies in 20 haloes 
-    Number of available haloes in the catalog:  43087
-    Number of available haloes selected:  20
-    Loaded 2612 particles from 27 galaxies in 20 haloes 
-    Number of available haloes in the catalog:  43087
-    Number of available haloes selected:  20
-    Loaded 2612 particles from 27 galaxies in 20 haloes 
-    Number of available haloes in the catalog:  43087
-    Number of available haloes selected:  20
-    Loaded 2612 particles from 27 galaxies in 20 haloes 
-    Number of available haloes in the catalog:  43087
-    Number of available haloes selected:  20
-    Loaded 2612 particles from 27 galaxies in 20 haloes 
-    Number of available haloes in the catalog:  43087
-    Number of available haloes selected:  20
-    Loaded 2612 particles from 27 galaxies in 20 haloes 
-    Number of available haloes in the catalog:  43087
-    Number of available haloes selected:  20
-    Loaded 2612 particles from 27 galaxies in 20 haloes 
-    Number of available haloes in the catalog:  43087
-    Number of available haloes selected:  20
-    Loaded 2612 particles from 27 galaxies in 20 haloes 
-    Number of available haloes in the catalog:  43087
-    Number of available haloes selected:  20
-    Loaded 2612 particles from 27 galaxies in 20 haloes 
-    Number of available haloes in the catalog:  43087
-    Number of available haloes selected:  20
-    Loaded 2612 particles from 27 galaxies in 20 haloes 
-    Number of available haloes in the catalog:  43087
-    Number of available haloes selected:  20
-    Loaded 2612 particles from 27 galaxies in 20 haloes 
-    Number of available haloes in the catalog:  43087
-    Number of available haloes selected:  20
-    Loaded 2612 particles from 27 galaxies in 20 haloes 
-    Number of available haloes in the catalog:  43087
-    Number of available haloes selected:  20
-    Loaded 2612 particles from 27 galaxies in 20 haloes 
-    Number of available haloes in the catalog:  43087
-    Number of available haloes selected:  20
-    Loaded 2612 particles from 27 galaxies in 20 haloes 
-    Number of available haloes in the catalog:  43087
-    Number of available haloes selected:  20
-    Loaded 2612 particles from 27 galaxies in 20 haloes 
-    Number of available haloes in the catalog:  43087
-    Number of available haloes selected:  20
-    Loaded 2612 particles from 27 galaxies in 20 haloes 
-    Number of available haloes in the catalog:  43087
-    Number of available haloes selected:  20
-    Loaded 2612 particles from 27 galaxies in 20 haloes 
-    Number of available haloes in the catalog:  43087
-    Number of available haloes selected:  20
-    Loaded 2612 particles from 27 galaxies in 20 haloes 
-    Number of available haloes in the catalog:  43087
-    Number of available haloes selected:  20
-    Loaded 2612 particles from 27 galaxies in 20 haloes 
-    Number of available haloes in the catalog:  43087
-    Number of available haloes selected:  20
-    Loaded 2612 particles from 27 galaxies in 20 haloes 
-    Number of available haloes in the catalog:  43087
-    Number of available haloes selected:  20
-    Loaded 2612 particles from 27 galaxies in 20 haloes 
-    Number of available haloes in the catalog:  43087
-    Number of available haloes selected:  20
-    Loaded 2612 particles from 27 galaxies in 20 haloes 
-    Number of available haloes in the catalog:  43087
-    Number of available haloes selected:  20
-    Loaded 2612 particles from 27 galaxies in 20 haloes 
-    Number of available haloes in the catalog:  43087
-    Number of available haloes selected:  20
-    Loaded 2612 particles from 27 galaxies in 20 haloes 
-    Number of available haloes in the catalog:  43087
-    Number of available haloes selected:  20
-    Loaded 2612 particles from 27 galaxies in 20 haloes 
-    Number of available haloes in the catalog:  43087
-    Number of available haloes selected:  20
-    Loaded 2612 particles from 27 galaxies in 20 haloes 
-    Number of available haloes in the catalog:  43087
-    Number of available haloes selected:  20
-    Loaded 2612 particles from 27 galaxies in 20 haloes 
 
 #### The single-line command provides the SEDs and magnitudes from LSST, SPHEREx and COSMOS filters
 
@@ -189,7 +108,7 @@ plt.show()
 ``` python
 import watercolor
 from watercolor.load_sim_stellar_catalog import load_hacc_galaxy_data, load_hacc_galaxy_data_opencosmo
-from watercolor.calculate_csp import calc_fluxes_for_galaxy
+from watercolor.calculate_csp import calc_fluxes_for_individual_galaxy
 from watercolor.load_sps_library import LIBRARY_FLUX_FILE, LIBRARY_WAVE_FILE, LIBRARY_AGE_FILE, LIBRARY_METAL_FILE
 from watercolor.dust_attenuation import spectrum_dusted, log_total_stellar_metal, log_total_stellar_mass
 from watercolor.cosmic_distance_effects import combine_redshift_and_dimming_effect
@@ -240,18 +159,26 @@ print('Total stars:', mstar_i.size, 'logmstar:', logmstar)
 #### 3. After selecting a unique galaxy tag, we calculate the SED. This is the rest-frame SED is due to spectral emission alone, and without dust attenuation.
 
 ``` python
-spec_wave_ssp, spec_flux_ssp, spec_csp, flux_proxy, gal_stellar_mass = watercolor.calculate_csp.calc_fluxes_for_galaxy(catalog_file_path,
-                                                                                                                       particle_file_path,
-                                                                                                                       unique_galaxy_tag,
-                                                                                                                       LIBRARY_FLUX_FILE,
-                                                                                                                       LIBRARY_WAVE_FILE,
-                                                                                                                       LIBRARY_AGE_FILE,
-                                                                                                                       LIBRARY_METAL_FILE)
-```
+# spec_wave_ssp, spec_flux_ssp, spec_csp, flux_proxy, gal_stellar_mass = watercolor.calculate_csp.calc_fluxes_for_galaxy(catalog_file_path,
+#                                                                                                                        particle_file_path,
+#                                                                                                                        unique_galaxy_tag,
+#                                                                                                                        LIBRARY_FLUX_FILE,
+#                                                                                                                        LIBRARY_WAVE_FILE,
+#                                                                                                                        LIBRARY_AGE_FILE,
+#                                                                                                                        LIBRARY_METAL_FILE)
 
-    Number of available haloes in the catalog:  43087
-    Number of available haloes selected:  20
-    Loaded 2612 particles from 27 galaxies in 20 haloes 
+
+spec_wave_ssp, spec_flux_ssp, spec_csp, flux_proxy, gal_stellar_mass = calc_fluxes_for_individual_galaxy(
+    galaxy_tags, 
+    metal_hydro,
+    mass,
+    age_hydro,
+    unique_galaxy_tag,
+    LIBRARY_FLUX_FILE,
+    LIBRARY_WAVE_FILE,
+    LIBRARY_AGE_FILE,
+    LIBRARY_METAL_FILE)
+```
 
 #### 4. We plot SEDs from both SSPs and CSPs
 
@@ -307,7 +234,7 @@ fig.tight_layout()
 plt.savefig('../../Plots/ssp_csp_spec.png', dpi=300)
 ```
 
-    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_1500500/2893587426.py:49: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_1514282/2893587426.py:49: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
       fig.tight_layout()
 
 ![](index_files/figure-commonmark/cell-11-output-2.png)
@@ -593,7 +520,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_1500500/2558093784.py:22: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_1514282/2558093784.py:22: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
       plt.tight_layout()
 
 ![](index_files/figure-commonmark/cell-25-output-2.png)
