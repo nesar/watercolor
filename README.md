@@ -44,47 +44,53 @@ final_sed_mJy, final_wave_um, lsst_mags, spherex_mags, cosmos_mags = photometry_
 
     Number of available haloes in the catalog:  43087
     Number of available haloes selected:  10
-    Loaded 526 particles from 13 galaxies in 10 haloes 
-    Number of galaxies: 13
+    Loaded 1633 particles from 15 galaxies in 10 haloes 
+    Number of galaxies: 15
     Number of available haloes in the catalog:  43087
     Number of available haloes selected:  10
-    Loaded 526 particles from 13 galaxies in 10 haloes 
+    Loaded 1633 particles from 15 galaxies in 10 haloes 
     Number of available haloes in the catalog:  43087
     Number of available haloes selected:  10
-    Loaded 526 particles from 13 galaxies in 10 haloes 
+    Loaded 1633 particles from 15 galaxies in 10 haloes 
     Number of available haloes in the catalog:  43087
     Number of available haloes selected:  10
-    Loaded 526 particles from 13 galaxies in 10 haloes 
+    Loaded 1633 particles from 15 galaxies in 10 haloes 
     Number of available haloes in the catalog:  43087
     Number of available haloes selected:  10
-    Loaded 526 particles from 13 galaxies in 10 haloes 
+    Loaded 1633 particles from 15 galaxies in 10 haloes 
     Number of available haloes in the catalog:  43087
     Number of available haloes selected:  10
-    Loaded 526 particles from 13 galaxies in 10 haloes 
+    Loaded 1633 particles from 15 galaxies in 10 haloes 
     Number of available haloes in the catalog:  43087
     Number of available haloes selected:  10
-    Loaded 526 particles from 13 galaxies in 10 haloes 
+    Loaded 1633 particles from 15 galaxies in 10 haloes 
     Number of available haloes in the catalog:  43087
     Number of available haloes selected:  10
-    Loaded 526 particles from 13 galaxies in 10 haloes 
+    Loaded 1633 particles from 15 galaxies in 10 haloes 
     Number of available haloes in the catalog:  43087
     Number of available haloes selected:  10
-    Loaded 526 particles from 13 galaxies in 10 haloes 
+    Loaded 1633 particles from 15 galaxies in 10 haloes 
     Number of available haloes in the catalog:  43087
     Number of available haloes selected:  10
-    Loaded 526 particles from 13 galaxies in 10 haloes 
+    Loaded 1633 particles from 15 galaxies in 10 haloes 
     Number of available haloes in the catalog:  43087
     Number of available haloes selected:  10
-    Loaded 526 particles from 13 galaxies in 10 haloes 
+    Loaded 1633 particles from 15 galaxies in 10 haloes 
     Number of available haloes in the catalog:  43087
     Number of available haloes selected:  10
-    Loaded 526 particles from 13 galaxies in 10 haloes 
+    Loaded 1633 particles from 15 galaxies in 10 haloes 
     Number of available haloes in the catalog:  43087
     Number of available haloes selected:  10
-    Loaded 526 particles from 13 galaxies in 10 haloes 
+    Loaded 1633 particles from 15 galaxies in 10 haloes 
     Number of available haloes in the catalog:  43087
     Number of available haloes selected:  10
-    Loaded 526 particles from 13 galaxies in 10 haloes 
+    Loaded 1633 particles from 15 galaxies in 10 haloes 
+    Number of available haloes in the catalog:  43087
+    Number of available haloes selected:  10
+    Loaded 1633 particles from 15 galaxies in 10 haloes 
+    Number of available haloes in the catalog:  43087
+    Number of available haloes selected:  10
+    Loaded 1633 particles from 15 galaxies in 10 haloes 
 
 #### The single-line command provides the SEDs and magnitudes from LSST, SPHEREx and COSMOS filters
 
@@ -178,7 +184,7 @@ fof_halo_tag, if_satellite, galaxy_tags, stellar_idx, metal_hydro, mass, age_hyd
 
     Number of available haloes in the catalog:  43087
     Number of available haloes selected:  10
-    Loaded 526 particles from 13 galaxies in 10 haloes 
+    Loaded 1633 particles from 15 galaxies in 10 haloes 
 
 ``` python
 galaxy_number = 8# Choosing one of the galaxies in the catalog
@@ -193,7 +199,7 @@ logmstar = log_total_stellar_mass(mstar_i)
 print('Total stars:', mstar_i.size, 'logmstar:', logmstar)
 ```
 
-    Total stars: 112 logmstar: [10.376839]
+    Total stars: 24 logmstar: [9.744703]
 
 #### 3. After selecting a unique galaxy tag, we calculate the SED. This is the rest-frame SED is due to spectral emission alone, and without dust attenuation.
 
@@ -209,7 +215,7 @@ spec_wave_ssp, spec_flux_ssp, spec_csp, flux_proxy, gal_stellar_mass = watercolo
 
     Number of available haloes in the catalog:  43087
     Number of available haloes selected:  10
-    Loaded 526 particles from 13 galaxies in 10 haloes 
+    Loaded 1633 particles from 15 galaxies in 10 haloes 
 
 #### 4. We plot SEDs from both SSPs and CSPs
 
@@ -265,7 +271,7 @@ fig.tight_layout()
 plt.savefig('../../Plots/ssp_csp_spec.png', dpi=300)
 ```
 
-    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_1915492/2893587426.py:49: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_1485148/2893587426.py:49: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
       fig.tight_layout()
 
 ![](index_files/figure-commonmark/cell-11-output-2.png)
@@ -551,7 +557,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_1915492/2558093784.py:22: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_1485148/2558093784.py:22: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
       plt.tight_layout()
 
 ![](index_files/figure-commonmark/cell-25-output-2.png)

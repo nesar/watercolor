@@ -111,7 +111,13 @@ def load_hacc_galaxy_data_opencosmo(particle_file_path: str = None,  # Input gal
 
     print('Number of available haloes in the catalog: ', np.unique(gal_properties.data["fof_halo_tag"]).size)
 
-    unique_fof_halo_tags_list = np.unique(gal_properties.data["fof_halo_tag"])[0:10] # Limiting to first 4 halos for testing
+    ###################################
+    ### below lines can be edited to keep all haloes or a random selection of haloes
+    np.random.seed(42)  # For reproducibility
+    selected_random_indices = np.random.randint(0, np.unique(gal_properties.data["fof_halo_tag"]).size, 10) # Randomly select 10 halos for testing
+    unique_fof_halo_tags_list = np.unique(gal_properties.data["fof_halo_tag"])[selected_random_indices] # Limiting to random 10 haloes for testing
+    ####################################
+
 
     print('Number of available haloes selected: ', unique_fof_halo_tags_list.size)
 
