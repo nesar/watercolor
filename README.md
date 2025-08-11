@@ -82,9 +82,9 @@ ax0.set_ylabel(r'${\rm mJy}$', fontsize = 'x-large')
     
 u, g, r, i, z, Y = lsst_mags.T
 
-ax1.scatter(u-g, r-i, c=Y)
+ax1.scatter(u-g, g-r, c=Y)
 ax1.set_xlabel(r'${\rm (u-g)}$', fontsize = 'x-large')
-ax1.set_ylabel(r'${\rm (r-i)}$', fontsize = 'x-large')
+ax1.set_ylabel(r'${\rm (g-r)}$', fontsize = 'x-large')
 
 ax2.scatter(i, g-r, c=u)
 ax2.set_xlabel(r'${\rm (i)}$', fontsize = 'x-large')
