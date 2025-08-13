@@ -6,7 +6,7 @@
 __all__ = ['GALS_DIR', 'GALS_FILE', 'Z_SOLAR_HACC', 'Z_SOLAR_PADOVA', 'H0', 'load_hacc_galaxy_data', 'load_opencosmo_collection',
            'read_particles_in_a_galaxy', 'load_hacc_galaxy_data_opencosmo']
 
-# %% ../nbs/01_load_sim_stellar_catalog.ipynb 5
+# %% ../nbs/01_load_sim_stellar_catalog.ipynb 4
 import numpy as np
 import os
 import matplotlib.pylab as plt
@@ -14,17 +14,17 @@ import pkg_resources
 import logging
 import opencosmo as oc
 
-# %% ../nbs/01_load_sim_stellar_catalog.ipynb 7
+# %% ../nbs/01_load_sim_stellar_catalog.ipynb 6
 GALS_DIR = "data/test_hacc_stellar_catalog/"
 GALS_FILE = pkg_resources.resource_stream("watercolor", GALS_DIR + "Gal_Z0.txt").name
 # OPEN_COSMO_FILE = pkg_resources.resource_stream("watercolor", GALS_DIR + "haloparticles_2gpc.hdf5").name
 
-# %% ../nbs/01_load_sim_stellar_catalog.ipynb 8
+# %% ../nbs/01_load_sim_stellar_catalog.ipynb 7
 Z_SOLAR_HACC = 0.012899 # Solar metallicity value in HACC Hydro
 Z_SOLAR_PADOVA = 0.019 # Solar metallicity value in Padova 
 H0 = 71.0 # Hubble Constant in HACC Hydro
 
-# %% ../nbs/01_load_sim_stellar_catalog.ipynb 9
+# %% ../nbs/01_load_sim_stellar_catalog.ipynb 8
 def _convert_metallicity(hacc_metallicity:np.array=None, # Metallicity values from HACC  
                          Z_solar:np.float32=Z_SOLAR_PADOVA, # Z_solar value from Padova
                         )-> np.array: # Metallicity array in Z/Z_solar units
@@ -49,7 +49,7 @@ def _convert_age(hacc_age:np.array=None, #Age in 1/H0 units
     
     return age_hydro_gyr
 
-# %% ../nbs/01_load_sim_stellar_catalog.ipynb 10
+# %% ../nbs/01_load_sim_stellar_catalog.ipynb 9
 def load_hacc_galaxy_data(fileIn:str=GALS_FILE, # Input galaxy catalog file from HACC hydro sim
                               Z_solar:np.float32=Z_SOLAR_PADOVA, #Solar metallicity
                               H0:np.float32=H0, # Hubble constant
@@ -65,7 +65,7 @@ def load_hacc_galaxy_data(fileIn:str=GALS_FILE, # Input galaxy catalog file from
     
     return fof_halo_tag, if_satellite, gal_tag, stellar_idx, metal_z_solar, mass, age_gyr, x, y, z, vx, vy, vz
 
-# %% ../nbs/01_load_sim_stellar_catalog.ipynb 11
+# %% ../nbs/01_load_sim_stellar_catalog.ipynb 10
 def load_opencosmo_collection(
     particle_file_path:str = None, # Path to the OpenCosmo particle file
     catalog_file_path:str = None, # Path to the OpenCosmo catalog file
@@ -77,7 +77,7 @@ def load_opencosmo_collection(
     # print(data)
     return collection
 
-# %% ../nbs/01_load_sim_stellar_catalog.ipynb 12
+# %% ../nbs/01_load_sim_stellar_catalog.ipynb 11
 def read_particles_in_a_galaxy(
     particle_file_path: str = None, # Path to the HDF5 file containing  particle data
     catalog_file_path:str = None, # Path to the OpenCosmo catalog file
@@ -95,7 +95,7 @@ def read_particles_in_a_galaxy(
         logging.error("Failed to load halo catalog: %s", e)
         raise RuntimeError(f"Failed to load halo catalog: {e}")
 
-# %% ../nbs/01_load_sim_stellar_catalog.ipynb 14
+# %% ../nbs/01_load_sim_stellar_catalog.ipynb 13
 def load_hacc_galaxy_data_opencosmo(particle_file_path: str = None,  # Input galaxy catalog file from HACC hydro sim        
                              catalog_file_path:str = None,  # Path to the OpenCosmo catalog file                       
                              Z_solar: np.float32 = Z_SOLAR_PADOVA,  # Solar metallicity                               
@@ -114,7 +114,7 @@ def load_hacc_galaxy_data_opencosmo(particle_file_path: str = None,  # Input gal
     ###################################
     ### below lines can be edited to keep all haloes or a random selection of haloes
     np.random.seed(42)  # For reproducibility
-    num_random_halos = 20  # Number of random halos to select for testing
+    num_random_halos = 200  # Number of random halos to select for testing
     selected_random_indices = np.random.randint(0, np.unique(gal_properties.data["fof_halo_tag"]).size, num_random_halos) # Randomly select 10 halos for testing
     unique_fof_halo_tags_list = np.unique(gal_properties.data["fof_halo_tag"])[selected_random_indices] # Limiting to random 10 haloes for testing
     ####################################

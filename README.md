@@ -22,6 +22,9 @@ pip install watercolor
 from watercolor.paint import photometry_from_catalog, photometry_from_catalog_opencosmo
 ```
 
+    /lcrc/project/cosmo_ai/nramachandra/Projects/Hydro_paint/watercolor/watercolor/load_sim_stellar_catalog.py:11: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+      import pkg_resources
+
 #### First we load the galaxy catalog. The main physical quantities required for painting the colors are the metallicities, stellar mass and age of the star particles of a galaxy.
 
 ``` python
@@ -40,9 +43,9 @@ final_sed_mJy, final_wave_um, lsst_mags, spherex_mags, cosmos_mags = photometry_
 ```
 
     Number of available haloes in the catalog:  43087
-    Number of available haloes selected:  20
-    Loaded 2612 particles from 27 galaxies in 20 haloes 
-    Number of galaxies: 27
+    Number of available haloes selected:  200
+    Loaded 19118 particles from 241 galaxies in 200 haloes 
+    Number of galaxies: 241
 
 #### The single-line command provides the SEDs and magnitudes from LSST, SPHEREx and COSMOS filters
 
@@ -115,19 +118,9 @@ from watercolor.filter_convolution import load_survey_pickle, photometry_from_sp
 #### 2. Then the galaxy-star catalog from HACC is loaded, using a unique galaxy tag, we select a galaxy
 
 ``` python
-particle_file_path = "/lcrc/project/cosmo_ai/nramachandra/Projects/Hydro_paint/Data/fromFE/haloparticles_2gpc.hdf5"
-dirIn0 = "/lcrc/project/cosmo_ai/nramachandra/Projects/Hydro_paint/Data/fromSciDAC/128MPC_RUNS_HACC_5PARAM/reformat/"
-dirIn1 = "KAPPA_2.127_EGW_0.479_SEED_7.143e5_VKIN_3794_EPS_9.752/output/"
-dirIn2 = "step_624/"
-dirIn3a = "galaxyparticles/"
-dirIn3b = "galaxyproperties/"
-
-
 particle_file_path = os.path.join(dirIn0, dirIn1, dirIn2, dirIn3a, "m000p-624.galaxyparticles.hdf5")
 catalog_file_path = os.path.join(dirIn0, dirIn1, dirIn2, dirIn3b, "m000p-624.galaxyproperties.hdf5")
-```
 
-``` python
 # fof_halo_tag, if_satellite, galaxy_tags, stellar_idx, metal_hydro, mass, age_hydro, x, y, z , vx, vy, vz = watercolor.load_sim_stellar_catalog.load_hacc_galaxy_data(galaxy_star_catalog_file)
 
 fof_halo_tag, if_satellite, galaxy_tags, stellar_idx, metal_hydro, mass, age_hydro, x, y, z , vx, vy, vz = load_hacc_galaxy_data_opencosmo(particle_file_path=particle_file_path, 
@@ -135,11 +128,11 @@ fof_halo_tag, if_satellite, galaxy_tags, stellar_idx, metal_hydro, mass, age_hyd
 ```
 
     Number of available haloes in the catalog:  43087
-    Number of available haloes selected:  20
-    Loaded 2612 particles from 27 galaxies in 20 haloes 
+    Number of available haloes selected:  200
+    Loaded 19118 particles from 241 galaxies in 200 haloes 
 
 ``` python
-galaxy_number = 12# Choosing one of the galaxies in the catalog
+galaxy_number = 173 #21# Choosing one of the galaxies in the catalog
 unique_galaxy_tag = np.unique(galaxy_tags)[galaxy_number]
 
 mstar_i = mass[galaxy_tags == unique_galaxy_tag]
@@ -151,7 +144,7 @@ logmstar = log_total_stellar_mass(mstar_i)
 print('Total stars:', mstar_i.size, 'logmstar:', logmstar)
 ```
 
-    Total stars: 118 logmstar: [10.419917]
+    Total stars: 343 logmstar: [10.850926]
 
 #### 3. After selecting a unique galaxy tag, we calculate the SED. This is the rest-frame SED is due to spectral emission alone, and without dust attenuation.
 
@@ -231,10 +224,10 @@ fig.tight_layout()
 plt.savefig('../../Plots/ssp_csp_spec.png', dpi=300)
 ```
 
-    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_1615613/2893587426.py:49: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_2008957/2893587426.py:49: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
       fig.tight_layout()
 
-![](index_files/figure-commonmark/cell-11-output-2.png)
+![](index_files/figure-commonmark/cell-10-output-2.png)
 
 #### 5. CSPs are attenuation due to dust
 
@@ -256,7 +249,7 @@ a.legend(fontsize='x-large')
 
     <matplotlib.legend.Legend>
 
-![](index_files/figure-commonmark/cell-13-output-2.png)
+![](index_files/figure-commonmark/cell-12-output-2.png)
 
 #### 6. The resulting dust attenuated spectra undergoes cosmic dimming and redshifting
 
@@ -287,7 +280,7 @@ a.legend(fontsize='x-large')
 
     <matplotlib.legend.Legend>
 
-![](index_files/figure-commonmark/cell-15-output-2.png)
+![](index_files/figure-commonmark/cell-14-output-2.png)
 
 #### 7. The final spectrum is convolved with telescope transmission curves to obtain magnitudes
 
@@ -315,62 +308,20 @@ flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(cen
                                                                           clip_bandpass=True)
 ```
 
-![](index_files/figure-commonmark/cell-16-output-1.png)
+![](index_files/figure-commonmark/cell-15-output-1.png)
 
 ## Luminosity distribution of galaxies can be checked too
 
-<!-- ### One can also find luminosity profiles for the simulated galaxies -->
-<!-- #### 1. First we project the luminosity on to grids -->
-<!-- #### 2. Next we plot the stellar density and luminosity profiles -->
-<!-- ### Radial mass profile of the galaxy -->
-
 ``` python
-from scipy.interpolate import griddata
-import scipy.ndimage as ndi
-```
+gal_tag_cond = np.where(galaxy_tags == unique_galaxy_tag)
 
-``` python
-def azimuthalAverage(image, center=None):
-    """
-    Calculate the azimuthally averaged radial profile.
+x_select =  (x[gal_tag_cond])# - np.mean(x[gal_tag_cond]))/(np.max(x[gal_tag_cond]) - np.min(x[gal_tag_cond]))
+y_select =  (y[gal_tag_cond])# - np.mean(y[gal_tag_cond]))/(np.max(y[gal_tag_cond]) - np.min(y[gal_tag_cond]))
 
-    image - The 2D image
-    center - The [x,y] pixel coordinates used as the center. The default is 
-             None, which then uses the center of the image (including 
-             fracitonal pixels).
-    
-    """
-    # Calculate the indices from the image
-    y, x = np.indices(image.shape)
+z_select = np.trapz(spec_flux_ssp, spec_wave_ssp)
+m_select = mass[gal_tag_cond]
 
-    if not center:
-        center = np.array([(x.max()-x.min())/2.0, (y.max()-y.min())/2.0])
 
-    r = np.hypot(x - center[0], y - center[1])
-
-    # Get sorted radii
-    ind = np.argsort(r.flat)
-    r_sorted = r.flat[ind]
-    i_sorted = image.flat[ind]
-
-    # Get the integer part of the radii (bin size = 1)
-    r_int = r_sorted.astype(int)
-
-    # Find all pixels that fall within each radial bin.
-    deltar = r_int[1:] - r_int[:-1]  # Assumes all radii represented
-    rind = np.where(deltar)[0]       # location of changed radius
-    nr = rind[1:] - rind[:-1]        # number of radius bin
-    
-    # Cumulative sum to figure out sums for each radius bin
-    csim = np.cumsum(i_sorted, dtype=float)
-    tbin = csim[rind[1:]] - csim[rind[:-1]]
-
-    radial_prof = tbin / nr
-
-    return radial_prof
-```
-
-``` python
 plot_galaxy_profiles(
     x=x_select,
     y=y_select, 
@@ -382,18 +333,16 @@ plot_galaxy_profiles(
 )
 ```
 
-    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_1615613/312085280.py:363: UserWarning: Attempt to set non-positive xlim on a log-scaled axis will be ignored.
+    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_2008957/3053756716.py:366: UserWarning: Attempt to set non-positive xlim on a log-scaled axis will be ignored.
       ax.set_xlim(0, max_extent)
-    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_1615613/312085280.py:370: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+    /lcrc/project/cosmo_ai/nramachandra/Projects/tmp/ipykernel_2008957/3053756716.py:373: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
       plt.tight_layout()
 
-![](index_files/figure-commonmark/cell-20-output-2.png)
+![](index_files/figure-commonmark/cell-16-output-2.png)
 
     Galaxy Properties:
-      Total mass: 2.63e+10 M☉
-      Total luminosity: 2.13e+00 L☉
-      Center: (71.653053, 31.657587)
-      Number of particles: 118
-      Maximum extent: 0.0213 units
-
-<!-- ## Under the hood -->
+      Total mass: 7.09e+10 M☉
+      Total luminosity: 2.48e+00 L☉
+      Center: (129.789169, 55.435337)
+      Number of particles: 343
+      Maximum extent: 0.0366 Mpc
