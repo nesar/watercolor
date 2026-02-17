@@ -5,21 +5,21 @@
 # %% auto #0
 __all__ = ['hidden_prints', 'spectrum_dusted', 'log_total_stellar_metal', 'log_total_stellar_mass']
 
-# %% ../nbs/04_dust_attenuation.ipynb #445482eb
+# %% ../nbs/04_dust_attenuation.ipynb #0fe5c99d
 import numpy as np
 from .load_sim_stellar_catalog import load_hacc_galaxy_data, load_hacc_galaxy_data_opencosmo
 from .calculate_csp import calc_fluxes_for_individual_galaxy
 from .load_sim_stellar_catalog import GALS_FILE
 from .load_sps_library import LIBRARY_FLUX_FILE, LIBRARY_WAVE_FILE, LIBRARY_AGE_FILE, LIBRARY_METAL_FILE
 
-# %% ../nbs/04_dust_attenuation.ipynb #81458463
+# %% ../nbs/04_dust_attenuation.ipynb #eb042521
 import sys
 import os
 from duste.DustAttnCalc import DustAttnCalc # https://github.com/Astropianist/DustE
 from io import StringIO
 from contextlib import contextmanager
 
-# %% ../nbs/04_dust_attenuation.ipynb #ec496c9f
+# %% ../nbs/04_dust_attenuation.ipynb #ffee8e6f
 # # Disable
 # def blockPrint():
 #     sys._jupyter_stdout = sys.stdout

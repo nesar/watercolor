@@ -5,10 +5,10 @@
 # %% auto #0
 __all__ = ['spec_ssp_lookup_nearest', 'spec_ssp_lookup']
 
-# %% ../nbs/02_ssp_interpolation.ipynb #57f1dd29
+# %% ../nbs/02_ssp_interpolation.ipynb #7bcb3555
 import numpy as np
 
-# %% ../nbs/02_ssp_interpolation.ipynb #c347c551
+# %% ../nbs/02_ssp_interpolation.ipynb #50e1e976
 def spec_ssp_lookup_nearest(age_hydro_i:np.float32=None, # Age of the HACC stellar particle
              metal_hydro_i:np.float32=None, # Metallicity of the stellar particle
              mass_hydro_i:np.float32=None, # Mass of the stellar particle
@@ -30,7 +30,7 @@ def spec_ssp_lookup_nearest(age_hydro_i:np.float32=None, # Age of the HACC stell
     
     return spec_wave, spec_flux_i
 
-# %% ../nbs/02_ssp_interpolation.ipynb #91af7c38
+# %% ../nbs/02_ssp_interpolation.ipynb #d7f5aaab
 def spec_ssp_lookup(age_hydro_i:np.float32=None, # Age of the HACC stellar particle
              metal_hydro_i:np.float32=None, # Metallicity of the stellar particle
              mass_hydro_i:np.float32=None, # Mass of the stellar particle
