@@ -1,11 +1,33 @@
 [build-system]
-requires = ["setuptools>=64.0"]
+requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name="watercolor"
-requires-python=">=3.12"
-dynamic = [ "keywords", "description", "version", "dependencies", "optional-dependencies", "readme", "license", "authors", "classifiers", "entry-points", "scripts", "urls"]
+name = "watercolor"
+dynamic = ["version"]
+description = "Painting hydrodynamical simulations with galaxy colors"
+readme = "README.md"
+requires-python = ">=3.12"
+license = {text = "Apache-2.0"}
+authors = [{name = "nesar", email = "nramachandra@anl.gov"}]
+keywords = ['nbdev', 'jupyter', 'notebook', 'python']
+classifiers = ["Natural Language :: English", "Intended Audience :: Developers", "Development Status :: 3 - Alpha", "Programming Language :: Python :: 3", "Programming Language :: Python :: 3 :: Only"]
+dependencies = ['arviz==0.16.1', 'numpy', 'matplotlib', 'opencosmo', 'astropy', '"duste', '@', 'git+https://github.com/nesar/DustE.git"']
 
-[tool.uv]
-cache-keys = [{ file = "pyproject.toml" }, { file = "settings.ini" }, { file = "setup.py" }]
+[project.urls]
+Repository = "https://github.com/nesar/watercolor"
+Documentation = "https://nesar.github.io/watercolor"
+
+[project.entry-points.nbdev]
+watercolor = "watercolor._modidx:d"
+
+[project.optional-dependencies]
+dev = ['pandas', 'seaborn', 'scipy<=1.12', 'GetDist']
+
+[tool.setuptools.dynamic]
+version = {attr = "watercolor.__version__"}
+
+[tool.setuptools.packages.find]
+include = ["watercolor"]
+
+[tool.nbdev]
