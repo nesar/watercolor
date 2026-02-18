@@ -6,17 +6,17 @@
 __all__ = ['GALS_DIR', 'GALS_FILE', 'OPEN_COSMO_FILE', 'Z_SOLAR_HACC', 'Z_SOLAR_PADOVA', 'H0', 'load_hacc_galaxy_data',
            'load_opencosmo_collection', 'read_particles_in_a_galaxy', 'load_hacc_galaxy_data_opencosmo']
 
-# %% ../nbs/01_load_sim_stellar_catalog.ipynb #fb514acd
+# %% ../nbs/01_load_sim_stellar_catalog.ipynb #37dbd62f
 import numpy as np
 import os
 import matplotlib.pylab as plt
-import pkg_resources
+from importlib.resources import files as _pkg_files
 import logging
 import opencosmo as oc
 
-# %% ../nbs/01_load_sim_stellar_catalog.ipynb #96ab116c
+# %% ../nbs/01_load_sim_stellar_catalog.ipynb #ba98b8b3
 GALS_DIR = "data/test_hacc_stellar_catalog/"
-GALS_FILE = pkg_resources.resource_stream("watercolor", GALS_DIR + "Gal_Z0.txt").name
+GALS_FILE = str(_pkg_files("watercolor").joinpath(GALS_DIR, "Gal_Z0.txt"))
 
 # OPEN_COSMO_FILE: path to the large HDF5 data file.
 # This file is too large to bundle with the package, so we look for it
@@ -24,12 +24,12 @@ GALS_FILE = pkg_resources.resource_stream("watercolor", GALS_DIR + "Gal_Z0.txt")
 _opencosmo_candidate = os.path.join(os.path.dirname(GALS_FILE), "haloparticles.hdf5")
 OPEN_COSMO_FILE = _opencosmo_candidate if os.path.exists(_opencosmo_candidate) else None
 
-# %% ../nbs/01_load_sim_stellar_catalog.ipynb #0a56a9b9
+# %% ../nbs/01_load_sim_stellar_catalog.ipynb #b70ea3bb
 Z_SOLAR_HACC = 0.012899 # Solar metallicity value in HACC Hydro
 Z_SOLAR_PADOVA = 0.019 # Solar metallicity value in Padova 
 H0 = 71.0 # Hubble Constant in HACC Hydro
 
-# %% ../nbs/01_load_sim_stellar_catalog.ipynb #68931af7
+# %% ../nbs/01_load_sim_stellar_catalog.ipynb #8fc5257c
 def _convert_metallicity(hacc_metallicity:np.array=None, # Metallicity values from HACC  
                          Z_solar:np.float32=Z_SOLAR_PADOVA, # Z_solar value from Padova
                         )-> np.array: # Metallicity array in Z/Z_solar units
@@ -54,7 +54,7 @@ def _convert_age(hacc_age:np.array=None, #Age in 1/H0 units
     
     return age_hydro_gyr
 
-# %% ../nbs/01_load_sim_stellar_catalog.ipynb #80bf578e
+# %% ../nbs/01_load_sim_stellar_catalog.ipynb #84848138
 def load_hacc_galaxy_data(fileIn:str=GALS_FILE, # Input galaxy catalog file from HACC hydro sim
                               Z_solar:np.float32=Z_SOLAR_PADOVA, #Solar metallicity
                               H0:np.float32=H0, # Hubble constant
@@ -70,7 +70,7 @@ def load_hacc_galaxy_data(fileIn:str=GALS_FILE, # Input galaxy catalog file from
     
     return fof_halo_tag, if_satellite, gal_tag, stellar_idx, metal_z_solar, mass, age_gyr, x, y, z, vx, vy, vz
 
-# %% ../nbs/01_load_sim_stellar_catalog.ipynb #e1d28949
+# %% ../nbs/01_load_sim_stellar_catalog.ipynb #36b70b64
 def load_opencosmo_collection(
     particle_file_path:str = None, # Path to the OpenCosmo particle file
     catalog_file_path:str = None, # Path to the OpenCosmo catalog file (optional for single-file format)
@@ -80,7 +80,7 @@ def load_opencosmo_collection(
     collection = oc.open(*files).with_units("physical")
     return collection
 
-# %% ../nbs/01_load_sim_stellar_catalog.ipynb #9d443ebc
+# %% ../nbs/01_load_sim_stellar_catalog.ipynb #00ef0437
 def read_particles_in_a_galaxy(
     particle_file_path: str = None, # Path to the HDF5 file containing  particle data
     catalog_file_path:str = None, # Path to the OpenCosmo catalog file
@@ -98,7 +98,7 @@ def read_particles_in_a_galaxy(
         logging.error("Failed to load halo catalog: %s", e)
         raise RuntimeError(f"Failed to load halo catalog: {e}")
 
-# %% ../nbs/01_load_sim_stellar_catalog.ipynb #cba0062c
+# %% ../nbs/01_load_sim_stellar_catalog.ipynb #f1a2fd9f
 def load_hacc_galaxy_data_opencosmo(particle_file_path: str = None,  # Input HDF5 file (single-file or particle-only)
                              catalog_file_path: str = None,  # Optional catalog file (SciDAC 2-file format only)
                              Z_solar: np.float32 = Z_SOLAR_PADOVA,  # Solar metallicity

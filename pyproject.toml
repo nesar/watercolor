@@ -12,7 +12,7 @@ license = {text = "Apache-2.0"}
 authors = [{name = "nesar", email = "nramachandra@anl.gov"}]
 keywords = ['nbdev', 'jupyter', 'notebook', 'python']
 classifiers = ["Natural Language :: English", "Intended Audience :: Developers", "Development Status :: 3 - Alpha", "Programming Language :: Python :: 3", "Programming Language :: Python :: 3 :: Only"]
-dependencies = ['arviz==0.16.1', 'numpy', 'matplotlib', 'opencosmo', 'astropy', '"duste', '@', 'git+https://github.com/nesar/DustE.git"']
+dependencies = ['arviz>=0.19', 'numpy', 'matplotlib', 'opencosmo', 'astropy', 'duste @ git+https://github.com/nesar/DustE.git']
 
 [project.urls]
 Repository = "https://github.com/nesar/watercolor"

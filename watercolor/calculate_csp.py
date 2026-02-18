@@ -5,7 +5,7 @@
 # %% auto #0
 __all__ = ['total_luminosity', 'galaxy_stellar_mass', 'ssp_to_csp', 'calc_fluxes_for_galaxy', 'calc_fluxes_for_individual_galaxy']
 
-# %% ../nbs/03_calculate_csp.ipynb #97439c4a
+# %% ../nbs/03_calculate_csp.ipynb #1774e91a
 import numpy as np
 from .ssp_interpolation import spec_ssp_lookup
 
@@ -16,7 +16,7 @@ from .load_sim_stellar_catalog import load_hacc_galaxy_data, load_hacc_galaxy_da
 from .load_sim_stellar_catalog import GALS_FILE
 from .load_sim_stellar_catalog import Z_SOLAR_PADOVA, H0
 
-# %% ../nbs/03_calculate_csp.ipynb #78b0af97
+# %% ../nbs/03_calculate_csp.ipynb #eb9fb594
 def total_luminosity(spec_flux_ssp:np.ndarray, # SSP SEDs   
                      spec_wave:np.array # SED Wavelength
                     )-> np.float32: #Luminosity
@@ -36,7 +36,7 @@ def ssp_to_csp(spec_flux_ssp:np.ndarray # SSP SEDs
     spec_csp = np.sum(spec_flux_ssp, axis=0) ## CSP
     return spec_csp
 
-# %% ../nbs/03_calculate_csp.ipynb #b0fbab25
+# %% ../nbs/03_calculate_csp.ipynb #a66d510d
 def calc_fluxes_for_galaxy(gal_file_in:str=GALS_FILE, # HACC stellar catalog, 
                            particle_file_in:str=None, # HACC particle catalog,
                            unique_gal_tag:np.float32=None, # Selected galaxy tag
@@ -73,7 +73,7 @@ def calc_fluxes_for_galaxy(gal_file_in:str=GALS_FILE, # HACC stellar catalog,
 
     return spec_wave_ssp, spec_flux_ssp, spec_csp, flux_proxy, gal_stellar_mass 
 
-# %% ../nbs/03_calculate_csp.ipynb #acfd4f8b
+# %% ../nbs/03_calculate_csp.ipynb #927d44fa
 def calc_fluxes_for_individual_galaxy(galaxy_tags_hacc:np.array=None, # HACC galaxy tags,
                                       metal_hacc:np.array=None, # Metallicity in the HACC catalog,
                                       mass_hacc:np.array=None, # Mass in the HACC catalog,

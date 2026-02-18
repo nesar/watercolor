@@ -6,24 +6,21 @@
 __all__ = ['STELLAR_LIBRARY_DIR', 'LIBRARY_FLUX_FILE', 'LIBRARY_WAVE_FILE', 'LIBRARY_AGE_FILE', 'LIBRARY_METAL_FILE',
            'load_fsps_spectral_library', 'load_fsps_age_metallicity']
 
-# %% ../nbs/00_load_sps_library.ipynb #79413d31
+# %% ../nbs/00_load_sps_library.ipynb #bb09fd47
 import numpy as np
 import os
 import matplotlib.pylab as plt
 from .load_sim_stellar_catalog import Z_SOLAR_PADOVA, H0
-import pkg_resources
+from importlib.resources import files as _pkg_files
 
-# %% ../nbs/00_load_sps_library.ipynb #24c3e18b
-# _THIS_DRNAME = os.path.dirname(os.path.abspath(__file__))
-# os.path.join(_THIS_DRNAME, "models", GPmodelname)
-
+# %% ../nbs/00_load_sps_library.ipynb #db722fac
 STELLAR_LIBRARY_DIR = "data/sps_library_data/"
-LIBRARY_FLUX_FILE = pkg_resources.resource_stream("watercolor", STELLAR_LIBRARY_DIR + "ssp_spec_flux_lines.npy").name
-LIBRARY_WAVE_FILE = pkg_resources.resource_stream("watercolor", STELLAR_LIBRARY_DIR + "ssp_spec_wave.npy").name
-LIBRARY_AGE_FILE = pkg_resources.resource_stream("watercolor", STELLAR_LIBRARY_DIR + "log_age.npy").name
-LIBRARY_METAL_FILE = pkg_resources.resource_stream("watercolor", STELLAR_LIBRARY_DIR + "zlegend.npy").name
+LIBRARY_FLUX_FILE = str(_pkg_files("watercolor").joinpath(STELLAR_LIBRARY_DIR, "ssp_spec_flux_lines.npy"))
+LIBRARY_WAVE_FILE = str(_pkg_files("watercolor").joinpath(STELLAR_LIBRARY_DIR, "ssp_spec_wave.npy"))
+LIBRARY_AGE_FILE = str(_pkg_files("watercolor").joinpath(STELLAR_LIBRARY_DIR, "log_age.npy"))
+LIBRARY_METAL_FILE = str(_pkg_files("watercolor").joinpath(STELLAR_LIBRARY_DIR, "zlegend.npy"))
 
-# %% ../nbs/00_load_sps_library.ipynb #34ca5d81
+# %% ../nbs/00_load_sps_library.ipynb #a13e7bbb
 def load_fsps_spectral_library(flux_fileIn:str=LIBRARY_FLUX_FILE, # Input flux file of the stellar spectra library
                                wave_fileIn:str=LIBRARY_WAVE_FILE, # Input wavelength file of the stellar spectra library
                               ) -> tuple: #Fluxes, wavelengths 
@@ -33,7 +30,7 @@ def load_fsps_spectral_library(flux_fileIn:str=LIBRARY_FLUX_FILE, # Input flux f
     # print('Wavelength shape: ', spec_wave.shape)
     return spec_flux, spec_wave
 
-# %% ../nbs/00_load_sps_library.ipynb #8ef980b5
+# %% ../nbs/00_load_sps_library.ipynb #7235e143
 def _load_fsps_age(age_fileIn:str=LIBRARY_AGE_FILE # Input age file of the stellar spectra library 
                   )-> np.array: # Age in Gyr
     
@@ -43,7 +40,7 @@ def _load_fsps_age(age_fileIn:str=LIBRARY_AGE_FILE # Input age file of the stell
     ## (age is in 1/H0 units)
     return age_fsps_gyr
 
-# %% ../nbs/00_load_sps_library.ipynb #2321d22e
+# %% ../nbs/00_load_sps_library.ipynb #c1684a13
 def _load_fsps_metallicity(metal_fileIn:str=LIBRARY_METAL_FILE, # Input metallicity file of the stellar spectra library
                            Z_solar:np.float32=Z_SOLAR_PADOVA # Solar metallicity in Padova
                           ) -> np.array: #Metallicity values in Z/Z_solar units
@@ -51,7 +48,7 @@ def _load_fsps_metallicity(metal_fileIn:str=LIBRARY_METAL_FILE, # Input metallic
     Z_padova_fsps = Z_legend/Z_solar
     return Z_padova_fsps
 
-# %% ../nbs/00_load_sps_library.ipynb #70d38ea5
+# %% ../nbs/00_load_sps_library.ipynb #9542f42c
 def load_fsps_age_metallicity(age_fileIn:str=LIBRARY_AGE_FILE, # Input metallicity file of the stellar spectra library
                               metal_fileIn:str=LIBRARY_METAL_FILE, # Input age file of the stellar spectra library 
                               Z_solar:np.float32=Z_SOLAR_PADOVA # Solar metallicity in Padova

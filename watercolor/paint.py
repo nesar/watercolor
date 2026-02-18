@@ -5,7 +5,7 @@
 # %% auto #0
 __all__ = ['photometry_from_catalog', 'photometry_from_catalog_opencosmo']
 
-# %% ../nbs/07_paint.ipynb #d07bc532
+# %% ../nbs/07_paint.ipynb #8305e28f
 import watercolor
 from .load_sim_stellar_catalog import load_hacc_galaxy_data, GALS_FILE, load_hacc_galaxy_data_opencosmo
 from .calculate_csp import calc_fluxes_for_individual_galaxy
@@ -14,10 +14,10 @@ from .dust_attenuation import spectrum_dusted, log_total_stellar_metal, log_tota
 from .cosmic_distance_effects import combine_redshift_and_dimming_effect
 from .filter_convolution import load_survey_pickle, photometry_from_spectra
 
-# %% ../nbs/07_paint.ipynb #22160e4f
+# %% ../nbs/07_paint.ipynb #51afab6e
 import numpy as np
 
-# %% ../nbs/07_paint.ipynb #c1c6d61a
+# %% ../nbs/07_paint.ipynb #9492e61e
 def photometry_from_catalog(galaxy_star_catalog_file:str=GALS_FILE, # Input galaxy catalog
                             galaxy_redshift:np.float32=0.001, # Galaxy redshift
                            )->tuple:# [SED, wavelengths, broadband magnitudes from lsst, cosmos, spherex]
@@ -114,7 +114,7 @@ def photometry_from_catalog(galaxy_star_catalog_file:str=GALS_FILE, # Input gala
     
     return final_sed_mJy, final_wave_um, lsst_mags, spherex_mags, cosmos_mags
 
-# %% ../nbs/07_paint.ipynb #7009cd86
+# %% ../nbs/07_paint.ipynb #13cb924a
 def photometry_from_catalog_opencosmo(galaxy_star_catalog_file:str=None, # Input galaxy catalog
                                       galaxy_star_particle_file:str=None, # Input galaxy particle catalog
                                       galaxy_redshift:np.float32=0.001, # Galaxy redshift

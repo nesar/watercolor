@@ -7,7 +7,7 @@ __all__ = ['ALL_FILTER_DIR', 'FILTERS_LSST', 'FILTERS_SPHEREX', 'FILTERS_COSMOS'
            'FILTERS_F784', 'load_filter_single', 'clip_bandpass_values', 'load_survey_filters', 'load_survey_pickle',
            'photometry_from_spectra']
 
-# %% ../nbs/06_filter_convolve.ipynb #10823ea1
+# %% ../nbs/06_filter_convolve.ipynb #e2866337
 import numpy as np
 import glob
 import pickle
@@ -26,21 +26,20 @@ from .cosmic_distance_effects import combine_redshift_and_dimming_effect
 
 
 from .calculate_csp import calc_fluxes_for_individual_galaxy
-import pkg_resources
+from importlib.resources import files as _pkg_files
 
-# %% ../nbs/06_filter_convolve.ipynb #aef43956
-# ALL_FILTER_DIR = '../watercolor/data/filter_specifics/'
+# %% ../nbs/06_filter_convolve.ipynb #4603b00d
 ALL_FILTER_DIR = "data/filter_specifics/"
 
-FILTERS_LSST = pkg_resources.resource_stream("watercolor", ALL_FILTER_DIR + 'LSST.pickle').name
-FILTERS_SPHEREX = pkg_resources.resource_stream("watercolor", ALL_FILTER_DIR + 'SPHEREx.pickle').name
-FILTERS_COSMOS = pkg_resources.resource_stream("watercolor", ALL_FILTER_DIR + 'COSMOS.pickle').name
-FILTERS_WISE = pkg_resources.resource_stream("watercolor", ALL_FILTER_DIR + 'WISE.pickle').name
-FILTERS_LS = pkg_resources.resource_stream("watercolor", ALL_FILTER_DIR + 'LEGACYSURVEY.pickle').name
-FILTERS_2MASS = pkg_resources.resource_stream("watercolor", ALL_FILTER_DIR + '2MASS.pickle').name
-FILTERS_F784 = pkg_resources.resource_stream("watercolor", ALL_FILTER_DIR + 'F784.pickle').name
+FILTERS_LSST = str(_pkg_files("watercolor").joinpath(ALL_FILTER_DIR, 'LSST.pickle'))
+FILTERS_SPHEREX = str(_pkg_files("watercolor").joinpath(ALL_FILTER_DIR, 'SPHEREx.pickle'))
+FILTERS_COSMOS = str(_pkg_files("watercolor").joinpath(ALL_FILTER_DIR, 'COSMOS.pickle'))
+FILTERS_WISE = str(_pkg_files("watercolor").joinpath(ALL_FILTER_DIR, 'WISE.pickle'))
+FILTERS_LS = str(_pkg_files("watercolor").joinpath(ALL_FILTER_DIR, 'LEGACYSURVEY.pickle'))
+FILTERS_2MASS = str(_pkg_files("watercolor").joinpath(ALL_FILTER_DIR, '2MASS.pickle'))
+FILTERS_F784 = str(_pkg_files("watercolor").joinpath(ALL_FILTER_DIR, 'F784.pickle'))
 
-# %% ../nbs/06_filter_convolve.ipynb #b7b44250
+# %% ../nbs/06_filter_convolve.ipynb #de037da7
 def load_filter_single(filtfile:str=None, # Individual filter files 
                           norm:bool=True #Bandpass normalization condition
                          )->tuple: #Wavelengths, bandpass values, central wavelengths, filter name
@@ -82,7 +81,7 @@ def load_filter_single(filtfile:str=None, # Individual filter files
 
     return bandpass_wav, bandpass_val, cenwav, bandpass_name
 
-# %% ../nbs/06_filter_convolve.ipynb #844bd373
+# %% ../nbs/06_filter_convolve.ipynb #0d777933
 def clip_bandpass_values(bandpass_wavs:np.float32=None, # Bandpass wavelengths
                        bandpass_vals:np.float32=None # Bandpasses
                       )->tuple: #Clipped bandpass wavelengths, clipped bandpass values
@@ -98,7 +97,7 @@ def clip_bandpass_values(bandpass_wavs:np.float32=None, # Bandpass wavelengths
 
     return all_clip_bandpass_wav, all_clip_bandpass_vals
 
-# %% ../nbs/06_filter_convolve.ipynb #91fc416a
+# %% ../nbs/06_filter_convolve.ipynb #72ccf60d
 def load_survey_filters(filtdir:str=ALL_FILTER_DIR+'LSST', #Input directory with all filter definitions
                         to_um:bool=True, #True/False to convert wavelengths to microns
                        )->tuple: #Central wavelengths, Bandpass wavelengths, Bandpass values, filter names 
@@ -146,7 +145,7 @@ def load_survey_filters(filtdir:str=ALL_FILTER_DIR+'LSST', #Input directory with
     return central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names
 
 
-# %% ../nbs/06_filter_convolve.ipynb #8a8b6ddf
+# %% ../nbs/06_filter_convolve.ipynb #2a6daab5
 def load_survey_pickle(survey:str='LSST' #Survey
                       )->tuple: #Central wavelengths, Bandpass wavelengths, Bandpass values, filter names
     
@@ -175,7 +174,7 @@ def load_survey_pickle(survey:str='LSST' #Survey
     
     return central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names
 
-# %% ../nbs/06_filter_convolve.ipynb #91ee4694
+# %% ../nbs/06_filter_convolve.ipynb #f6710644
 def photometry_from_spectra(central_wavelengths:np.array=None, # Central wavelengths
                      sed_um_wave:np.array=None, # SED wavelengths (in microns)
                      sed_mJy_flux:np.array=None, # SED fluxes (in mJy)
