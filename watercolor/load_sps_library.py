@@ -34,10 +34,9 @@ def load_fsps_spectral_library(flux_fileIn:str=LIBRARY_FLUX_FILE, # Input flux f
 def _load_fsps_age(age_fileIn:str=LIBRARY_AGE_FILE # Input age file of the stellar spectra library 
                   )-> np.array: # Age in Gyr
     
-    # log_age_gyr = np.load(os.path.join(dirIn, "log_age.npy")) - 9
+    # log_age.npy stores log10(age) in years; subtracting 9 converts to log10(age/Gyr)
     log_age_gyr = np.load( age_fileIn ) - 9
-    age_fsps_gyr = 10**log_age_gyr
-    ## (age is in 1/H0 units)
+    age_fsps_gyr = 10**log_age_gyr  # Gyr
     return age_fsps_gyr
 
 # %% ../nbs/00_load_sps_library.ipynb #c1684a13

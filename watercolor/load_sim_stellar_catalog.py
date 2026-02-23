@@ -99,7 +99,7 @@ def read_particles_in_a_galaxy(
         raise RuntimeError(f"Failed to load halo catalog: {e}")
 
 # %% ../nbs/01_load_sim_stellar_catalog.ipynb #f1a2fd9f
-def load_hacc_galaxy_data_opencosmo(particle_file_path: str = None,  # Input HDF5 file (single-file or particle-only)
+def load_hacc_galaxy_data_opencosmo(particle_file_path: str = OPEN_COSMO_FILE,  # Input HDF5 file (single-file or particle-only)
                              catalog_file_path: str = None,  # Optional catalog file (SciDAC 2-file format only)
                              Z_solar: np.float32 = Z_SOLAR_PADOVA,  # Solar metallicity
                              H0: np.float32 = H0,  # Hubble constant
@@ -116,8 +116,9 @@ def load_hacc_galaxy_data_opencosmo(particle_file_path: str = None,  # Input HDF
     if has_halo_properties and not has_galaxy_properties:
         # ---- New OpenCosmo single-file format ----
         star_particles = collection["star_particles"]
+        star_data = star_particles.get_data()
 
-        fof_halo_tag = np.array(star_particles.data['fof_halo_tag'])
+        fof_halo_tag = np.array(star_data['fof_halo_tag'])
         unique_halo_tags = np.unique(fof_halo_tag)
 
         if num_halos is not None and num_halos < len(unique_halo_tags):
@@ -131,19 +132,20 @@ def load_hacc_galaxy_data_opencosmo(particle_file_path: str = None,  # Input HDF
         fof_halo_tag = fof_halo_tag[mask]
         gal_tag = fof_halo_tag.copy()  # Use fof_halo_tag as gal_tag (no separate gal_tag in new format)
         if_satellite = np.zeros_like(fof_halo_tag, dtype=np.float64)  # No satellite info in new format
-        stellar_idx = np.array(star_particles.data['id'])[mask]
-        metal = np.array(star_particles.data['zmet'])[mask]
-        mass = np.array(star_particles.data['mass'])[mask]
-        age = np.array(star_particles.data['age'])[mask]
-        x = np.array(star_particles.data['x'])[mask]
-        y = np.array(star_particles.data['y'])[mask]
-        z = np.array(star_particles.data['z'])[mask]
-        vx = np.array(star_particles.data['vx'])[mask]
-        vy = np.array(star_particles.data['vy'])[mask]
-        vz = np.array(star_particles.data['vz'])[mask]
+        stellar_idx = np.array(star_data['id'])[mask]
+        metal = np.array(star_data['zmet'])[mask]
+        mass = np.array(star_data['mass'])[mask]
+        # OpenCosmo converts raw H0^-1 units → Gyr automatically via with_units("physical").
+        # np.array() strips the astropy Quantity unit, leaving numerical values in Gyr.
+        age_gyr = np.array(star_data['age'])[mask]
+        x = np.array(star_data['x'])[mask]
+        y = np.array(star_data['y'])[mask]
+        z = np.array(star_data['z'])[mask]
+        vx = np.array(star_data['vx'])[mask]
+        vy = np.array(star_data['vy'])[mask]
+        vz = np.array(star_data['vz'])[mask]
 
         metal_z_solar = _convert_metallicity(metal, Z_solar)
-        age_gyr = age  # Already in Gyr from OpenCosmo physical units
 
         print(f"Loaded {len(x)} star particles from {np.unique(fof_halo_tag).shape[0]} haloes (new OpenCosmo format)")
 
@@ -152,9 +154,10 @@ def load_hacc_galaxy_data_opencosmo(particle_file_path: str = None,  # Input HDF
         gal_properties = collection["galaxy_properties"]
         star_particles = collection["star_particles"]
 
-        print('Number of available haloes in the catalog: ', np.unique(gal_properties.data["fof_halo_tag"]).size)
+        gal_data = gal_properties.get_data()
+        print('Number of available haloes in the catalog: ', np.unique(gal_data["fof_halo_tag"]).size)
 
-        unique_fof_halo_tags = np.unique(gal_properties.data["fof_halo_tag"])
+        unique_fof_halo_tags = np.unique(gal_data["fof_halo_tag"])
         if num_halos is not None and num_halos < len(unique_fof_halo_tags):
             np.random.seed(42)
             selected_indices = np.random.choice(len(unique_fof_halo_tags), num_halos, replace=False)
@@ -175,27 +178,28 @@ def load_hacc_galaxy_data_opencosmo(particle_file_path: str = None,  # Input HDF
         all_vx, all_vy, all_vz = [], [], []
 
         for unique_fof_halo_tag in unique_fof_halo_tags_list:
-            selected_gal_tags = gal_properties.filter(oc.col('fof_halo_tag').isin(unique_fof_halo_tag)).data["gal_tag"].data
+            selected_gal_tags = gal_properties.filter(oc.col('fof_halo_tag').isin(unique_fof_halo_tag)).get_data()["gal_tag"]
 
             star_particles_sel = read_particles_in_a_galaxy(
                 particle_file_path=particle_file_path,
                 catalog_file_path=catalog_file_path,
                 unique_gal_tags=selected_gal_tags)
 
-            x_ = star_particles_sel.data['x']
-            y_ = star_particles_sel.data['y']
-            z_ = star_particles_sel.data['z']
-            vx_ = star_particles_sel.data['vx']
-            vy_ = star_particles_sel.data['vy']
-            vz_ = star_particles_sel.data['vz']
+            sel_data = star_particles_sel.get_data()
+            x_ = np.array(sel_data['x'])
+            y_ = np.array(sel_data['y'])
+            z_ = np.array(sel_data['z'])
+            vx_ = np.array(sel_data['vx'])
+            vy_ = np.array(sel_data['vy'])
+            vz_ = np.array(sel_data['vz'])
 
             all_fof_halo_tags.append(unique_fof_halo_tag * np.ones_like(x_))
-            all_masses.append(star_particles_sel.data['mass'])
-            all_ages.append(star_particles_sel.data['age'])
-            all_metals.append(star_particles_sel.data['zmet'])
-            all_stellar_idx.append(star_particles_sel.data['id'])
+            all_masses.append(np.array(sel_data['mass']))
+            all_ages.append(np.array(sel_data['age']))  # OpenCosmo returns Gyr via with_units("physical")
+            all_metals.append(np.array(sel_data['zmet']))
+            all_stellar_idx.append(np.array(sel_data['id']))
             all_if_satellites.append(np.ones_like(x_))
-            all_gal_tags.append(star_particles_sel.data['gal_tag'])
+            all_gal_tags.append(np.array(sel_data['gal_tag']))
             all_x.append(x_); all_y.append(y_); all_z.append(z_)
             all_vx.append(vx_); all_vy.append(vy_); all_vz.append(vz_)
 
@@ -210,7 +214,8 @@ def load_hacc_galaxy_data_opencosmo(particle_file_path: str = None,  # Input HDF
         vx = np.concatenate(all_vx); vy = np.concatenate(all_vy); vz = np.concatenate(all_vz)
 
         metal_z_solar = _convert_metallicity(metal, Z_solar)
-        age_gyr = age / 1e9
+        # OpenCosmo converts to Gyr via with_units("physical"); no further conversion needed.
+        age_gyr = age
 
         print(f"Loaded {len(x)} particles from {np.unique(gal_tag).shape[0]} galaxies in {np.unique(fof_halo_tag).shape[0]} haloes")
 
