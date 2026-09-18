@@ -20,7 +20,7 @@ from .load_sim_stellar_catalog import Z_SOLAR_PADOVA, H0
 def total_luminosity(spec_flux_ssp:np.ndarray, # SSP SEDs   
                      spec_wave:np.array # SED Wavelength
                     )-> np.float32: #Luminosity
-    flux_proxy = np.trapz(spec_flux_ssp, spec_wave, axis=1) 
+    flux_proxy = np.trapezoid(spec_flux_ssp, spec_wave, axis=1) 
     return flux_proxy
 
 

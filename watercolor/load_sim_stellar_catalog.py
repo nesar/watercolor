@@ -60,16 +60,21 @@ def _opencosmo_age_to_gyr(age_column, # 'age' column/array from an OpenCosmo sta
     '''
     Convert an OpenCosmo star-particle 'age' column to Gyr.
 
-    `collection.with_units("physical")` tags this column with its *native*
-    unit, which is **yr** (verified against a real 2Gpc haloparticles file),
-    not Gyr. A bare `np.array(column)` silently drops the unit and leaves
-    every age ~1e9x too large -- collapsing every SSP age lookup in
-    `calc_fluxes_for_individual_galaxy` to the oldest library bin. Convert
-    through the attached astropy Quantity so this stays correct even if a
-    future opencosmo build changes the native unit; fall back to the
-    verified yr->Gyr factor for plain arrays (e.g. already np.array'd).
+    `collection.with_units("physical")` tags this column with a unit, but
+    *how* it's exposed has varied across opencosmo builds/files: an astropy
+    Table `Column` with a separate `.quantity` view (native unit verified as
+    **yr**, not Gyr, against a real 2Gpc haloparticles file -- a bare
+    `np.array(column)` there silently drops the unit and leaves every age
+    ~1e9x too large), or a bare astropy `Quantity` already (native unit
+    verified as **Gyr** against a SciDAC ensemble file) -- there
+    `np.array(quantity)` drops the unit but keeps the Gyr-scaled number, so
+    the old fallback's /1e9 wrongly shrinks it by another 1e9x. Handle both:
+    convert through whichever Quantity view is available, in its own
+    reported unit, rather than assuming a fixed native unit.
     '''
     quantity = getattr(age_column, 'quantity', None)
+    if quantity is None and hasattr(age_column, 'to_value'):
+        quantity = age_column  # already a bare Quantity
     if quantity is not None:
         return quantity.to_value('Gyr')
     return np.asarray(age_column, dtype=float) / 1e9
@@ -91,6 +96,31 @@ def load_hacc_galaxy_data(fileIn:str=GALS_FILE, # Input galaxy catalog file from
     return fof_halo_tag, if_satellite, gal_tag, stellar_idx, metal_z_solar, mass, age_gyr, x, y, z, vx, vy, vz
 
 # %% ../nbs/01_load_sim_stellar_catalog.ipynb 11
+_CATALOG_MARKER_KEYS = {'star_particles', 'halo_properties', 'galaxy_properties'}
+
+def _select_populated_simulation_member(collection:"oc.SimulationCollection", # A multi-realization ensemble collection
+                                        )-> "oc.StructureCollection": # First member with star particles
+    '''
+    A `SimulationCollection` bundles many realizations (e.g. a SciDAC
+    parameter-scan ensemble) into one file under keys like `SCIDAC_000`,
+    `SCIDAC_001`, .... Most members can be empty (no halos found in that
+    parameter point's subvolume) -- pick the first with star particles so
+    `OPEN_COSMO_FILE` keeps working as a single default catalog.
+    '''
+    keys = list(collection.keys())
+    for key in keys:
+        member = collection[key]
+        member_keys = list(member.keys()) if hasattr(member, 'keys') else []
+        if 'star_particles' not in member_keys:
+            continue
+        n = len(member['star_particles'].get_data())
+        if n > 0:
+            print(f"SimulationCollection: {len(keys)} members, using '{key}' "
+                  f"({n} star particles; first non-empty)")
+            return member
+    raise ValueError(f"No populated member found among {len(keys)} "
+                     "SimulationCollection entries")
+
 def load_opencosmo_collection(
     particle_file_path:str = None, # Path to the OpenCosmo particle file
     catalog_file_path:str = None, # Path to the OpenCosmo catalog file (optional for single-file format)
@@ -98,6 +128,16 @@ def load_opencosmo_collection(
 
     files = [f for f in [particle_file_path, catalog_file_path] if f is not None]
     collection = oc.open(*files).with_units("physical")
+    keys = list(collection.keys()) if hasattr(collection, 'keys') else []
+    # `oc.open` returns a SimulationCollection both for genuine multi-
+    # realization ensembles (members keyed by realization name, e.g.
+    # 'SCIDAC_000', each itself a StructureCollection) AND, for some single-
+    # catalog files, one whose "members" are just the individual particle-
+    # type datasets (keys like 'star_particles', 'halo_properties', ...) --
+    # already exactly what the rest of this module expects. Only descend
+    # into member-selection in the former case.
+    if isinstance(collection, oc.SimulationCollection) and not (_CATALOG_MARKER_KEYS & set(keys)):
+        collection = _select_populated_simulation_member(collection)
     return collection
 
 # %% ../nbs/01_load_sim_stellar_catalog.ipynb 12

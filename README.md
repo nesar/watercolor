@@ -348,7 +348,7 @@ gal_tag_cond = np.where(galaxy_tags == unique_galaxy_tag)
 x_select =  (x[gal_tag_cond])# - np.mean(x[gal_tag_cond]))/(np.max(x[gal_tag_cond]) - np.min(x[gal_tag_cond]))
 y_select =  (y[gal_tag_cond])# - np.mean(y[gal_tag_cond]))/(np.max(y[gal_tag_cond]) - np.min(y[gal_tag_cond]))
 
-z_select = np.trapz(spec_flux_ssp, spec_wave_ssp)
+z_select = np.trapezoid(spec_flux_ssp, spec_wave_ssp)
 m_select = mass[gal_tag_cond]
 
 
