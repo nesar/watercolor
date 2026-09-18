@@ -104,14 +104,16 @@ def combine_redshift_and_dimming_effect(wave:np.array=[], # Wavelength grids of 
     DL = cosmo1.luminosity_distance(galaxy_redshift)      # in unit of [Mpc]
     DL = DL.value/1e3 #in [Gpc]
     dL = DL*3.08568e+27 # in [cm]
-    # Redefine the speed of light in cm/s
-    c = 2.998e10
+    LSUN_ERG_S = 3.828e33 # IAU nominal solar luminosity, erg/s (was 1e33: ~3.83x too faint)
+    # Speed of light in A/s (was 2.998e10 cm/s -- 1e8x too small for wave in A,
+    # which alone inflated every flux/magnitude by ~1e8x / ~20 mag)
+    c = 2.99792458e18
 
-    spec0 = spec*1e33 / (4*np.pi*(dL**2)*(1.0+galaxy_redshift))  # Convert luminosity to flux in erg/s/cm^2/A
-    spec0 *= wave**2 / c  # Convert flux per A to flux per Hz in erg/s/cm^2/Hz
+    wave0 = (1.0+galaxy_redshift)*np.asarray(wave) # observed-frame wavelength [A]
+
+    spec0 = spec*LSUN_ERG_S / (4*np.pi*(dL**2)*(1.0+galaxy_redshift))  # Convert luminosity to flux in erg/s/cm^2/A
+    spec0 *= wave0**2 / c  # Convert flux per A to flux per Hz in erg/s/cm^2/Hz (observed-frame wave, since fnu(nu_obs) needs lambda_obs)
     spec0 *= 1e23  # Convert flux from erg/s/cm^2/Hz to Jy
     spec0 *= 1e3  # Jy to mJy
-    
-    wave0 = (1.0+galaxy_redshift)*np.asarray(wave) # In [A]?
     
     return wave0, spec0 # redsh_wave in [A], redsh_spec in [mJy]

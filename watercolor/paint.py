@@ -62,7 +62,8 @@ def photometry_from_catalog(galaxy_star_catalog_file:str=GALS_FILE, # Input gala
         
         
         sed_um_wave = redsh_wave/1e4 # in um
-        sed_mJy_flux = redsh_spec/1e3  ## in mJy
+        sed_mJy_flux = redsh_spec  # already in mJy (combine_redshift_and_dimming_effect returns mJy directly;
+                                    # a redundant /1e3 here used to make every flux/magnitude ~7.5 mag too faint)
         
         
         # Filter convolution - LSST
@@ -185,7 +186,8 @@ def photometry_from_catalog_opencosmo(galaxy_star_catalog_file:str=None, # Input
         
         
         sed_um_wave = redsh_wave/1e4 # in um
-        sed_mJy_flux = redsh_spec/1e3  ## in mJy
+        sed_mJy_flux = redsh_spec  # already in mJy (combine_redshift_and_dimming_effect returns mJy directly;
+                                    # a redundant /1e3 here used to make every flux/magnitude ~7.5 mag too faint)
         
         
         # Filter convolution - LSST
