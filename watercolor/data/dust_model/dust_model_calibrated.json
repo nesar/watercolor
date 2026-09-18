@@ -1,0 +1,39 @@
+{
+  "a": 0.6954885763780976,
+  "b": 0.1866320344762755,
+  "c": 0.3,
+  "d": 0.3,
+  "e": 0.0,
+  "sigma": 0.18351410135007384,
+  "n": 0.021540033104830235,
+  "mu": 0.0030779283943724806,
+  "tau_min": 0.005,
+  "tau_max": 4.0,
+  "apply_bump": true,
+  "meta": {
+    "calibrated_to": [
+      "SDSS",
+      "DEEP2",
+      "WISE"
+    ],
+    "zbins": [
+      0.0,
+      0.2,
+      0.4,
+      0.7,
+      1.0,
+      1.4
+    ],
+    "fit_parameters": [
+      "a",
+      "b",
+      "sigma",
+      "n",
+      "mu"
+    ],
+    "objective": 0.2452285393739439,
+    "library": "dustless_library.npz",
+    "note": "tau_V = a*10^(b(logM-10))*10^(c logZ)*(1+z)^d, lognormal sigma; Noll+09 slope n (bump tied), CF birth-cloud amplitude mu",
+    "provenance": "snapshot of /lcrc/project/cosmo_ai/nramachandra/Projects/SPHEREx/MAH/SEDPhot_v2/outputs/dust_model_calibrated.json (2026-07-18), bundled here so watercolor.dust_model works without that path being reachable"
+  }
+}
