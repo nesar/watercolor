@@ -19,10 +19,10 @@ pip install watercolor
 ## Simple implementation
 
 ``` python
-from watercolor.paint import photometry_from_catalog, photometry_from_catalog_opencosmo
+from watercolor.paint import photometry_from_catalog_opencosmo
 ```
 
-    /lcrc/project/cosmo_ai/nramachandra/opencosmo_env/lib/python3.11/site-packages/sedpy/observate.py:12: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+    /home/nramachandra/anaconda3/envs/opencosmo_env/lib/python3.12/site-packages/sedpy/observate.py:12: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
       from pkg_resources import resource_filename, resource_listdir
 
 #### First we load the galaxy catalog. The main physical quantities required for painting the colors are the metallicities, stellar mass and age of the star particles of a galaxy.
@@ -31,7 +31,9 @@ from watercolor.paint import photometry_from_catalog, photometry_from_catalog_op
 final_sed_mJy, final_wave_um, lsst_mags, spherex_mags, cosmos_mags = photometry_from_catalog_opencosmo(galaxy_star_particle_file=particle_file_path)
 ```
 
-    FileNotFoundError: [Errno 2] Unable to synchronously open file (unable to open file: name = '/lcrc/project/cosmo_ai/nramachandra/Projects/Hydro_paint/watercolor/watercolor/data/test_hacc_stellar_catalog/haloparticles.hdf5', errno = 2, error message = 'No such file or directory', flags = 0, o_flags = 0)
+    SimulationCollection: 64 members, using 'SCIDAC_000' (15416 star particles; first non-empty)
+    Loaded 15416 star particles from 2 haloes (new OpenCosmo format)
+    Number of galaxies: 2
 
 #### The single-line command provides the SEDs and magnitudes from LSST, SPHEREx and COSMOS filters
 
@@ -58,7 +60,7 @@ for gal_id in np.random.randint(0, final_sed_mJy.shape[0], 12):
     ax0.plot(final_wave_um[gal_id], final_sed_mJy[gal_id], label=str(gal_id), alpha=0.94)
 
 ax0.set_xlim(0.09, 3.2)
-ax0.set_ylim(1e-10, 1e2)
+# ax0.set_ylim(1e-10, 1e2)
 ax0.set_xscale('log')
 ax0.set_yscale('log')
 
@@ -159,7 +161,8 @@ from watercolor.filter_convolution import load_survey_pickle, photometry_from_sp
 fof_halo_tag, if_satellite, galaxy_tags, stellar_idx, metal_hydro, mass, age_hydro, x, y, z , vx, vy, vz = load_hacc_galaxy_data_opencosmo(particle_file_path=particle_file_path)
 ```
 
-    Loaded 10079 star particles from 2 haloes (new OpenCosmo format)
+    SimulationCollection: 64 members, using 'SCIDAC_000' (15416 star particles; first non-empty)
+    Loaded 15416 star particles from 2 haloes (new OpenCosmo format)
 
 ``` python
 galaxy_number = 0 #21# Choosing one of the galaxies in the catalog
@@ -174,7 +177,7 @@ logmstar = log_total_stellar_mass(mstar_i)
 print('Total stars:', mstar_i.size, 'logmstar:', logmstar)
 ```
 
-    Total stars: 5234 logmstar: [12.065893]
+    Total stars: 603 logmstar: [11.110663]
 
 #### 3. After selecting a unique galaxy tag, we calculate the SED. This is the rest-frame SED is due to spectral emission alone, and without dust attenuation.
 
@@ -254,7 +257,7 @@ fig.tight_layout()
 # plt.savefig('../../Plots/ssp_csp_spec.png', dpi=300)
 ```
 
-    /tmp/ipykernel_3562943/2900359430.py:49: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+    /tmp/nramachandra/ipykernel_1129697/2900359430.py:49: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
       fig.tight_layout()
 
 ![](index_files/figure-commonmark/cell-12-output-2.png)
@@ -363,18 +366,18 @@ plot_galaxy_profiles(
 )
 ```
 
-    /tmp/ipykernel_3562943/4241656325.py:8: DeprecationWarning: `trapz` is deprecated. Use `trapezoid` instead, or one of the numerical integration functions in `scipy.integrate`.
-      z_select = np.trapz(spec_flux_ssp, spec_wave_ssp)
-    /tmp/ipykernel_3562943/3053756716.py:366: UserWarning: Attempt to set non-positive xlim on a log-scaled axis will be ignored.
+    /tmp/nramachandra/ipykernel_1129697/3053756716.py:58: RuntimeWarning: invalid value encountered in divide
+      avg_weight = np.where(particle_counts > 0, total_quantity / particle_counts, 0)
+    /tmp/nramachandra/ipykernel_1129697/3053756716.py:366: UserWarning: Attempt to set non-positive xlim on a log-scaled axis will be ignored.
       ax.set_xlim(0, max_extent)
-    /tmp/ipykernel_3562943/3053756716.py:373: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+    /tmp/nramachandra/ipykernel_1129697/3053756716.py:373: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
       plt.tight_layout()
 
 ![](index_files/figure-commonmark/cell-18-output-2.png)
 
     Galaxy Properties:
-      Total mass: 1.16e+12 M☉
-      Total luminosity: 4.77e+01 L☉
-      Center: (4053.570601, 3254.488590)
-      Number of particles: 5234
-      Maximum extent: 1.5610 Mpc
+      Total mass: 1.29e+11 M☉
+      Total luminosity: 4.51e+10 L☉
+      Center: (141.227095, 133.336776)
+      Number of particles: 603
+      Maximum extent: 0.3484 Mpc
