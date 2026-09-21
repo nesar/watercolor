@@ -4,8 +4,8 @@
 
 # %% auto 0
 __all__ = ['ALL_FILTER_DIR', 'FILTERS_LSST', 'FILTERS_SPHEREX', 'FILTERS_COSMOS', 'FILTERS_WISE', 'FILTERS_LS', 'FILTERS_2MASS',
-           'FILTERS_F784', 'load_filter_single', 'clip_bandpass_values', 'load_survey_filters', 'load_survey_pickle',
-           'photometry_from_spectra']
+           'FILTERS_F784', 'FILTERS_SDSS', 'load_filter_single', 'clip_bandpass_values', 'load_survey_filters',
+           'load_survey_pickle', 'photometry_from_spectra']
 
 # %% ../nbs/06_filter_convolve.ipynb 3
 import numpy as np
@@ -37,6 +37,7 @@ FILTERS_WISE = str(_pkg_files("watercolor").joinpath(ALL_FILTER_DIR, 'WISE.pickl
 FILTERS_LS = str(_pkg_files("watercolor").joinpath(ALL_FILTER_DIR, 'LEGACYSURVEY.pickle'))
 FILTERS_2MASS = str(_pkg_files("watercolor").joinpath(ALL_FILTER_DIR, '2MASS.pickle'))
 FILTERS_F784 = str(_pkg_files("watercolor").joinpath(ALL_FILTER_DIR, 'F784.pickle'))
+FILTERS_SDSS = str(_pkg_files("watercolor").joinpath(ALL_FILTER_DIR, 'SDSS.pickle'))
 
 # %% ../nbs/06_filter_convolve.ipynb 9
 def load_filter_single(filtfile:str=None, # Individual filter files 
@@ -162,6 +163,8 @@ def load_survey_pickle(survey:str='LSST' #Survey
         FILTER_NAME = FILTERS_2MASS
     elif (survey=='F784'):
         FILTER_NAME = FILTERS_F784
+    elif (survey=='SDSS'):
+        FILTER_NAME = FILTERS_SDSS
         
         
         
