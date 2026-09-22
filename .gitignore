@@ -152,3 +152,6 @@ checklink/cookies.txt
 
 # Large data files
 *.hdf5
+
+# cached catalog samples written by the notebooks
+nbs/_cache/

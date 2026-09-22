@@ -12,7 +12,7 @@ license = {text = "Apache-2.0"}
 authors = [{name = "nesar", email = "nramachandra@anl.gov"}]
 keywords = ['nbdev', 'jupyter', 'notebook', 'python']
 classifiers = ["Natural Language :: English", "Intended Audience :: Developers", "Development Status :: 3 - Alpha", "Programming Language :: Python :: 3", "Programming Language :: Python :: 3 :: Only"]
-dependencies = ['numpy>=2', 'matplotlib', 'opencosmo>=1.4.0b2', 'astropy', 'arviz', 'DustE', 'astro-sedpy']
+dependencies = ['numpy>=2', 'scipy>=1.13', 'matplotlib', 'opencosmo>=1.4.0b2', 'astropy', 'arviz', 'DustE', 'astro-sedpy']
 
 [project.urls]
 Repository = "https://github.com/nesar/watercolor"
@@ -22,7 +22,7 @@ Documentation = "https://nesar.github.io/watercolor"
 watercolor = "watercolor._modidx:d"
 
 [project.optional-dependencies]
-dev = ['pandas', 'seaborn', 'scipy>=1.13', 'GetDist']
+dev = ['pandas', 'seaborn', 'GetDist']
 
 [tool.setuptools.dynamic]
 version = {attr = "watercolor.__version__"}

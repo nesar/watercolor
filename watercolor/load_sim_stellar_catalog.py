@@ -4,7 +4,8 @@
 
 # %% auto 0
 __all__ = ['TEST_CATALOG_DIR', 'OPEN_COSMO_FILE', 'Z_SOLAR_HACC', 'Z_SOLAR_PADOVA', 'H0', 'load_opencosmo_collection',
-           'read_particles_in_a_galaxy', 'load_hacc_galaxy_data_opencosmo']
+           'read_particles_in_a_galaxy', 'catalog_redshift', 'load_galaxy_properties', 'assign_particles_to_galaxies',
+           'central_galaxy_tags', 'load_hacc_galaxy_data_opencosmo']
 
 # %% ../nbs/01_load_sim_stellar_catalog.ipynb 4
 import numpy as np
@@ -12,7 +13,9 @@ import os
 import matplotlib.pylab as plt
 from importlib.resources import files as _pkg_files
 import logging
+from functools import lru_cache
 import opencosmo as oc
+from scipy.spatial import cKDTree
 
 # %% ../nbs/01_load_sim_stellar_catalog.ipynb 6
 TEST_CATALOG_DIR = "data/test_hacc_stellar_catalog/"
@@ -59,6 +62,14 @@ def _opencosmo_age_to_gyr(age_column, # 'age' column/array from an OpenCosmo sta
         return quantity.to_value('Gyr')
     return np.asarray(age_column, dtype=float) / 1e9
 
+
+def _initial_star_mass(star_data, # Star-particle table from an OpenCosmo collection
+                      )-> np.array: # Mass formed per particle (Msun); falls back to the current mass
+    if 'initial_star_mass' in star_data.colnames:
+        return np.array(star_data['initial_star_mass'])
+    logging.warning("No 'initial_star_mass' column: using current particle mass for the SSP weights (SEDs ~0.4 mag too faint)")
+    return np.array(star_data['mass'])
+
 # %% ../nbs/01_load_sim_stellar_catalog.ipynb 10
 _CATALOG_MARKER_KEYS = {'star_particles', 'halo_properties', 'galaxy_properties'}
 
@@ -85,10 +96,12 @@ def _select_populated_simulation_member(collection:"oc.SimulationCollection", # 
     raise ValueError(f"No populated member found among {len(keys)} "
                      "SimulationCollection entries")
 
+@lru_cache(maxsize=8)
 def load_opencosmo_collection(
     particle_file_path:str = None, # Path to the OpenCosmo particle file
     catalog_file_path:str = None, # Path to the OpenCosmo catalog file (optional for single-file format)
     ) -> oc.StructureCollection: # OpenCosmo particle collection
+    '''Cached per path: opening a 64-member ensemble file takes ~45 s, and several functions open the same catalog.'''
 
     files = [f for f in [particle_file_path, catalog_file_path] if f is not None]
     collection = oc.open(*files).with_units("physical")
@@ -110,133 +123,164 @@ def read_particles_in_a_galaxy(
     catalog_file_path:str = None, # Path to the OpenCosmo catalog file
     unique_gal_tags:list = None # Unique identifier for the halo to filter particles
 ) -> oc.Dataset: # OpenCosmo dataset containing particles of a specific halo
+    '''Only for catalogs whose star particles carry a `gal_tag` column (the SciDAC galaxyparticles files).'''
     try:
         collection = load_opencosmo_collection(particle_file_path, catalog_file_path)
-        # print(collection)
-        
-        selected_gal = collection.filter(oc.col('gal_tag').isin(unique_gal_tags))#.take(1,at='random')
-        selected_star_particles = selected_gal["star_particles"]
-
-        return selected_star_particles
+        selected_gal = collection.filter(oc.col('gal_tag').isin(unique_gal_tags))
+        return selected_gal["star_particles"]
     except Exception as e:
         logging.error("Failed to load halo catalog: %s", e)
         raise RuntimeError(f"Failed to load halo catalog: {e}")
 
+
+def catalog_redshift(collection:oc.StructureCollection=None, # An OpenCosmo collection
+                     )-> float: # Redshift of the snapshot the catalog was extracted from (NaN if not recorded)
+    for key in ('star_particles', 'halo_properties', 'galaxy_properties'):
+        try:
+            return float(collection[key].header.file.redshift)
+        except Exception:
+            continue
+    return float('nan')
+
+
+def _table_to_arrays(table):
+    '''astropy Table / QTable -> {column: plain ndarray} (units dropped, so callers convert explicitly)'''
+    return {k: np.asarray(getattr(table[k], 'value', table[k])) for k in table.colnames}
+
+
+def load_galaxy_properties(collection:oc.StructureCollection=None, # From `load_opencosmo_collection`
+                           )-> dict: # {column: ndarray} of the galaxy_properties table, or None if the catalog has none
+    keys = list(collection.keys()) if hasattr(collection, 'keys') else []
+    if 'galaxy_properties' not in keys:
+        return None
+    return _table_to_arrays(collection['galaxy_properties'].get_data())
+
+
+def assign_particles_to_galaxies(x:np.array=None, # Particle x (Mpc)
+                                 y:np.array=None, # Particle y (Mpc)
+                                 z:np.array=None, # Particle z (Mpc)
+                                 fof_halo_tag:np.array=None, # Particle FOF halo tag
+                                 galaxy_properties:dict=None, # From `load_galaxy_properties`
+                                 radius_mpc:np.array=None, # Membership radius per galaxy (Mpc); None -> `gal_radius`
+                                 )-> np.array: # `gal_tag` per particle; -1 for particles in no galaxy
+    '''
+    Geometric galaxy membership for catalogs that store galaxies but not
+    which star belongs to which: each particle goes to the nearest galaxy
+    centre (`gal_center_*`) of its own FOF halo, if that centre is within the
+    galaxy's `gal_radius`. HACC's `gal_mass_star` is the stellar mass inside
+    a 50 kpc sphere around `gal_center`, so this reproduces it; where two
+    galaxies' spheres overlap the particle is given to the nearer one
+    (HACC's own membership, from DBSCAN, is preferred when a catalog carries it).
+    '''
+    gp = galaxy_properties
+    centres = np.column_stack([gp['gal_center_x'], gp['gal_center_y'], gp['gal_center_z']]).astype(float)
+    radius = np.asarray(gp['gal_radius'] if radius_mpc is None else radius_mpc, dtype=float)
+    positions = np.column_stack([x, y, z]).astype(float)
+    gal_tag = np.full(positions.shape[0], -1, dtype=np.int64)
+    # search inside each halo (galaxies of different haloes are never within 50 kpc of each other's stars)
+    g_order = np.argsort(gp['fof_halo_tag'], kind='stable'); g_tags = np.asarray(gp['fof_halo_tag'])[g_order]
+    p_order = np.argsort(fof_halo_tag, kind='stable'); p_tags = np.asarray(fof_halo_tag)[p_order]
+    for tag in np.unique(g_tags):
+        g = g_order[np.searchsorted(g_tags, tag, 'left'):np.searchsorted(g_tags, tag, 'right')]
+        p = p_order[np.searchsorted(p_tags, tag, 'left'):np.searchsorted(p_tags, tag, 'right')]
+        if g.size == 0 or p.size == 0:
+            continue
+        dist, nearest = cKDTree(centres[g]).query(positions[p], k=1)
+        inside = dist <= radius[g][nearest]
+        gal_tag[p[inside]] = np.asarray(gp['gal_tag'])[g][nearest[inside]]
+    return gal_tag
+
+
+def central_galaxy_tags(galaxy_properties:dict=None, # From `load_galaxy_properties`
+                        )-> dict: # {fof_halo_tag: gal_tag of its most massive galaxy}
+    order = np.lexsort((-np.asarray(galaxy_properties['gal_mass_star']), np.asarray(galaxy_properties['fof_halo_tag'])))
+    halos = np.asarray(galaxy_properties['fof_halo_tag'])[order]
+    first = np.r_[True, halos[1:] != halos[:-1]]
+    return dict(zip(halos[first], np.asarray(galaxy_properties['gal_tag'])[order][first]))
+
 # %% ../nbs/01_load_sim_stellar_catalog.ipynb 13
-def load_hacc_galaxy_data_opencosmo(particle_file_path: str = OPEN_COSMO_FILE,  # Input HDF5 file (single-file or particle-only)
-                             catalog_file_path: str = None,  # Optional catalog file (SciDAC 2-file format only)
+def load_hacc_galaxy_data_opencosmo(particle_file_path: str = OPEN_COSMO_FILE,  # Input HDF5 file (halo particles, with or without galaxy_properties; or the SciDAC galaxyparticles file)
+                             catalog_file_path: str = None,  # Optional second file (SciDAC galaxyproperties)
                              Z_solar: np.float32 = Z_SOLAR_PADOVA,  # Solar metallicity
                              H0: np.float32 = H0,  # Hubble constant
                              num_halos: int = None,  # Max number of halos to load (None = all)
-                             ) -> tuple:  # fof_halo_tag, if_satellite, gal_tag, stellar_idx, metal_z_solar, mass, age_gyr, x, y, z, vx, vy, vz
+                             return_initial_mass: bool = False,  # Also return the particles' initial (formed) mass, as a 14th entry
+                             drop_unassigned: bool = True,  # Drop star particles that belong to no galaxy (intracluster light) when galaxies are defined
+                             ) -> tuple:  # fof_halo_tag, if_satellite, gal_tag, stellar_idx, metal_z_solar, mass, age_gyr, x, y, z, vx, vy, vz (, initial_mass)
+    '''
+    One loader for the three catalog layouts (see the table at the top of
+    this notebook). Galaxy membership comes, in order of preference, from a
+    `gal_tag` column on the star particles, from `assign_particles_to_galaxies`
+    when the catalog has a `galaxy_properties` table but no membership, or
+    from the FOF halo when it has neither.
 
+    `mass` is the particles' *current* stellar mass (what a galaxy's M* is
+    made of). SSP libraries are normalised per unit mass *formed*, so the
+    SED weights need `initial_star_mass` instead (median mass/initial = 0.69
+    at z=0, a 0.4 mag effect) -- ask for it with `return_initial_mass=True`.
+    '''
     collection = load_opencosmo_collection(particle_file_path, catalog_file_path)
+    galaxy_properties = load_galaxy_properties(collection)
+    star_data = collection['star_particles'].get_data()
+    columns = set(star_data.colnames)
 
-    # Detect format: new single-file has halo_properties, old SciDAC has galaxy_properties
-    collection_keys = list(collection.keys()) if hasattr(collection, 'keys') else []
-    has_halo_properties = "halo_properties" in collection_keys
-    has_galaxy_properties = "galaxy_properties" in collection_keys
+    stellar_idx = np.array(star_data['id'])
+    metal = np.array(star_data['zmet'])
+    mass = np.array(star_data['mass'])
+    initial_mass = _initial_star_mass(star_data)
+    age_gyr = _opencosmo_age_to_gyr(star_data['age'])
+    x, y, z = (np.array(star_data[k]) for k in ('x', 'y', 'z'))
+    vx, vy, vz = (np.array(star_data[k]) for k in ('vx', 'vy', 'vz'))
 
-    if has_halo_properties and not has_galaxy_properties:
-        # ---- New OpenCosmo single-file format ----
-        star_particles = collection["star_particles"]
-        star_data = star_particles.get_data()
-
+    if 'gal_tag' in columns:
+        # SciDAC galaxyparticles: HACC's own (DBSCAN) membership on the particles
+        gal_tag = np.array(star_data['gal_tag'])
+        if 'fof_halo_tag' in columns:
+            fof_halo_tag = np.array(star_data['fof_halo_tag'])
+        else:
+            g_tags, g_halos = np.asarray(galaxy_properties['gal_tag']), np.asarray(galaxy_properties['fof_halo_tag'])
+            order = np.argsort(g_tags); pos = np.searchsorted(g_tags[order], gal_tag)
+            pos = np.clip(pos, 0, len(order) - 1); found = g_tags[order][pos] == gal_tag
+            fof_halo_tag = np.where(found, g_halos[order][pos], -1)
+        membership = "gal_tag column"
+    elif galaxy_properties is not None:
         fof_halo_tag = np.array(star_data['fof_halo_tag'])
-        unique_halo_tags = np.unique(fof_halo_tag)
-
-        if num_halos is not None and num_halos < len(unique_halo_tags):
-            np.random.seed(42)
-            selected_indices = np.random.choice(len(unique_halo_tags), num_halos, replace=False)
-            selected_tags = unique_halo_tags[selected_indices]
-            mask = np.isin(fof_halo_tag, selected_tags)
-        else:
-            mask = np.ones(len(fof_halo_tag), dtype=bool)
-
-        fof_halo_tag = fof_halo_tag[mask]
-        gal_tag = fof_halo_tag.copy()  # Use fof_halo_tag as gal_tag (no separate gal_tag in new format)
-        if_satellite = np.zeros_like(fof_halo_tag, dtype=np.float64)  # No satellite info in new format
-        stellar_idx = np.array(star_data['id'])[mask]
-        metal = np.array(star_data['zmet'])[mask]
-        mass = np.array(star_data['mass'])[mask]
-        age_gyr = _opencosmo_age_to_gyr(star_data['age'])[mask]
-        x = np.array(star_data['x'])[mask]
-        y = np.array(star_data['y'])[mask]
-        z = np.array(star_data['z'])[mask]
-        vx = np.array(star_data['vx'])[mask]
-        vy = np.array(star_data['vy'])[mask]
-        vz = np.array(star_data['vz'])[mask]
-
-        metal_z_solar = _convert_metallicity(metal, Z_solar)
-
-        print(f"Loaded {len(x)} star particles from {np.unique(fof_halo_tag).shape[0]} haloes (new OpenCosmo format)")
-
+        gal_tag = assign_particles_to_galaxies(x, y, z, fof_halo_tag, galaxy_properties)
+        membership = "nearest galaxy centre within gal_radius"
     else:
-        # ---- Old SciDAC 2-file format (galaxy_properties + galaxyparticles) ----
-        gal_properties = collection["galaxy_properties"]
-        star_particles = collection["star_particles"]
+        fof_halo_tag = np.array(star_data['fof_halo_tag'])
+        gal_tag = fof_halo_tag.copy()  # whole FOF halo = one "galaxy"
+        membership = "whole FOF halo"
 
-        gal_data = gal_properties.get_data()
-        print('Number of available haloes in the catalog: ', np.unique(gal_data["fof_halo_tag"]).size)
+    keep = np.ones(len(mass), dtype=bool)
+    if drop_unassigned and galaxy_properties is not None:
+        keep &= gal_tag >= 0
 
-        unique_fof_halo_tags = np.unique(gal_data["fof_halo_tag"])
-        if num_halos is not None and num_halos < len(unique_fof_halo_tags):
-            np.random.seed(42)
-            selected_indices = np.random.choice(len(unique_fof_halo_tags), num_halos, replace=False)
-            unique_fof_halo_tags_list = unique_fof_halo_tags[selected_indices]
-        else:
-            unique_fof_halo_tags_list = unique_fof_halo_tags
+    unique_halo_tags = np.unique(fof_halo_tag[keep])
+    if num_halos is not None and num_halos < len(unique_halo_tags):
+        np.random.seed(42)
+        selected_tags = unique_halo_tags[np.random.choice(len(unique_halo_tags), num_halos, replace=False)]
+        keep &= np.isin(fof_halo_tag, selected_tags)
 
-        print('Number of available haloes selected: ', unique_fof_halo_tags_list.size)
+    if galaxy_properties is not None:
+        # satellite = not the most massive galaxy of its halo
+        central = central_galaxy_tags(galaxy_properties)
+        halos_c = np.array(list(central.keys())); tags_c = np.array(list(central.values()))
+        order = np.argsort(halos_c); pos = np.clip(np.searchsorted(halos_c[order], fof_halo_tag), 0, len(order) - 1)
+        central_of_particle = np.where(halos_c[order][pos] == fof_halo_tag, tags_c[order][pos], -1)
+        if_satellite = (central_of_particle != gal_tag).astype(np.float64)
+    else:
+        if_satellite = np.zeros(len(mass), dtype=np.float64)
 
-        all_fof_halo_tags = []
-        all_if_satellites = []
-        all_gal_tags = []
-        all_stellar_idx = []
-        all_metals = []
-        all_ages = []
-        all_masses = []
-        all_x, all_y, all_z = [], [], []
-        all_vx, all_vy, all_vz = [], [], []
+    (fof_halo_tag, if_satellite, gal_tag, stellar_idx, metal, mass, initial_mass, age_gyr,
+     x, y, z, vx, vy, vz) = (a[keep] for a in (fof_halo_tag, if_satellite, gal_tag, stellar_idx, metal, mass, initial_mass, age_gyr,
+                                               x, y, z, vx, vy, vz))
+    metal_z_solar = _convert_metallicity(metal, Z_solar)
 
-        for unique_fof_halo_tag in unique_fof_halo_tags_list:
-            selected_gal_tags = gal_properties.filter(oc.col('fof_halo_tag').isin(unique_fof_halo_tag)).get_data()["gal_tag"]
+    print(f"Loaded {len(x)} star particles from {np.unique(gal_tag).shape[0]} galaxies in "
+          f"{np.unique(fof_halo_tag).shape[0]} haloes (membership: {membership}; z = {catalog_redshift(collection):.3f})")
 
-            star_particles_sel = read_particles_in_a_galaxy(
-                particle_file_path=particle_file_path,
-                catalog_file_path=catalog_file_path,
-                unique_gal_tags=selected_gal_tags)
-
-            sel_data = star_particles_sel.get_data()
-            x_ = np.array(sel_data['x'])
-            y_ = np.array(sel_data['y'])
-            z_ = np.array(sel_data['z'])
-            vx_ = np.array(sel_data['vx'])
-            vy_ = np.array(sel_data['vy'])
-            vz_ = np.array(sel_data['vz'])
-
-            all_fof_halo_tags.append(unique_fof_halo_tag * np.ones_like(x_))
-            all_masses.append(np.array(sel_data['mass']))
-            all_ages.append(_opencosmo_age_to_gyr(sel_data['age']))
-            all_metals.append(np.array(sel_data['zmet']))
-            all_stellar_idx.append(np.array(sel_data['id']))
-            all_if_satellites.append(np.ones_like(x_))
-            all_gal_tags.append(np.array(sel_data['gal_tag']))
-            all_x.append(x_); all_y.append(y_); all_z.append(z_)
-            all_vx.append(vx_); all_vy.append(vy_); all_vz.append(vz_)
-
-        fof_halo_tag = np.concatenate(all_fof_halo_tags)
-        if_satellite = np.concatenate(all_if_satellites)
-        gal_tag = np.concatenate(all_gal_tags)
-        stellar_idx = np.concatenate(all_stellar_idx)
-        metal = np.concatenate(all_metals)
-        mass = np.concatenate(all_masses)
-        age_gyr = np.concatenate(all_ages)
-        x = np.concatenate(all_x); y = np.concatenate(all_y); z = np.concatenate(all_z)
-        vx = np.concatenate(all_vx); vy = np.concatenate(all_vy); vz = np.concatenate(all_vz)
-
-        metal_z_solar = _convert_metallicity(metal, Z_solar)
-
-        print(f"Loaded {len(x)} particles from {np.unique(gal_tag).shape[0]} galaxies in {np.unique(fof_halo_tag).shape[0]} haloes")
+    if return_initial_mass:
+        return fof_halo_tag, if_satellite, gal_tag, stellar_idx, metal_z_solar, mass, age_gyr, x, y, z, vx, vy, vz, initial_mass
 
     return fof_halo_tag, if_satellite, gal_tag, stellar_idx, metal_z_solar, mass, age_gyr, x, y, z, vx, vy, vz

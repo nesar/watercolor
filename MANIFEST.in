@@ -4,6 +4,7 @@ include CONTRIBUTING.md
 include README.md
 include watercolor/data/filter_specifics/*
 include watercolor/data/sps_library_data/*
-include watercolor/data/test_hacc_stellar_catalog/*.txt
+include watercolor/data/dust_model/*
+include watercolor/data/observations/*
 exclude watercolor/data/test_hacc_stellar_catalog/*.hdf5
 recursive-exclude * __pycache__

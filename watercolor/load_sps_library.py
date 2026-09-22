@@ -4,7 +4,7 @@
 
 # %% auto 0
 __all__ = ['STELLAR_LIBRARY_DIR', 'LIBRARY_FLUX_FILE', 'LIBRARY_WAVE_FILE', 'LIBRARY_AGE_FILE', 'LIBRARY_METAL_FILE',
-           'load_fsps_spectral_library', 'load_fsps_age_metallicity']
+           'C_ANGSTROM_PER_S', 'load_fsps_spectral_library', 'load_fsps_age_metallicity']
 
 # %% ../nbs/00_load_sps_library.ipynb 3
 import numpy as np
@@ -21,13 +21,29 @@ LIBRARY_AGE_FILE = str(_pkg_files("watercolor").joinpath(STELLAR_LIBRARY_DIR, "l
 LIBRARY_METAL_FILE = str(_pkg_files("watercolor").joinpath(STELLAR_LIBRARY_DIR, "zlegend.npy"))
 
 # %% ../nbs/00_load_sps_library.ipynb 6
+C_ANGSTROM_PER_S = 2.99792458e18 # Speed of light in Angstrom/s
+
 def load_fsps_spectral_library(flux_fileIn:str=LIBRARY_FLUX_FILE, # Input flux file of the stellar spectra library
                                wave_fileIn:str=LIBRARY_WAVE_FILE, # Input wavelength file of the stellar spectra library
-                              ) -> tuple: #Fluxes, wavelengths 
+                               per_angstrom:bool=True, # Convert the stored L_nu [Lsun/Hz] to L_lambda [Lsun/A]
+                              ) -> tuple: #Fluxes (Lsun/A per Msun formed), wavelengths (A)
+    '''
+    Load the SSP spectral library.
+
+    The bundled `ssp_spec_flux_lines.npy` is the native FSPS output
+    (Padova isochrones + BaSeL, Kroupa IMF, nebular emission on): **L_nu in
+    Lsun/Hz per 1 Msun of stars formed** -- checked against python-fsps
+    (`StellarPopulation.get_spectrum(peraa=False)`), ratio 1.000 over the
+    whole grid. Everything downstream (CSP sums, bolometric integrals over
+    wavelength, the redshift/dimming step, dust) works in L_lambda, so convert
+    here, once: L_lambda = L_nu * c / lambda^2. Reading the stored numbers as
+    Lsun/A instead tilts every SED by lambda^2 (far too red: +0.6 in u-g,
+    +1.0 in g-i) and leaves it ~1e10x too faint.
+    '''
     spec_flux = np.load(flux_fileIn)
     spec_wave = np.load(wave_fileIn)
-    # print('Library shape: ', spec_flux.shape) 
-    # print('Wavelength shape: ', spec_wave.shape)
+    if per_angstrom:
+        spec_flux = spec_flux * C_ANGSTROM_PER_S / spec_wave**2
     return spec_flux, spec_wave
 
 # %% ../nbs/00_load_sps_library.ipynb 7

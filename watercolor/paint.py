@@ -7,10 +7,11 @@ __all__ = ['photometry_from_catalog_opencosmo']
 
 # %% ../nbs/07_paint.ipynb 4
 import watercolor
-from .load_sim_stellar_catalog import load_hacc_galaxy_data_opencosmo
+from .load_sim_stellar_catalog import load_hacc_galaxy_data_opencosmo, load_opencosmo_collection, catalog_redshift
 from .calculate_csp import calc_fluxes_for_individual_galaxy
 from .load_sps_library import LIBRARY_FLUX_FILE, LIBRARY_WAVE_FILE, LIBRARY_AGE_FILE, LIBRARY_METAL_FILE
 from .dust_attenuation import spectrum_dusted, log_total_stellar_metal, log_total_stellar_mass
+from .dust_model import attenuate_particle_sed, load_default_dust_model
 from .cosmic_distance_effects import combine_redshift_and_dimming_effect
 from .filter_convolution import load_survey_pickle, photometry_from_spectra
 
@@ -20,12 +21,24 @@ import numpy as np
 # %% ../nbs/07_paint.ipynb 6
 def photometry_from_catalog_opencosmo(galaxy_star_catalog_file:str=None, # Input galaxy catalog
                                       galaxy_star_particle_file:str=None, # Input galaxy particle catalog
-                                      galaxy_redshift:np.float32=0.001, # Galaxy redshift
+                                      galaxy_redshift:np.float32=None, # Redshift to place every galaxy at; None -> the catalog's own snapshot redshift (0.001 if the file does not record one)
+                                      dust:str='population', # 'population': calibrated two-component model + IR re-emission (watercolor.dust_model); 'duste': legacy DustE attenuation; None: no dust
+                                      seed:int=0, # Seed for the per-galaxy dust optical-depth scatter
                                       )->tuple:# [SED, wavelengths, broadband magnitudes from lsst, cosmos, spherex]
     
     # load catalog from HACC
     # fof_halo_tag, if_satellite, galaxy_tags, stellar_idx, metal_hydro, mass, age_hydro, x, y, z , vx, vy, vz = load_hacc_galaxy_data(galaxy_star_catalog_file)
-    fof_halo_tag, if_satellite, galaxy_tags, stellar_idx, metal_hydro, mass, age_hydro, x, y, z , vx, vy, vz = load_hacc_galaxy_data_opencosmo(galaxy_star_particle_file, galaxy_star_catalog_file)
+    fof_halo_tag, if_satellite, galaxy_tags, stellar_idx, metal_hydro, mass, age_hydro, x, y, z , vx, vy, vz, mass_formed = load_hacc_galaxy_data_opencosmo(galaxy_star_particle_file, galaxy_star_catalog_file, return_initial_mass=True)
+
+    if galaxy_redshift is None:
+        z_catalog = catalog_redshift(load_opencosmo_collection(galaxy_star_particle_file, galaxy_star_catalog_file))
+        galaxy_redshift = max(z_catalog, 0.001) if np.isfinite(z_catalog) else 0.001
+        print(f'Placing galaxies at the catalog redshift z = {galaxy_redshift:.4f}')
+
+    population_dust_model = load_default_dust_model() if dust == 'population' else None
+    # filter curves are loaded once, not per galaxy
+    filters_lsst, filters_spherex, filters_cosmos = load_survey_pickle('LSST'), load_survey_pickle('SPHEREx'), load_survey_pickle('COSMOS')
+    rng = np.random.default_rng(seed)
 
 
     num_galaxies_in_catalog = np.unique(galaxy_tags).shape[0]
@@ -66,7 +79,7 @@ def photometry_from_catalog_opencosmo(galaxy_star_catalog_file:str=None, # Input
         #                                                                                       LIBRARY_METAL_FILE)
         
         
-        spec_wave_ssp, spec_flux_ssp, spec_csp, flux_proxy, gal_stellar_mass = calc_fluxes_for_individual_galaxy(
+        spec_wave_ssp, spec_flux_ssp, spec_csp, flux_proxy, gal_stellar_mass, spec_csp_young = calc_fluxes_for_individual_galaxy(
             galaxy_tags, 
             metal_hydro,
             mass,
@@ -75,11 +88,24 @@ def photometry_from_catalog_opencosmo(galaxy_star_catalog_file:str=None, # Input
             LIBRARY_FLUX_FILE,
             LIBRARY_WAVE_FILE,
             LIBRARY_AGE_FILE,
-            LIBRARY_METAL_FILE)
+            LIBRARY_METAL_FILE,
+            mass_formed_hacc=mass_formed, # SSP library is per unit mass formed
+            return_ssp_spectra=False,
+            return_young_csp=True) # light of <10 Myr stars, for the birth-cloud dust term
         
 
-        # Dust attenuation
-        spec_wave_csp_dusted = spectrum_dusted(spec_csp, spec_wave_ssp, logmstar, logZ, galaxy_redshift) # (spec_csp in L_bolometric A^-1)
+        # Dust attenuation (+ energy-balance IR re-emission for the population model)
+        if dust == 'population':
+            age_i = age_hydro[galaxy_tags == unique_galaxy_tag]
+            spec_wave_csp_dusted, _ = attenuate_particle_sed(spec_csp, spec_wave_ssp, mstar_i, metal_i, age_i,
+                                                             galaxy_redshift, dust_model=population_dust_model, rng=rng,
+                                                             spec_young=spec_csp_young)
+        elif dust == 'duste':
+            spec_wave_csp_dusted = spectrum_dusted(spec_csp, spec_wave_ssp, logmstar, logZ, galaxy_redshift) # (spec_csp in L_bolometric A^-1)
+        elif dust is None:
+            spec_wave_csp_dusted = spec_csp
+        else:
+            raise ValueError(f"dust must be 'population', 'duste' or None, got {dust!r}")
         
         # Cosmic redshifting and dimming
         redsh_wave, redsh_spec = combine_redshift_and_dimming_effect(wave=spec_wave_ssp, 
@@ -93,7 +119,7 @@ def photometry_from_catalog_opencosmo(galaxy_star_catalog_file:str=None, # Input
         
         
         # Filter convolution - LSST
-        central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names_lsst = load_survey_pickle('LSST')
+        central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names_lsst = filters_lsst
         
         _, appmag_ext_lsst, _ = photometry_from_spectra(central_wavelengths, 
                                                         sed_um_wave, 
@@ -106,7 +132,7 @@ def photometry_from_catalog_opencosmo(galaxy_star_catalog_file:str=None, # Input
                                                         clip_bandpass=True)
         
         # Filter convolution - SPHEREx
-        central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names_spherex = load_survey_pickle('SPHEREx')
+        central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names_spherex = filters_spherex
         
         _, appmag_ext_spherex, _ = photometry_from_spectra(central_wavelengths, 
                                                            sed_um_wave, 
@@ -119,7 +145,7 @@ def photometry_from_catalog_opencosmo(galaxy_star_catalog_file:str=None, # Input
                                                            clip_bandpass=True)
         
         # Filter convolution - COSMOS
-        central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names_cosmos = load_survey_pickle('COSMOS')
+        central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names_cosmos = filters_cosmos
         
         _, appmag_ext_cosmos, _ = photometry_from_spectra(central_wavelengths, 
                                                           sed_um_wave, 

@@ -89,7 +89,10 @@ def clip_bandpass_values(bandpass_wavs:np.float32=None, # Bandpass wavelengths
     all_clip_bandpass_wav, all_clip_bandpass_vals = [], []
 
     for b in range(len(bandpass_wavs)):
-        nonz_bandpass_val = (bandpass_vals[b] > 0)
+        # The SPHEREx curves have Gaussian tails down to 1e-240: numerically nothing, but
+        # such tiny values make the dot products ~1000x slower (denormal arithmetic). Clip
+        # everything below 1e-10 of the peak, which changes no band flux at the 1e-10 level.
+        nonz_bandpass_val = (bandpass_vals[b] > 1e-10*np.max(bandpass_vals[b]))
         clip_bandpass_wav = bandpass_wavs[b][nonz_bandpass_val]
         clip_bandpass_vals = bandpass_vals[b][nonz_bandpass_val]
         all_clip_bandpass_wav.append(clip_bandpass_wav)
@@ -146,7 +149,8 @@ def load_survey_filters(filtdir:str=ALL_FILTER_DIR+'LSST', #Input directory with
 
 
 # %% ../nbs/06_filter_convolve.ipynb 12
-def load_survey_pickle(survey:str='LSST' #Survey
+def load_survey_pickle(survey:str='LSST', #Survey
+                       sort_by_wavelength:bool=True # Return the bands in order of increasing central wavelength
                       )->tuple: #Central wavelengths, Bandpass wavelengths, Bandpass values, filter names
     
     if (survey=='LSST'):
@@ -173,6 +177,16 @@ def load_survey_pickle(survey:str='LSST' #Survey
         
     with open(FILTER_NAME, 'rb') as f:
      central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names = pickle.load(f)
+
+    # The pickles were written in directory-listing order (LSST is stored as z, g, r, y, u, i;
+    # the 102 SPHEREx channels are shuffled), so unpacking `u, g, r, i, z, y = mags.T` silently
+    # mislabels bands. Return everything in wavelength order instead.
+    if sort_by_wavelength:
+        order = np.argsort(central_wavelengths)
+        central_wavelengths = [central_wavelengths[k] for k in order]
+        bandpass_wavs = [bandpass_wavs[k] for k in order]
+        bandpass_vals = [bandpass_vals[k] for k in order]
+        bandpass_names = [bandpass_names[k] for k in order]
     
     return central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names
 
@@ -200,11 +214,12 @@ def photometry_from_spectra(central_wavelengths:np.array=None, # Central wavelen
     band_fluxes = np.zeros_like(central_wavelengths)
 
     for b, bandpass_wav in enumerate(bandpass_wavs):
-        # fluxes in mJy
+        # fluxes in mJy. (An elementwise product + sum, not np.dot: BLAS ddot on these
+        # ~1e4-point vectors runs ~1000x slower than this on multi-core nodes.)
         if clip_bandpass:
-            band_fluxes[b] = np.dot(all_clip_bandpass_vals[b], sed_interp(all_clip_bandpass_wav[b]))
+            band_fluxes[b] = np.sum(all_clip_bandpass_vals[b]*sed_interp(all_clip_bandpass_wav[b]))
         else:
-            band_fluxes[b] = np.dot(bandpass_vals[b], sed_interp(bandpass_wav))
+            band_fluxes[b] = np.sum(bandpass_vals[b]*sed_interp(bandpass_wav))
 
     flux = 1e3*band_fluxes # uJy
     appmag_ext = -2.5*np.log10(flux)+23.9

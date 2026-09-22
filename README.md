@@ -32,7 +32,8 @@ final_sed_mJy, final_wave_um, lsst_mags, spherex_mags, cosmos_mags = photometry_
 ```
 
     SimulationCollection: 64 members, using 'SCIDAC_000' (15416 star particles; first non-empty)
-    Loaded 15416 star particles from 2 haloes (new OpenCosmo format)
+    Loaded 15416 star particles from 2 galaxies in 2 haloes (membership: whole FOF halo; z = 0.000)
+    Placing galaxies at the catalog redshift z = 0.0010
     Number of galaxies: 2
 
 #### The single-line command provides the SEDs and magnitudes from LSST, SPHEREx and COSMOS filters
@@ -147,10 +148,11 @@ plt.show()
 
 ``` python
 import watercolor
-from watercolor.load_sim_stellar_catalog import load_hacc_galaxy_data, load_hacc_galaxy_data_opencosmo
+from watercolor.load_sim_stellar_catalog import load_hacc_galaxy_data_opencosmo
 from watercolor.calculate_csp import calc_fluxes_for_individual_galaxy
 from watercolor.load_sps_library import LIBRARY_FLUX_FILE, LIBRARY_WAVE_FILE, LIBRARY_AGE_FILE, LIBRARY_METAL_FILE
-from watercolor.dust_attenuation import spectrum_dusted, log_total_stellar_metal, log_total_stellar_mass
+from watercolor.dust_attenuation import log_total_stellar_metal, log_total_stellar_mass
+from watercolor.dust_model import attenuate_particle_sed
 from watercolor.cosmic_distance_effects import combine_redshift_and_dimming_effect
 from watercolor.filter_convolution import load_survey_pickle, photometry_from_spectra
 ```
@@ -158,11 +160,10 @@ from watercolor.filter_convolution import load_survey_pickle, photometry_from_sp
 #### 2. Then the galaxy-star catalog from HACC is loaded, using a unique galaxy tag, we select a galaxy
 
 ``` python
-fof_halo_tag, if_satellite, galaxy_tags, stellar_idx, metal_hydro, mass, age_hydro, x, y, z , vx, vy, vz = load_hacc_galaxy_data_opencosmo(particle_file_path=particle_file_path)
+fof_halo_tag, if_satellite, galaxy_tags, stellar_idx, metal_hydro, mass, age_hydro, x, y, z , vx, vy, vz, mass_formed = load_hacc_galaxy_data_opencosmo(particle_file_path=particle_file_path, return_initial_mass=True)
 ```
 
-    SimulationCollection: 64 members, using 'SCIDAC_000' (15416 star particles; first non-empty)
-    Loaded 15416 star particles from 2 haloes (new OpenCosmo format)
+    Loaded 15416 star particles from 2 galaxies in 2 haloes (membership: whole FOF halo; z = 0.000)
 
 ``` python
 galaxy_number = 0 #21# Choosing one of the galaxies in the catalog
@@ -170,6 +171,7 @@ unique_galaxy_tag = np.unique(galaxy_tags)[galaxy_number]
 
 mstar_i = mass[galaxy_tags == unique_galaxy_tag]
 metal_i = metal_hydro[galaxy_tags == unique_galaxy_tag]
+age_i = age_hydro[galaxy_tags == unique_galaxy_tag]
 if_satellite_i = if_satellite[galaxy_tags == unique_galaxy_tag]
 
 logZ = log_total_stellar_metal(metal_i, mstar_i)
@@ -191,7 +193,9 @@ print('Total stars:', mstar_i.size, 'logmstar:', logmstar)
 #                                                                                                                        LIBRARY_METAL_FILE)
 
 
-spec_wave_ssp, spec_flux_ssp, spec_csp, flux_proxy, gal_stellar_mass = calc_fluxes_for_individual_galaxy(
+# The SSP library is per unit mass *formed*, so the particles' initial masses weight the SSPs;
+# spec_csp_young is the part of the CSP emitted by stars younger than 10 Myr (for the birth-cloud dust)
+spec_wave_ssp, spec_flux_ssp, spec_csp, flux_proxy, gal_stellar_mass, spec_csp_young = calc_fluxes_for_individual_galaxy(
     galaxy_tags, 
     metal_hydro,
     mass,
@@ -200,7 +204,9 @@ spec_wave_ssp, spec_flux_ssp, spec_csp, flux_proxy, gal_stellar_mass = calc_flux
     LIBRARY_FLUX_FILE,
     LIBRARY_WAVE_FILE,
     LIBRARY_AGE_FILE,
-    LIBRARY_METAL_FILE)
+    LIBRARY_METAL_FILE,
+    mass_formed_hacc=mass_formed,
+    return_young_csp=True)
 ```
 
 #### 4. We plot SEDs from both SSPs and CSPs
@@ -257,16 +263,21 @@ fig.tight_layout()
 # plt.savefig('../../Plots/ssp_csp_spec.png', dpi=300)
 ```
 
-    /tmp/nramachandra/ipykernel_1129697/2900359430.py:49: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+    /tmp/nramachandra/ipykernel_1593577/2900359430.py:49: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
       fig.tight_layout()
 
 ![](index_files/figure-commonmark/cell-12-output-2.png)
 
-#### 5. CSPs are attenuation due to dust
+#### 5. CSPs are attenuated by dust, and the absorbed energy is re-emitted in the infrared
 
 ``` python
-spec_wave_csp_dusted = spectrum_dusted(spec_csp, spec_wave_ssp, logmstar, logZ, 0.01)
+spec_wave_csp_dusted, dust_diagnostics = attenuate_particle_sed(spec_csp, spec_wave_ssp, mstar_i, metal_i, age_i,
+                                                                galaxy_redshift=0.01, spec_young=spec_csp_young,
+                                                                rng=np.random.default_rng(0))
+print(dust_diagnostics)
 ```
+
+    {'logmass': 11.110663414001465, 'logz': -0.010802718810737133, 'log_sfr': -0.31836048012143786, 'log_ssfr': -11.429023894122903, 'tau_v': 0.24652923403943397, 'l_abs': 8233652297.310994}
 
 ``` python
 f, a = plt.subplots(1, 1, figsize=(12, 3))
@@ -295,7 +306,7 @@ redsh_wave, redsh_spec = combine_redshift_and_dimming_effect(wave=spec_wave_ssp,
 ``` python
 f, a = plt.subplots(1, 1, figsize=(12, 3))
 a.plot(spec_wave_ssp, spec_csp, label='Pre-distance effects')
-a.plot(redsh_wave, redsh_spec*1e6, label='Redshift and dimming')
+a.plot(redsh_wave, redsh_spec, label='Redshift and dimming [mJy]')
 
 
 
@@ -307,7 +318,7 @@ a.set_yscale('log')
 
 
 a.set_xlabel(r'${\rm wavelength\ [\AA]}$', fontsize = 'x-large')
-a.set_ylabel(r'$L_{\rm CSP}(\lambda)\ {\rm [L_{\odot}/\AA]}$', fontsize = 'x-large')
+a.set_ylabel(r'$L_\lambda\ {\rm [L_{\odot}/\AA]}$  /  $f_\nu$ [mJy]', fontsize = 'x-large')
 a.legend(fontsize='x-large')
 ```
 
@@ -328,7 +339,7 @@ central_wavelengths, bandpass_wavs, bandpass_vals, bandpass_names = load_survey_
 # sed_um_wave = spec_wave_ssp/1e4
 # sed_mJy_flux = spec_csp*1e3
 sed_um_wave = redsh_wave/1e4
-sed_mJy_flux = redsh_spec*1e3
+sed_mJy_flux = redsh_spec # combine_redshift_and_dimming_effect already returns mJy
 
 flux_survey, appmag_ext_survey, band_fluxes_survey = photometry_from_spectra(central_wavelengths, 
                                                                           sed_um_wave, 
@@ -366,18 +377,18 @@ plot_galaxy_profiles(
 )
 ```
 
-    /tmp/nramachandra/ipykernel_1129697/3053756716.py:58: RuntimeWarning: invalid value encountered in divide
+    /tmp/nramachandra/ipykernel_1593577/3053756716.py:58: RuntimeWarning: invalid value encountered in divide
       avg_weight = np.where(particle_counts > 0, total_quantity / particle_counts, 0)
-    /tmp/nramachandra/ipykernel_1129697/3053756716.py:366: UserWarning: Attempt to set non-positive xlim on a log-scaled axis will be ignored.
+    /tmp/nramachandra/ipykernel_1593577/3053756716.py:366: UserWarning: Attempt to set non-positive xlim on a log-scaled axis will be ignored.
       ax.set_xlim(0, max_extent)
-    /tmp/nramachandra/ipykernel_1129697/3053756716.py:373: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+    /tmp/nramachandra/ipykernel_1593577/3053756716.py:373: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
       plt.tight_layout()
 
 ![](index_files/figure-commonmark/cell-18-output-2.png)
 
     Galaxy Properties:
       Total mass: 1.29e+11 M☉
-      Total luminosity: 4.51e+10 L☉
+      Total luminosity: 6.27e+10 L☉
       Center: (141.227095, 133.336776)
       Number of particles: 603
       Maximum extent: 0.3484 Mpc

@@ -1,0 +1,38 @@
+{
+  "a": 0.2647201499857052,
+  "b": 0.4105940555957036,
+  "c": 0.0,
+  "d": 0.0,
+  "e": 0.3453143774102529,
+  "sigma": 0.11926111473790078,
+  "n": -0.296269539900162,
+  "mu": 0.0,
+  "tau_bc": 0.6736289150291455,
+  "tau_min": 0.005,
+  "tau_max": 4.0,
+  "apply_bump": true,
+  "meta": {
+    "calibrated_to": [
+      "SDSS"
+    ],
+    "z_range": [
+      0.02,
+      0.26
+    ],
+    "fit_parameters": [
+      "a",
+      "b",
+      "e",
+      "n",
+      "sigma",
+      "tau_bc"
+    ],
+    "objective": 0.14964226429990213,
+    "objective_without_tau_bc": 0.20307905626541958,
+    "objective_no_dust": 0.6916161779055836,
+    "log_ssfr": "star particles younger than 1 Gyr (log_sfr_from_particles, window_gyr=1.0)",
+    "library": "watercolor calc_csp_for_galaxies: smoothed particle SFH, mass-formed weights, FSPS Padova/BaSeL/Kroupa + nebular",
+    "sample": "SciDAC step_624 (z=0), 8000 random galaxies, seed 17",
+    "note": "tau_V = a*10^(b(logM-10))*10^(e(log sSFR+10)), lognormal sigma; Noll+09 slope n (bump tied); tau_bc = extra Charlot-Fall birth-cloud optical depth on stars younger than 10 Myr. Calibrated by nbs/08_observational_comparison.ipynb"
+  }
+}
