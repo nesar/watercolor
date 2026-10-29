@@ -155,14 +155,16 @@ class SurveyColorEngine:
     Dusted survey colors of a painted galaxy sample as a cheap function of
     the dust model, (z, i)-matched to a real spectroscopic survey.
 
-    A single-snapshot catalog has no redshifts or selection function. For
-    each narrow redshift bin of the survey, the whole painted sample is
-    placed at the bin centre and every real galaxy is paired with the
-    painted galaxy closest to it in apparent `i` magnitude (within
+    For each narrow redshift bin of the survey, every real galaxy is paired
+    with the painted galaxy closest to it in apparent `i` magnitude (within
     `mag_tol`). The painted sample then has the survey's joint (z, i)
     distribution by construction, and its colors can be compared to the real
     ones object for object. The real galaxies' own measurement errors are
     added to the painted colors.
+
+    Snapshot catalogs have no redshifts: the whole painted sample is placed
+    at each bin's centre. For a lightcone pass `redshifts`: each bin then
+    uses only the painted galaxies inside it, each at its own redshift.
 
     Band fluxes are precomputed as sums over the filter curve, so changing
     the dust only costs an `exp` at the filter's wavelength points (same
@@ -181,6 +183,7 @@ class SurveyColorEngine:
                  n_real_per_bin:int=2500, # Real galaxies used per redshift bin
                  mag_tol:float=0.2, # Maximum |i_painted - i_real| for a match
                  seed:int=5, # Seed for the survey subsampling and the noise / dust-scatter draws
+                 redshifts:np.ndarray=None, # Per-galaxy redshifts (lightcone); None -> snapshot mode
                  ):
         rng = np.random.default_rng(seed)
         self.logmass, self.logz, self.log_ssfr = (np.asarray(x, dtype=float) for x in (logmass, logz, log_ssfr))
@@ -194,28 +197,43 @@ class SurveyColorEngine:
             if real.shape[0] == 0:
                 continue
             real = rng.choice(real, min(real.shape[0], n_real_per_bin), replace=False)
-            wave_obs, fnu_old = combine_redshift_and_dimming_effect(wave_rest_aa, spec_old, z_mid)
-            _, fnu_young = combine_redshift_and_dimming_effect(wave_rest_aa, spec_young, z_mid)
-            q_old, q_young, wave_band_rest = [], [], []
-            for band_wave_um, band_vals in zip(filters[1], filters[2]):
-                band_wave_aa, band_vals = np.asarray(band_wave_um)*1e4, np.asarray(band_vals)
-                idx = np.clip(np.searchsorted(wave_obs, band_wave_aa), 1, wave_obs.shape[0] - 1)
-                frac = (band_wave_aa - wave_obs[idx - 1])/(wave_obs[idx] - wave_obs[idx - 1])
-                q_old.append((fnu_old[:, idx - 1]*(1 - frac) + fnu_old[:, idx]*frac)*band_vals)
-                q_young.append((fnu_young[:, idx - 1]*(1 - frac) + fnu_young[:, idx]*frac)*band_vals)
-                wave_band_rest.append(band_wave_aa/(1 + z_mid))
-            self.bins.append(dict(z=z_mid, real=real, q_old=q_old, q_young=q_young, wave_band_rest=wave_band_rest,
+            if redshifts is None:
+                members = np.arange(self.n_gal); z_members = np.full(self.n_gal, z_mid)
+            else:
+                members = np.where((np.asarray(redshifts) >= z_lo) & (np.asarray(redshifts) < z_hi))[0]
+                z_members = np.asarray(redshifts, dtype=float)[members]
+                if members.shape[0] == 0:
+                    continue
+            # band quadrature per member galaxy at its own redshift: q[b] has shape (n_members, n_points)
+            q_old = [np.empty((members.shape[0], len(bw))) for bw in filters[1]]
+            q_young = [np.empty((members.shape[0], len(bw))) for bw in filters[1]]
+            wave_band_rest = [np.empty((members.shape[0], len(bw))) for bw in filters[1]]
+            for z_value in np.unique(z_members):
+                rows = np.where(z_members == z_value)[0]
+                wave_obs, fnu_old = combine_redshift_and_dimming_effect(wave_rest_aa, spec_old[members[rows]], z_value)
+                _, fnu_young = combine_redshift_and_dimming_effect(wave_rest_aa, spec_young[members[rows]], z_value)
+                for b, (band_wave_um, band_vals) in enumerate(zip(filters[1], filters[2])):
+                    band_wave_aa, band_vals = np.asarray(band_wave_um)*1e4, np.asarray(band_vals)
+                    idx = np.clip(np.searchsorted(wave_obs, band_wave_aa), 1, wave_obs.shape[0] - 1)
+                    frac = (band_wave_aa - wave_obs[idx - 1])/(wave_obs[idx] - wave_obs[idx - 1])
+                    q_old[b][rows] = (fnu_old[:, idx - 1]*(1 - frac) + fnu_old[:, idx]*frac)*band_vals
+                    q_young[b][rows] = (fnu_young[:, idx - 1]*(1 - frac) + fnu_young[:, idx]*frac)*band_vals
+                    wave_band_rest[b][rows] = band_wave_aa/(1 + z_value)
+            self.bins.append(dict(z=z_mid, real=real, members=members, z_members=z_members,
+                                  q_old=q_old, q_young=q_young, wave_band_rest=wave_band_rest,
                                   noise=rng.standard_normal((real.shape[0], 4))))
 
     def tau_v(self, dust_model:DustModel, # Dust model
-              redshift:float=0.0, # Redshift
-              )-> np.ndarray: # Diffuse V-band optical depth of every painted galaxy
-        mean = dust_model.tau_v_mean(self.logmass, self.logz, redshift, log_ssfr=self.log_ssfr)
-        return np.clip(mean*np.exp(dust_model.sigma*self.tau_scatter), dust_model.tau_min, dust_model.tau_max)
+              redshift:float=0.0, # Redshift (scalar, or one per selected galaxy)
+              index:np.ndarray=None, # Painted galaxies to evaluate; None -> all
+              )-> np.ndarray: # Diffuse V-band optical depth of the selected painted galaxies
+        index = np.arange(self.n_gal) if index is None else np.asarray(index)
+        mean = dust_model.tau_v_mean(self.logmass[index], self.logz[index], redshift, log_ssfr=self.log_ssfr[index])
+        return np.clip(mean*np.exp(dust_model.sigma*self.tau_scatter[index]), dust_model.tau_min, dust_model.tau_max)
 
     def magnitudes(self, dust_model:DustModel, # Dust model; None -> dust-free
                    k:int=0, # Redshift-bin index
-                   )-> np.ndarray: # AB magnitudes (n_gal, n_band) of the whole painted sample at that bin's redshift
+                   )-> np.ndarray: # AB magnitudes (n_members, n_band) of the bin's painted galaxies (`bins[k]['members']`)
         b = self.bins[k]
         mags = []
         for q_old, q_young, wave_rest in zip(b['q_old'], b['q_young'], b['wave_band_rest']):
@@ -223,30 +241,33 @@ class SurveyColorEngine:
                 flux = np.sum(q_old + q_young, axis=1)
             else:
                 birth_cloud = np.exp(-tau_birthcloud(wave_rest, dust_model.tau_bc))
-                diffuse = np.exp(-self.tau_v(dust_model, b['z'])[:, None]
-                                 * tau_diffuse(wave_rest, 1.0, n=dust_model.n, apply_bump=dust_model.apply_bump)[None, :])
-                flux = np.sum((q_old + q_young*birth_cloud[None, :])*diffuse, axis=1)
+                diffuse = np.exp(-self.tau_v(dust_model, b['z_members'], b['members'])[:, None]
+                                 * tau_diffuse(wave_rest, 1.0, n=dust_model.n, apply_bump=dust_model.apply_bump))
+                flux = np.sum((q_old + q_young*birth_cloud)*diffuse, axis=1)
             mags.append(-2.5*np.log10(1e3*flux) + 23.9)
         return np.array(mags).T
 
     def matched_colors(self, dust_model:DustModel, # Dust model; None -> dust-free
                        add_noise:bool=True, # Add the matched real galaxies' measurement errors to the painted colors
-                       )-> dict: # painted / real colors [u-g, g-r, r-i, i-z], plus z, mag_i, painted-galaxy index and redshift-bin index of every pair
-        out = dict(painted=[], real=[], z=[], mag_i=[], index=[], zbin=[])
+                       )-> dict: # painted / real colors [u-g, g-r, r-i, i-z], plus z, mag_i, tau_v, painted-galaxy index and redshift-bin index of every pair
+        out = dict(painted=[], real=[], z=[], mag_i=[], tau_v=[], index=[], zbin=[])
         for k, b in enumerate(self.bins):
             mags = self.magnitudes(dust_model, k)
+            if mags.shape[0] < 2:
+                continue
             i_real = self.survey['colors'][b['real'], 4]
             order = np.argsort(mags[:, 3]); i_sorted = mags[order, 3]
-            j = np.clip(np.searchsorted(i_sorted, i_real), 1, self.n_gal - 1)
+            j = np.clip(np.searchsorted(i_sorted, i_real), 1, mags.shape[0] - 1)
             j = np.where(np.abs(i_sorted[j - 1] - i_real) < np.abs(i_sorted[j] - i_real), j - 1, j)
             good = np.abs(i_sorted[j] - i_real) < self.mag_tol
             pick = order[j[good]]; m = mags[pick]
             colors = np.column_stack([m[:, 0] - m[:, 1], m[:, 1] - m[:, 2], m[:, 2] - m[:, 3], m[:, 3] - m[:, 4]])
             if add_noise:
                 colors = colors + self.survey['err_colors'][b['real'][good], :4]*b['noise'][good]
+            tau = np.zeros(pick.shape[0]) if dust_model is None else self.tau_v(dust_model, b['z_members'][pick], b['members'][pick])
             out['painted'].append(colors); out['real'].append(self.survey['colors'][b['real'][good], :4])
-            out['z'].append(np.full(pick.shape[0], b['z'])); out['mag_i'].append(m[:, 3])
-            out['index'].append(pick); out['zbin'].append(np.full(pick.shape[0], k))
+            out['z'].append(b['z_members'][pick]); out['mag_i'].append(m[:, 3]); out['tau_v'].append(tau)
+            out['index'].append(b['members'][pick]); out['zbin'].append(np.full(pick.shape[0], k))
         return {key: np.concatenate(val) for key, val in out.items()}
 
     def objective(self, dust_model:DustModel, # Dust model; None -> dust-free

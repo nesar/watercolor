@@ -7,7 +7,7 @@ __all__ = ['photometry_from_catalog_opencosmo']
 
 # %% ../nbs/07_paint.ipynb 4
 import watercolor
-from .load_sim_stellar_catalog import load_hacc_galaxy_data_opencosmo, load_opencosmo_collection, catalog_redshift
+from .load_sim_stellar_catalog import load_hacc_galaxy_data_opencosmo, load_opencosmo_collection, catalog_redshift, galaxy_redshifts, is_lightcone
 from .calculate_csp import calc_fluxes_for_individual_galaxy
 from .load_sps_library import LIBRARY_FLUX_FILE, LIBRARY_WAVE_FILE, LIBRARY_AGE_FILE, LIBRARY_METAL_FILE
 from .dust_attenuation import spectrum_dusted, log_total_stellar_metal, log_total_stellar_mass
@@ -21,7 +21,7 @@ import numpy as np
 # %% ../nbs/07_paint.ipynb 6
 def photometry_from_catalog_opencosmo(galaxy_star_catalog_file:str=None, # Input galaxy catalog
                                       galaxy_star_particle_file:str=None, # Input galaxy particle catalog
-                                      galaxy_redshift:np.float32=None, # Redshift to place every galaxy at; None -> the catalog's own snapshot redshift (0.001 if the file does not record one)
+                                      galaxy_redshift:np.float32=None, # Redshift to place every galaxy at; None -> each galaxy's own redshift (lightcone) or the catalog's snapshot redshift (0.001 if the file records none)
                                       dust:str='population', # 'population': calibrated two-component model + IR re-emission (watercolor.dust_model); 'duste': legacy DustE attenuation; None: no dust
                                       seed:int=0, # Seed for the per-galaxy dust optical-depth scatter
                                       )->tuple:# [SED, wavelengths, broadband magnitudes from lsst, cosmos, spherex]
@@ -30,10 +30,18 @@ def photometry_from_catalog_opencosmo(galaxy_star_catalog_file:str=None, # Input
     # fof_halo_tag, if_satellite, galaxy_tags, stellar_idx, metal_hydro, mass, age_hydro, x, y, z , vx, vy, vz = load_hacc_galaxy_data(galaxy_star_catalog_file)
     fof_halo_tag, if_satellite, galaxy_tags, stellar_idx, metal_hydro, mass, age_hydro, x, y, z , vx, vy, vz, mass_formed = load_hacc_galaxy_data_opencosmo(galaxy_star_particle_file, galaxy_star_catalog_file, return_initial_mass=True)
 
+    unique_galaxy_tags = np.unique(galaxy_tags)
     if galaxy_redshift is None:
-        z_catalog = catalog_redshift(load_opencosmo_collection(galaxy_star_particle_file, galaxy_star_catalog_file))
-        galaxy_redshift = max(z_catalog, 0.001) if np.isfinite(z_catalog) else 0.001
-        print(f'Placing galaxies at the catalog redshift z = {galaxy_redshift:.4f}')
+        collection = load_opencosmo_collection(galaxy_star_particle_file, galaxy_star_catalog_file)
+        if is_lightcone(collection):
+            z_per_galaxy = galaxy_redshifts(collection, unique_galaxy_tags)
+            print(f'Lightcone: each galaxy at its own redshift, z = {np.nanmin(z_per_galaxy):.3f}-{np.nanmax(z_per_galaxy):.3f}')
+        else:
+            z_catalog = catalog_redshift(collection)
+            z_per_galaxy = np.full(unique_galaxy_tags.shape[0], max(z_catalog, 0.001) if np.isfinite(z_catalog) else 0.001)
+            print(f'Placing galaxies at the catalog redshift z = {z_per_galaxy[0]:.4f}')
+    else:
+        z_per_galaxy = np.full(unique_galaxy_tags.shape[0], float(galaxy_redshift))
 
     population_dust_model = load_default_dust_model() if dust == 'population' else None
     # filter curves are loaded once, not per galaxy
@@ -54,7 +62,8 @@ def photometry_from_catalog_opencosmo(galaxy_star_catalog_file:str=None, # Input
     for galaxy_number in range(np.unique(galaxy_tags).shape[0]):
         # Go through all the galaxies in the catalog (the unique galaxy tags)
     
-        unique_galaxy_tag = np.unique(galaxy_tags)[galaxy_number]
+        unique_galaxy_tag = unique_galaxy_tags[galaxy_number]
+        z_i = float(z_per_galaxy[galaxy_number])
 
         mstar_i = mass[galaxy_tags == unique_galaxy_tag]
         metal_i = metal_hydro[galaxy_tags == unique_galaxy_tag]
@@ -98,10 +107,10 @@ def photometry_from_catalog_opencosmo(galaxy_star_catalog_file:str=None, # Input
         if dust == 'population':
             age_i = age_hydro[galaxy_tags == unique_galaxy_tag]
             spec_wave_csp_dusted, _ = attenuate_particle_sed(spec_csp, spec_wave_ssp, mstar_i, metal_i, age_i,
-                                                             galaxy_redshift, dust_model=population_dust_model, rng=rng,
+                                                             z_i, dust_model=population_dust_model, rng=rng,
                                                              spec_young=spec_csp_young)
         elif dust == 'duste':
-            spec_wave_csp_dusted = spectrum_dusted(spec_csp, spec_wave_ssp, logmstar, logZ, galaxy_redshift) # (spec_csp in L_bolometric A^-1)
+            spec_wave_csp_dusted = spectrum_dusted(spec_csp, spec_wave_ssp, logmstar, logZ, z_i) # (spec_csp in L_bolometric A^-1)
         elif dust is None:
             spec_wave_csp_dusted = spec_csp
         else:
@@ -110,7 +119,7 @@ def photometry_from_catalog_opencosmo(galaxy_star_catalog_file:str=None, # Input
         # Cosmic redshifting and dimming
         redsh_wave, redsh_spec = combine_redshift_and_dimming_effect(wave=spec_wave_ssp, 
                                                              spec=spec_wave_csp_dusted, 
-                                                             galaxy_redshift=galaxy_redshift) # redsh_wave in [A], redsh_spec in [mJy]
+                                                             galaxy_redshift=z_i) # redsh_wave in [A], redsh_spec in [mJy]
         
         
         sed_um_wave = redsh_wave/1e4 # in um

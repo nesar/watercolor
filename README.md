@@ -31,10 +31,9 @@ from watercolor.paint import photometry_from_catalog_opencosmo
 final_sed_mJy, final_wave_um, lsst_mags, spherex_mags, cosmos_mags = photometry_from_catalog_opencosmo(galaxy_star_particle_file=particle_file_path)
 ```
 
-    SimulationCollection: 64 members, using 'SCIDAC_000' (15416 star particles; first non-empty)
-    Loaded 15416 star particles from 2 galaxies in 2 haloes (membership: whole FOF halo; z = 0.000)
-    Placing galaxies at the catalog redshift z = 0.0010
-    Number of galaxies: 2
+    Loaded 51825 star particles from 305 galaxies in 10 haloes (membership: nearest galaxy centre within gal_radius; lightcone, z = 0.151-0.913)
+    Lightcone: each galaxy at its own redshift, z = 0.151-0.913
+    Number of galaxies: 305
 
 #### The single-line command provides the SEDs and magnitudes from LSST, SPHEREx and COSMOS filters
 
@@ -163,11 +162,14 @@ from watercolor.filter_convolution import load_survey_pickle, photometry_from_sp
 fof_halo_tag, if_satellite, galaxy_tags, stellar_idx, metal_hydro, mass, age_hydro, x, y, z , vx, vy, vz, mass_formed = load_hacc_galaxy_data_opencosmo(particle_file_path=particle_file_path, return_initial_mass=True)
 ```
 
-    Loaded 15416 star particles from 2 galaxies in 2 haloes (membership: whole FOF halo; z = 0.000)
+    Loaded 51825 star particles from 305 galaxies in 10 haloes (membership: nearest galaxy centre within gal_radius; lightcone, z = 0.151-0.913)
 
 ``` python
-galaxy_number = 0 #21# Choosing one of the galaxies in the catalog
-unique_galaxy_tag = np.unique(galaxy_tags)[galaxy_number]
+# Choosing one of the galaxies in the catalog: the one with the most star particles
+# (a 10-particle dwarf shows up as a handful of blobs in the profile plots below)
+_tags, _counts = np.unique(galaxy_tags, return_counts=True)
+galaxy_number = int(np.argmax(_counts))
+unique_galaxy_tag = _tags[galaxy_number]
 
 mstar_i = mass[galaxy_tags == unique_galaxy_tag]
 metal_i = metal_hydro[galaxy_tags == unique_galaxy_tag]
@@ -179,7 +181,7 @@ logmstar = log_total_stellar_mass(mstar_i)
 print('Total stars:', mstar_i.size, 'logmstar:', logmstar)
 ```
 
-    Total stars: 603 logmstar: [11.110663]
+    Total stars: 3860 logmstar: [11.962018]
 
 #### 3. After selecting a unique galaxy tag, we calculate the SED. This is the rest-frame SED is due to spectral emission alone, and without dust attenuation.
 
@@ -263,7 +265,7 @@ fig.tight_layout()
 # plt.savefig('../../Plots/ssp_csp_spec.png', dpi=300)
 ```
 
-    /tmp/nramachandra/ipykernel_1593577/2900359430.py:49: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+    /tmp/nramachandra/ipykernel_2761527/2900359430.py:49: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
       fig.tight_layout()
 
 ![](index_files/figure-commonmark/cell-12-output-2.png)
@@ -277,7 +279,7 @@ spec_wave_csp_dusted, dust_diagnostics = attenuate_particle_sed(spec_csp, spec_w
 print(dust_diagnostics)
 ```
 
-    {'logmass': 11.110663414001465, 'logz': -0.010802718810737133, 'log_sfr': -0.31836048012143786, 'log_ssfr': -11.429023894122903, 'tau_v': 0.24652923403943397, 'l_abs': 8233652297.310994}
+    {'logmass': 11.962018013000488, 'logz': 0.06423628330230713, 'log_sfr': -0.6130823445950926, 'log_ssfr': -12.57510035759558, 'tau_v': 0.2216526273071572, 'l_abs': 55446554949.98991}
 
 ``` python
 f, a = plt.subplots(1, 1, figsize=(12, 3))
@@ -377,18 +379,16 @@ plot_galaxy_profiles(
 )
 ```
 
-    /tmp/nramachandra/ipykernel_1593577/3053756716.py:58: RuntimeWarning: invalid value encountered in divide
-      avg_weight = np.where(particle_counts > 0, total_quantity / particle_counts, 0)
-    /tmp/nramachandra/ipykernel_1593577/3053756716.py:366: UserWarning: Attempt to set non-positive xlim on a log-scaled axis will be ignored.
+    /tmp/nramachandra/ipykernel_2761527/725773892.py:371: UserWarning: Attempt to set non-positive xlim on a log-scaled axis will be ignored.
       ax.set_xlim(0, max_extent)
-    /tmp/nramachandra/ipykernel_1593577/3053756716.py:373: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+    /tmp/nramachandra/ipykernel_2761527/725773892.py:378: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
       plt.tight_layout()
 
 ![](index_files/figure-commonmark/cell-18-output-2.png)
 
     Galaxy Properties:
-      Total mass: 1.29e+11 M☉
-      Total luminosity: 6.27e+10 L☉
-      Center: (141.227095, 133.336776)
-      Number of particles: 603
-      Maximum extent: 0.3484 Mpc
+      Total mass: 9.16e+11 M☉
+      Total luminosity: 5.35e+11 L☉
+      Center: (-1659.273682, -513.768494)
+      Number of particles: 3860
+      Maximum extent: 0.0552 Mpc
